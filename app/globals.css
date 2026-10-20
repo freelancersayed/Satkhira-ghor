@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Brand Theme Colors */
+    --brand-green: #1b4332;
+    --brand-honey: #ffb703;
+    --brand-mustard: #e65f2b;
+    --brand-organic: #faf9f6;
+
+    --forest-primary: #1b4332;
+    --forest-dark: #0f281e;
+    --forest-light: #2d6a4f;
+    --honey-gold: #ffb703;
+    --honey-hover: #d99800;
+    --warm-ochre: #e65f2b;
+    --cream-bg: #faf9f6;
+    --cream-card: #f3efe6;
+    --text-primary: #14241e;
+    --text-secondary: #4a5b53;
+  }
+
+  body {
+    background-color: var(--brand-organic);
+    color: var(--text-primary);
+    font-family: 'SolaimanLipi', var(--font-hind-siliguri), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom Tailwind v4 theme definitions */
+@theme {
+  --color-brandGreen: #1b4332;
+  --color-brandHoney: #ffb703;
+  --color-brandMustard: #e65f2b;
+  --color-brandOrganic: #faf9f6;
+
+  --color-brand-green: #1b4332;
+  --color-brand-honey: #ffb703;
+  --color-brand-mustard: #e65f2b;
+  --color-brand-organic: #faf9f6;
+
+  --color-forest-50: #f0f7f4;
+  --color-forest-100: #dceee6;
+  --color-forest-200: #bcdec9;
+  --color-forest-300: #8bc4a4;
+  --color-forest-400: #52a379;
+  --color-forest-500: #2d815c;
+  --color-forest-600: #1b4332;
+  --color-forest-700: #153d31;
+  --color-forest-800: #102e25;
+  --color-forest-900: #0a1e18;
+  --color-forest: #1b4332;
+
+  --color-honey-50: #fffbea;
+  --color-honey-100: #fff3c4;
+  --color-honey-200: #ffe588;
+  --color-honey-300: #ffd74c;
+  --color-honey-400: #ffc51a;
+  --color-honey-500: #ffb703;
+  --color-honey-600: #d99800;
+  --color-honey-700: #a67200;
+  --color-honey: #ffb703;
+
+  --color-ochre-50: #fdf4ef;
+  --color-ochre-100: #fae5da;
+  --color-ochre-200: #f4cab5;
+  --color-ochre-300: #eda686;
+  --color-ochre-400: #e65f2b;
+  --color-ochre-500: #c84c1c;
+  --color-ochre-600: #a03b13;
+  --color-ochre-700: #782a0b;
+  --color-ochre: #e65f2b;
+
+  --color-cream-50: #fcfbf9;
+  --color-cream-100: #faf9f6;
+  --color-cream-200: #f3efe6;
+  --color-cream: #faf9f6;
+
+  --font-bangla: 'SolaimanLipi', var(--font-hind-siliguri), sans-serif;
+}
+
+/* Smooth transitions & custom animations */
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+/* Glassmorphism helpers */
+.glass-nav {
+  background: rgba(250, 249, 246, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}

@@ -1,0 +1,27 @@
+{
+  "name": "satkhira-ghor",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^0.453.0",
+    "mongoose": "^9.11.2",
+    "next": "^14.2.20",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^4.0.0"
+  }
+}
