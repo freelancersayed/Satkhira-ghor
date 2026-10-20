@@ -37,7 +37,7 @@ export default function ProductCard({ product }) {
         {/* Badge */}
         {product.badge && (
           <span
-            className={`absolute top-3 left-3 text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm z-10 ${
+            className={`absolute top-2 left-2 sm:top-3 sm:left-3 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-sm z-10 ${
               badgeColorMap[product.badgeType] || 'bg-[#1B4D3E] text-white'
             }`}
           >
@@ -58,48 +58,48 @@ export default function ProductCard({ product }) {
       </div>
 
       {/* Card Content */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+      <div className="p-2.5 sm:p-5 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
         <div>
           {/* Category & Unit */}
-          <div className="flex items-center justify-between text-[11px] text-[#4A5B53] font-medium mb-1">
-            <span className="text-[#C86D3B] font-semibold">{product.categoryName}</span>
-            <span className="bg-[#FAF0D4] text-[#7E4E18] px-2 py-0.5 rounded-md font-semibold">
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#4A5B53] font-medium mb-1">
+            <span className="text-[#C86D3B] font-semibold truncate max-w-[65%]">{product.categoryName}</span>
+            <span className="bg-[#FAF0D4] text-[#7E4E18] px-1.5 sm:px-2 py-0.5 rounded-md font-semibold text-[9px] sm:text-[11px] whitespace-nowrap">
               {product.unit}
             </span>
           </div>
 
           {/* Title */}
           <Link href={`/products/${product.slug}`}>
-            <h3 className="font-bold text-sm sm:text-base text-[#1B4D3E] hover:text-[#C86D3B] line-clamp-2 transition-colors">
+            <h3 className="font-bold text-xs sm:text-base text-[#1B4D3E] hover:text-[#C86D3B] line-clamp-2 transition-colors min-h-[2rem] sm:min-h-[2.5rem]">
               {product.name}
             </h3>
           </Link>
 
           {/* Subtitle (English name) */}
-          <p className="text-[11px] text-[#4A5B53]/80 line-clamp-1 mt-0.5">
+          <p className="text-[10px] sm:text-[11px] text-[#4A5B53]/80 line-clamp-1 mt-0.5">
             {product.nameEn}
           </p>
 
           {/* Rating */}
-          <div className="flex items-center gap-1.5 mt-2">
+          <div className="flex items-center gap-1 mt-1 sm:mt-2">
             <div className="flex items-center text-[#E5A93C]">
-              <Star className="w-3.5 h-3.5 fill-current" />
+              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
             </div>
-            <span className="text-xs font-bold text-[#1B4D3E]">{product.rating}</span>
-            <span className="text-[11px] text-[#4A5B53]/70">
-              ({product.reviewCount} রিভিউ)
+            <span className="text-[11px] sm:text-xs font-bold text-[#1B4D3E]">{product.rating}</span>
+            <span className="text-[10px] sm:text-[11px] text-[#4A5B53]/70">
+              ({product.reviewCount})
             </span>
           </div>
         </div>
 
         {/* Pricing & Add to Cart Button */}
-        <div className="pt-2 border-t border-[#EFE9DC]/70 flex items-center justify-between gap-2">
-          <div>
-            <div className="text-base sm:text-lg font-black text-[#1B4D3E]">
+        <div className="pt-2 border-t border-[#EFE9DC]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+          <div className="flex sm:flex-col items-baseline sm:items-start gap-1.5 sm:gap-0">
+            <div className="text-sm sm:text-lg font-black text-[#1B4D3E]">
               ৳{product.price}
             </div>
             {product.originalPrice && (
-              <span className="text-xs text-[#4A5B53]/70 line-through">
+              <span className="text-[10px] sm:text-xs text-[#4A5B53]/70 line-through">
                 ৳{product.originalPrice}
               </span>
             )}
@@ -107,7 +107,7 @@ export default function ProductCard({ product }) {
 
           <button
             onClick={handleAddToCart}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1B4D3E] hover:bg-[#153D31] text-[#FAF0D4] text-xs font-bold rounded-xl transition-all duration-150 active:scale-95 shadow-sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-[#1B4D3E] hover:bg-[#153D31] text-[#FAF0D4] text-[11px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all duration-150 active:scale-95 shadow-sm"
             aria-label={`Add ${product.name} to cart`}
           >
             <ShoppingBag className="w-3.5 h-3.5 text-[#E5A93C]" />

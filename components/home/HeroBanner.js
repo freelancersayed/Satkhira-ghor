@@ -78,7 +78,7 @@ export default function HeroBanner() {
   ];
 
   return (
-    <section className="relative overflow-hidden text-white py-20 sm:py-28 max-h-[500px]  min-h-[200px] sm:min-h-[200px]  flex items-center">
+    <section className="relative overflow-hidden text-white py-12 sm:py-24 min-h-[380px] sm:min-h-[420px] flex items-center">
 
       {/* ── Full-background HD Slideshow ── */}
       <div className="absolute inset-0 z-0">
@@ -149,7 +149,7 @@ export default function HeroBanner() {
             )}
 
             {/* Heading */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight sm:leading-tight whitespace-pre-line drop-shadow-lg">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight sm:leading-tight whitespace-pre-line drop-shadow-lg">
               {hero.title || (
                 <>
                   প্রকৃতির সেরা উপহার,{' '}
@@ -161,41 +161,41 @@ export default function HeroBanner() {
             </h1>
 
             {/* Description */}
-            <p className="text-sm sm:text-base text-white/85 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed drop-shadow">
+            {/* <p className="text-sm sm:text-xs text-white/85 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed drop-shadow">
               {hero.description ||
                 'সাতক্ষীরার গভীর সুন্দরবনের খাঁটি খলসী ফুলের মধু, প্রাচীন বিলোনা পদ্ধতির দেশি গাওয়া ঘি এবং খাঁটি ঘানি ভাঙা সরিষার তেল। ১০০% বিশুদ্ধ ও কেমিক্যালমুক্ত।'}
-            </p>
+            </p> */}
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 ">
               <Link
                 href="/shop"
-                className="w-full sm:w-auto px-8 py-4 bg-[#E5A93C] hover:bg-[#C98A23] text-[#102E25] font-black rounded-2xl shadow-lg hover:shadow-[#E5A93C]/40 transition-all flex items-center justify-center gap-2 group"
+                className="w-full sm:w-auto px-8 py-2 bg-[#E5A93C] hover:bg-[#C98A23] text-[#102E25] font-black rounded-2xl shadow-lg hover:shadow-[#E5A93C]/40 transition-all flex items-center justify-center gap-2 group"
               >
                 <span>পণ্য কিনুন</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4  group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/about-us"
-                className="w-full sm:w-auto px-8 py-4 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold rounded-2xl backdrop-blur-md transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold rounded-2xl backdrop-blur-md transition-all flex items-center justify-center gap-2"
               >
                 <span>আমাদের গল্প শুনুন</span>
               </Link>
             </div>
 
             {/* Quick Stats */}
-            <div className="pt-6 border-t border-white/20 grid grid-cols-3 gap-4 text-center lg:text-left">
+            <div className="pt-2 border-t border-white/20 grid grid-cols-3 gap-2 sm:gap-4 text-center lg:text-left">
               <div>
-                <div className="text-xl sm:text-2xl font-black text-[#E5A93C] drop-shadow">১০০%</div>
-                <div className="text-[11px] text-white/70">প্রাকৃতিক ও খাঁটি</div>
+                <div className="text-sm sm:text-xl font-black text-[#E5A93C] drop-shadow">১০০%</div>
+                <div className="text-[10px] sm:text-[11px] text-white/70">প্রাকৃতিক ও খাঁটি</div>
               </div>
               <div>
-                <div className="text-xl sm:text-2xl font-black text-[#E5A93C] drop-shadow">১২,৫০০+</div>
-                <div className="text-[11px] text-white/70">সন্তুষ্ট পরিবার</div>
+                <div className="text-sm sm:text-xl font-black text-[#E5A93C] drop-shadow">১২,৫০০+</div>
+                <div className="text-[10px] sm:text-[11px] text-white/70">সন্তুষ্ট পরিবার</div>
               </div>
               <div>
-                <div className="text-xl sm:text-2xl font-black text-[#E5A93C] drop-shadow">২৪-৪৮ ঘণ্টা</div>
-                <div className="text-[11px] text-white/70">সারাদেশে ডেলিভারি</div>
+                <div className="text-sm sm:text-xl font-black text-[#E5A93C] drop-shadow">২৪-৪৮ ঘণ্টা</div>
+                <div className="text-[10px] sm:text-[11px] text-white/70">সারাদেশে ডেলিভারি</div>
               </div>
             </div>
           </div>

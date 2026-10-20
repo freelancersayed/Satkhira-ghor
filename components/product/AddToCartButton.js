@@ -23,7 +23,7 @@ export default function AddToCartButton({ product }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 ">
       {/* Quantity Stepper */}
       <div className="flex items-center gap-4">
         <span className="text-xs font-bold text-[#1B4D3E] uppercase tracking-wider">

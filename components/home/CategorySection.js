@@ -17,7 +17,7 @@ export default function CategorySection() {
   ];
 
   return (
-    <section className="py-16 sm:py-20 bg-[#FAF8F4] relative">
+    <section className="py-16 sm:py-16 bg-[#FAF8F4] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12 relative">
           <div className="flex items-center justify-center gap-2 mb-1">
@@ -40,20 +40,20 @@ export default function CategorySection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-6">
           {displayCategories.map((cat) => (
             <Link
               key={cat.id}
               href={`/shop?cat=${cat.id}`}
-              className="group bg-white rounded-2xl p-6 text-center border border-[#EFE9DC] shadow-sm hover:shadow-lg hover:border-[#1B4D3E]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center"
+              className="group bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 text-center border border-[#EFE9DC] shadow-sm hover:shadow-lg hover:border-[#1B4D3E]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center"
             >
-              <div className="w-16 h-16 rounded-2xl bg-[#FAF0D4] flex items-center justify-center text-3xl mb-3 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-[#FAF0D4] flex items-center justify-center text-2xl sm:text-3xl mb-1.5 sm:mb-3 group-hover:scale-110 transition-transform">
                 {cat.icon}
               </div>
-              <h3 className="text-sm font-bold text-[#1B4D3E] group-hover:text-[#C86D3B] transition-colors">
+              <h3 className="text-xs sm:text-sm font-bold text-[#1B4D3E] group-hover:text-[#C86D3B] transition-colors line-clamp-1">
                 {cat.name.split(' (')[0]}
               </h3>
-              <span className="text-[11px] text-[#4A5B53] mt-1">
+              <span className="text-[10px] sm:text-[11px] text-[#4A5B53] mt-0.5 sm:mt-1 hidden sm:inline-block">
                 পণ্য দেখুন →
               </span>
             </Link>
