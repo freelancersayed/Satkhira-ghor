@@ -1,82 +1,110 @@
 @import "tailwindcss";
+@config "../tailwind.config.js";
 
-@layer base {
-  :root {
-    /* Brand Theme Colors */
-    --brand-green: #1b4332;
-    --brand-honey: #ffb703;
-    --brand-mustard: #e65f2b;
-    --brand-organic: #faf9f6;
+:root {
+  /* ==========================================================================
+     1. CORE BRAND COLORS (Forest Green Theme)
+     ========================================================================== */
+  --brand-primary: #0F3D2E;         /* Deep Forest Green */
+  --brand-primary-dark: #072219;    /* Ultra Dark Forest */
+  --brand-primary-light: #1A5440;   /* Muted Leaf Green */
 
-    --forest-primary: #1b4332;
-    --forest-dark: #0f281e;
-    --forest-light: #2d6a4f;
-    --honey-gold: #ffb703;
-    --honey-hover: #d99800;
-    --warm-ochre: #e65f2b;
-    --cream-bg: #faf9f6;
-    --cream-card: #f3efe6;
-    --text-primary: #14241e;
-    --text-secondary: #4a5b53;
-  }
+  /* ==========================================================================
+     2. HIGH-CONVERSION ACCENTS
+     ========================================================================== */
+  --brand-accent: #E06A28;          /* Vibrant Terracotta/Warm Ochre */
+  --brand-accent-hover: #C55314;    /* Deeper Burnt Amber */
+  --brand-accent-light: #FBEFE8;    /* Soft Tint Background */
 
-  body {
-    background-color: var(--brand-organic);
-    color: var(--text-primary);
-    font-family: 'SolaimanLipi', var(--font-hind-siliguri), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+  /* ==========================================================================
+     3. SURFACES & BACKGROUNDS
+     ========================================================================== */
+  --brand-bg: #FAF8F5;              /* Cream / Off-White */
+  --brand-card: #FFFFFF;            /* Pure White */
+  --brand-border: #EAE3D8;          /* Soft Sand-Grey Border */
+
+  /* ==========================================================================
+     4. TYPOGRAPHY
+     ========================================================================== */
+  --text-primary: #1C2421;          /* Deep Charcoal with Green Tint */
+  --text-secondary: #56625D;        /* Medium Sage Grey */
+  --text-muted: #8E9C96;            /* Light Muted Grey */
+
+  /* ==========================================================================
+     5. COMPLEMENTARY VARIATIONS
+     ========================================================================== */
+  --brand-green: var(--brand-primary);
+  --brand-terracotta: var(--brand-accent);
+  --brand-honey-gold: #D4A373;
 }
 
-/* Custom Tailwind v4 theme definitions */
+body {
+  background-color: var(--brand-bg);
+  color: var(--text-primary);
+  font-family: 'SolaimanLipi', var(--font-hind-siliguri), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Tailwind theme definitions */
 @theme {
-  --color-brandGreen: #1b4332;
-  --color-brandHoney: #ffb703;
-  --color-brandMustard: #e65f2b;
-  --color-brandOrganic: #faf9f6;
+  --color-brand-primary: #0F3D2E;
+  --color-brand-primary-dark: #0A2B20;
+  --color-brand-primary-light: #164E3B;
+  --color-brand-accent: #D97706;
+  --color-brand-accent-hover: #B45309;
+  --color-brand-accent-light: #F59E0B;
+  --color-brand-bg: #FDFBF7;
 
-  --color-brand-green: #1b4332;
-  --color-brand-honey: #ffb703;
-  --color-brand-mustard: #e65f2b;
-  --color-brand-organic: #faf9f6;
+  --color-brandGreen: #0F3D2E;
+  --color-brandHoney: #D97706;
+  --color-brandMustard: #C25E2E;
+  --color-brandOrganic: #FDFBF7;
 
-  --color-forest-50: #f0f7f4;
-  --color-forest-100: #dceee6;
-  --color-forest-200: #bcdec9;
-  --color-forest-300: #8bc4a4;
-  --color-forest-400: #52a379;
-  --color-forest-500: #2d815c;
-  --color-forest-600: #1b4332;
-  --color-forest-700: #153d31;
-  --color-forest-800: #102e25;
-  --color-forest-900: #0a1e18;
-  --color-forest: #1b4332;
+  --color-brand-green: #0F3D2E;
+  --color-brand-honey: #D97706;
+  --color-brand-mustard: #C25E2E;
+  --color-brand-organic: #FDFBF7;
 
-  --color-honey-50: #fffbea;
-  --color-honey-100: #fff3c4;
-  --color-honey-200: #ffe588;
-  --color-honey-300: #ffd74c;
-  --color-honey-400: #ffc51a;
-  --color-honey-500: #ffb703;
-  --color-honey-600: #d99800;
-  --color-honey-700: #a67200;
-  --color-honey: #ffb703;
+  --color-forest-50: #f0fdf4;
+  --color-forest-100: #dcfce7;
+  --color-forest-200: #bbf7d0;
+  --color-forest-300: #86efac;
+  --color-forest-400: #4ade80;
+  --color-forest-500: #22c55e;
+  --color-forest-600: #16a34a;
+  --color-forest-700: #15803d;
+  --color-forest-800: #164e3b;
+  --color-forest-900: #0f3d2e;
+  --color-forest-950: #0a2b20;
+  --color-forest: #0f3d2e;
+
+  --color-honey-50: #fffbeb;
+  --color-honey-100: #fef3c7;
+  --color-honey-200: #fde68a;
+  --color-honey-300: #fcd34d;
+  --color-honey-400: #fbbf24;
+  --color-honey-500: #f59e0b;
+  --color-honey-600: #d97706;
+  --color-honey-700: #b45309;
+  --color-honey-800: #92400e;
+  --color-honey: #d97706;
 
   --color-ochre-50: #fdf4ef;
   --color-ochre-100: #fae5da;
   --color-ochre-200: #f4cab5;
   --color-ochre-300: #eda686;
   --color-ochre-400: #e65f2b;
-  --color-ochre-500: #c84c1c;
+  --color-ochre-500: #c25e2e;
   --color-ochre-600: #a03b13;
   --color-ochre-700: #782a0b;
-  --color-ochre: #e65f2b;
+  --color-ochre: #c25e2e;
 
-  --color-cream-50: #fcfbf9;
-  --color-cream-100: #faf9f6;
-  --color-cream-200: #f3efe6;
-  --color-cream: #faf9f6;
+  --color-cream-50: #ffffff;
+  --color-cream-100: #fdfbf7;
+  --color-cream-200: #f9fafb;
+  --color-cream-300: #f3efe6;
+  --color-cream: #fdfbf7;
 
   --font-bangla: 'SolaimanLipi', var(--font-hind-siliguri), sans-serif;
 }
@@ -110,4 +138,61 @@ html {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+/* High-Contrast, WCAG AAA Honey Gold CTA Buttons */
+.btn-cta-gold {
+  background-color: #F59E0B;
+  background-image: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #111827;
+  font-weight: 800;
+  box-shadow: 0 4px 14px 0 rgba(217, 119, 6, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-cta-gold:hover {
+  background-image: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+  color: #0A0A0A;
+  box-shadow: 0 8px 22px 0 rgba(217, 119, 6, 0.45);
+  transform: translateY(-1px) scale(1.02);
+}
+
+.btn-cta-gold:active {
+  transform: scale(0.98);
+}
+
+/* Deep Forest Primary Action Buttons */
+.btn-cta-forest {
+  background-color: #0F3D2E;
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 4px 14px 0 rgba(15, 61, 46, 0.25);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-cta-forest:hover {
+  background-color: #0A2B20;
+  box-shadow: 0 8px 20px 0 rgba(15, 61, 46, 0.35);
+  transform: translateY(-1px) scale(1.01);
+}
+
+.btn-cta-forest:active {
+  transform: scale(0.98);
+}
+
+/* Print Area Formatting for Invoices & Shipping Labels */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .print-area {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
 }

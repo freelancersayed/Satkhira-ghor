@@ -17,7 +17,7 @@ function ShopContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/products?t=' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache, no-store' } })
+    fetch('/api/products')
       .then((res) => res.json())
       .then((data) => {
         if (data.products) {
@@ -56,33 +56,33 @@ function ShopContent() {
   };
 
   return (
-    <div className="py-10 sm:py-16">
+    <div className="py-10 sm:py-16 bg-[#FDFBF7] min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Page Title & Breadcrumb Header */}
         <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-bold text-[#C86D3B] uppercase tracking-widest">
+          <span className="text-xs font-bold text-[#B45309] uppercase tracking-widest">
             প্রাকৃতিক পণ্য ভান্ডার
           </span>
-          <h1 className="text-3xl sm:text-4xl font-black text-[#1B4D3E]">
+          <h1 className="text-3xl sm:text-4xl font-black text-[#0F3D2E]">
             সাতক্ষীরা ঘরের সকল খাঁটি পণ্য
           </h1>
-          <p className="text-xs sm:text-sm text-[#4A5B53]">
+          <p className="text-xs sm:text-sm text-[#4B5563]">
             সুন্দরবনের খাঁটি মধু, বিলোনা গাওয়া ঘি, ঘানি ভাঙা সরিষার তেল ও ঐতিহ্যবাহী মিষ্টান্ন
           </p>
         </div>
 
         {/* Search & Filter Toolbar */}
-        <div className="bg-white p-4 sm:p-6 rounded-3xl border border-[#EFE9DC] shadow-sm space-y-4">
+        <div className="bg-white p-4 sm:p-6 rounded-3xl border border-[#E8E2D5] shadow-sm space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
             {/* Search Input */}
             <div className="md:col-span-7 relative">
-              <Search className="w-4 h-4 text-[#4A5B53] absolute left-4 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#4B5563] absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="পণ্যের নাম দিয়ে খুঁজুন (যেমন: মধু, ঘি, তেল)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#FCFBF7] border border-[#EFE9DC] text-xs sm:text-sm text-[#1B4D3E] focus:outline-none focus:border-[#1B4D3E] transition-colors"
+                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#FDFBF7] border border-[#E8E2D5] text-xs sm:text-sm text-[#0F3D2E] focus:outline-none focus:border-[#0F3D2E] transition-colors"
               />
             </div>
 
@@ -91,7 +91,7 @@ function ShopContent() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full py-3 px-4 rounded-2xl bg-[#FCFBF7] border border-[#EFE9DC] text-xs sm:text-sm text-[#1B4D3E] focus:outline-none focus:border-[#1B4D3E] font-medium transition-colors"
+                className="w-full py-3 px-4 rounded-2xl bg-[#FDFBF7] border border-[#E8E2D5] text-xs sm:text-sm text-[#0F3D2E] focus:outline-none focus:border-[#0F3D2E] font-medium transition-colors"
               >
                 <option value="featured">ফিচার্ড পণ্য (Featured)</option>
                 <option value="price-low">মূল্য: কম থেকে বেশি (Price: Low to High)</option>
@@ -104,7 +104,7 @@ function ShopContent() {
             <div className="md:col-span-2">
               <button
                 onClick={handleResetFilters}
-                className="w-full py-3 px-4 rounded-2xl bg-[#F7F4ED] hover:bg-[#EFE9DC] text-[#4A5B53] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full py-3 px-4 rounded-2xl bg-[#F7F5F0] hover:bg-[#E8E2D5] text-[#4B5563] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>রিসেট ফিল্টার</span>
@@ -114,8 +114,8 @@ function ShopContent() {
 
           {/* Category Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-2 scrollbar-none">
-            <span className="text-xs font-bold text-[#1B4D3E] whitespace-nowrap flex items-center gap-1 mr-2">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-[#C86D3B]" />
+            <span className="text-xs font-bold text-[#0F3D2E] whitespace-nowrap flex items-center gap-1 mr-2">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#D97706]" />
               ক্যাটাগরি:
             </span>
             {categories.map((cat) => {
@@ -126,8 +126,8 @@ function ShopContent() {
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
                     isSelected
-                      ? 'bg-[#1B4D3E] text-[#FAF0D4] shadow-md scale-105'
-                      : 'bg-[#FAF8F4] text-[#4A5B53] hover:bg-[#FAF0D4] hover:text-[#1B4D3E] border border-[#EFE9DC]'
+                      ? 'bg-[#0F3D2E] text-white shadow-md scale-105'
+                      : 'bg-[#FDFBF7] text-[#4B5563] hover:bg-[#FEF3C7] hover:text-[#0F3D2E] border border-[#E8E2D5]'
                   }`}
                 >
                   {cat.icon && <span className="mr-1">{cat.icon}</span>}
@@ -139,12 +139,12 @@ function ShopContent() {
         </div>
 
         {/* Results Count Header */}
-        <div className="flex items-center justify-between text-xs text-[#4A5B53] px-1">
+        <div className="flex items-center justify-between text-xs text-[#4B5563] px-1">
           <span>
-            সর্বমোট <strong className="text-[#1B4D3E] font-bold">{filteredProducts.length}</strong> টি পণ্য পাওয়া গেছে
+            সর্বমোট <strong className="text-[#0F3D2E] font-bold">{filteredProducts.length}</strong> টি পণ্য পাওয়া গেছে
           </span>
           {selectedCategory !== 'all' && (
-            <span className="text-[#C86D3B] font-semibold">
+            <span className="text-[#B45309] font-semibold">
               ফিল্টার: {categories.find((c) => c.id === selectedCategory)?.name}
             </span>
           )}
@@ -153,8 +153,8 @@ function ShopContent() {
         {/* Product Grid / Loading */}
         {loading ? (
           <div className="py-20 text-center">
-            <div className="w-10 h-10 border-4 border-[#1B4D3E] border-t-[#E5A93C] rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-xs text-[#8C9C93]">পণ্য লোড হচ্ছে...</p>
+            <div className="w-10 h-10 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-xs text-[#6B7280]">পণ্য লোড হচ্ছে...</p>
           </div>
         ) : (
           <ProductGrid products={filteredProducts} />
@@ -169,8 +169,8 @@ export default function ShopPage() {
     <Suspense
       fallback={
         <div className="py-24 text-center">
-          <div className="w-12 h-12 border-4 border-[#1B4D3E] border-t-[#E5A93C] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm font-bold text-[#1B4D3E]">পণ্য লোড হচ্ছে...</p>
+          <div className="w-12 h-12 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm font-bold text-[#0F3D2E]">পণ্য লোড হচ্ছে...</p>
         </div>
       }
     >

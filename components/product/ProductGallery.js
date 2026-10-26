@@ -10,7 +10,7 @@ export default function ProductGallery({ images = [], name = 'Product Image' }) 
   return (
     <div className="space-y-4">
       {/* Main Image Stage */}
-      <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-[#FAF8F4] border border-[#EFE9DC] shadow-sm">
+      <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-[#FDFBF7] border border-[#E8E2D5] shadow-sm">
         <Image
           src={selectedImage}
           alt={name}
@@ -20,8 +20,8 @@ export default function ProductGallery({ images = [], name = 'Product Image' }) 
           sizes="(max-width: 768px) 100vw, 50vw"
         />
 
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-semibold text-[#1B4D3E] shadow-sm border border-[#EFE9DC]">
-          <ShieldCheck className="w-4 h-4 text-[#E5A93C]" />
+        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-semibold text-[#0F3D2E] shadow-sm border border-[#E8E2D5]">
+          <ShieldCheck className="w-4 h-4 text-[#F59E0B]" />
           <span>খাঁটি ও প্রাকৃতিক গুণমান</span>
         </div>
       </div>
@@ -35,8 +35,8 @@ export default function ProductGallery({ images = [], name = 'Product Image' }) 
               onClick={() => setSelectedImage(img)}
               className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all ${
                 selectedImage === img
-                  ? 'border-[#1B4D3E] ring-2 ring-[#1B4D3E]/20 scale-105'
-                  : 'border-[#EFE9DC] hover:border-[#1B4D3E]/50'
+                  ? 'border-[#0F3D2E] ring-2 ring-[#0F3D2E]/20 scale-105'
+                  : 'border-[#E8E2D5] hover:border-[#0F3D2E]/50'
               }`}
             >
               <Image

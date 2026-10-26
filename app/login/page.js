@@ -67,7 +67,7 @@ function LoginForm() {
 
       // Auto redirect based on role
       setTimeout(() => {
-        if (data.user.role === 'admin') {
+        if (['admin', 'manager', 'staff'].includes(data.user.role)) {
           router.push('/admin');
         } else if (redirect && redirect !== '/') {
           router.push(redirect);
@@ -82,57 +82,68 @@ function LoginForm() {
     }
   };
 
-  const handleDemoAdminFill = () => {
+  const handleFillCredentials = (phone, password) => {
     setFormData((prev) => ({
       ...prev,
-      phone: '01700000000',
-      password: 'admin123',
+      phone,
+      password,
     }));
     setIsRegister(false);
   };
 
   return (
-    <div className="min-h-screen py-12 sm:py-16 bg-[#FAF8F4] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 sm:py-16 bg-[#FDFBF7] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <div className="w-12 h-12 rounded-2xl bg-[#1B4D3E] flex items-center justify-center text-[#E5A93C] shadow-md group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-[#0F3D2E] flex items-center justify-center text-[#F59E0B] shadow-md group-hover:scale-105 transition-transform">
               <span className="font-serif text-2xl font-bold">স</span>
             </div>
           </Link>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1B4D3E]">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F3D2E]">
             {isRegister ? 'নতুন অ্যাকাউন্ট খুলুন' : 'লগইন করুন'}
           </h2>
-          <p className="text-xs sm:text-sm text-[#4A5B53]">
+          <p className="text-xs sm:text-sm text-slate-600">
             সাতক্ষীরা ঘর • খাঁটি ও প্রাকৃতিক পণ্যের বিশ্বস্ত ঠিকানা
           </p>
         </div>
 
-        {/* Demo Admin Card for quick testing */}
-        <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 text-xs text-amber-900 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <KeyRound className="w-5 h-5 text-amber-600 flex-shrink-0" />
-            <div>
-              <p className="font-bold">টেস্টিং ডেমো অ্যাডমিন তথ্য:</p>
-              <p className="text-[11px] text-amber-800">
-                মোবাইল: <code className="font-mono font-bold">01700000000</code> | পাসওয়ার্ড: <code className="font-mono font-bold">admin123</code>
-              </p>
-            </div>
+        {/* Demo Roles Card for quick testing */}
+        <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 text-xs text-amber-900 shadow-sm space-y-2.5">
+          <div className="flex items-center gap-2 font-bold text-amber-900">
+            <KeyRound className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <span>১-ক্লিকে টেস্ট লগইন (RBAC রোল নির্বাচন করুন):</span>
           </div>
-          <button
-            type="button"
-            onClick={handleDemoAdminFill}
-            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-colors whitespace-nowrap shadow-sm"
-          >
-            অটো পূরণ করুন
-          </button>
+          <div className="grid grid-cols-3 gap-1.5 pt-1">
+            <button
+              type="button"
+              onClick={() => handleFillCredentials('01700000000', 'admin123')}
+              className="px-2 py-1.5 bg-[#0F3D2E] hover:bg-emerald-950 text-white rounded-xl text-[11px] font-bold shadow-2xs transition-all text-center"
+            >
+              👑 অ্যাডমিন
+            </button>
+            <button
+              type="button"
+              onClick={() => handleFillCredentials('01800000000', 'manager123')}
+              className="px-2 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[11px] font-bold shadow-2xs transition-all text-center"
+            >
+              💼 ম্যানেজার
+            </button>
+            <button
+              type="button"
+              onClick={() => handleFillCredentials('01900000000', 'staff123')}
+              className="px-2 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-[11px] font-bold shadow-2xs transition-all text-center"
+            >
+              🚚 স্টাফ
+            </button>
+          </div>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#EFE9DC] shadow-xl space-y-6">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E2D5] shadow-xl space-y-6">
           {/* Tabs */}
-          <div className="flex rounded-xl bg-[#F7F4ED] p-1 border border-[#EFE9DC]">
+          <div className="flex rounded-xl bg-[#F7F5F0] p-1 border border-[#E8E2D5]">
             <button
               type="button"
               onClick={() => {
@@ -141,8 +152,8 @@ function LoginForm() {
               }}
               className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
                 !isRegister
-                  ? 'bg-white text-[#1B4D3E] shadow-sm'
-                  : 'text-[#4A5B53] hover:text-[#1B4D3E]'
+                  ? 'bg-white text-[#0F3D2E] shadow-sm'
+                  : 'text-slate-600 hover:text-[#0F3D2E]'
               }`}
             >
               লগইন
@@ -155,8 +166,8 @@ function LoginForm() {
               }}
               className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
                 isRegister
-                  ? 'bg-white text-[#1B4D3E] shadow-sm'
-                  : 'text-[#4A5B53] hover:text-[#1B4D3E]'
+                  ? 'bg-white text-[#0F3D2E] shadow-sm'
+                  : 'text-slate-600 hover:text-[#0F3D2E]'
               }`}
             >
               নতুন রেজিস্ট্রেশন
@@ -180,11 +191,11 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {isRegister && (
               <div>
-                <label className="block text-xs font-bold text-[#1B4D3E] mb-1.5">
+                <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
                   আপনার পূর্ণ নাম <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <UserIcon className="w-4 h-4 text-[#8C9C93] absolute left-3.5 top-3.5" />
+                  <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
                     type="text"
                     required
@@ -193,18 +204,18 @@ function LoginForm() {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     placeholder="যেমন: মোঃ সাকিব হোসেন"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EFE9DC] focus:border-[#1B4D3E] focus:ring-1 focus:ring-[#1B4D3E] outline-none text-xs text-[#102E25]"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-[#1B4D3E] mb-1.5">
+              <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
                 মোবাইল নম্বর <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Phone className="w-4 h-4 text-[#8C9C93] absolute left-3.5 top-3.5" />
+                <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
                   type="tel"
                   required
@@ -213,18 +224,18 @@ function LoginForm() {
                     setFormData({ ...formData, phone: e.target.value })
                   }
                   placeholder="017XXXXXXXX"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EFE9DC] focus:border-[#1B4D3E] focus:ring-1 focus:ring-[#1B4D3E] outline-none text-xs text-[#102E25]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
                 />
               </div>
             </div>
 
             {isRegister && (
               <div>
-                <label className="block text-xs font-bold text-[#1B4D3E] mb-1.5">
+                <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
                   ইমেইল (ঐচ্ছিক)
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#8C9C93] absolute left-3.5 top-3.5" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
                     type="email"
                     value={formData.email}
@@ -232,18 +243,18 @@ function LoginForm() {
                       setFormData({ ...formData, email: e.target.value })
                     }
                     placeholder="example@gmail.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EFE9DC] focus:border-[#1B4D3E] focus:ring-1 focus:ring-[#1B4D3E] outline-none text-xs text-[#102E25]"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-[#1B4D3E] mb-1.5">
+              <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
                 পাসওয়ার্ড <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-[#8C9C93] absolute left-3.5 top-3.5" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
                   type="password"
                   required
@@ -253,14 +264,14 @@ function LoginForm() {
                     setFormData({ ...formData, password: e.target.value })
                   }
                   placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EFE9DC] focus:border-[#1B4D3E] focus:ring-1 focus:ring-[#1B4D3E] outline-none text-xs text-[#102E25]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
                 />
               </div>
             </div>
 
             {isRegister && (
               <div>
-                <label className="block text-xs font-bold text-[#1B4D3E] mb-1.5">
+                <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
                   ডেলিভারি ঠিকানা (ঐচ্ছিক)
                 </label>
                 <textarea
@@ -270,7 +281,7 @@ function LoginForm() {
                     setFormData({ ...formData, address: e.target.value })
                   }
                   placeholder="বাড়ি, রোড নং, এলাকা, জেলা"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#EFE9DC] focus:border-[#1B4D3E] focus:ring-1 focus:ring-[#1B4D3E] outline-none text-xs text-[#102E25]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
                 />
               </div>
             )}
@@ -278,10 +289,10 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-[#1B4D3E] hover:bg-[#153D31] text-[#FAF0D4] rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 rounded-xl font-black text-sm shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
                   <span>{isRegister ? 'অ্যাকাউন্ট তৈরি করুন' : 'লগইন করুন'}</span>
@@ -292,12 +303,12 @@ function LoginForm() {
           </form>
 
           {/* Guest Checkout reminder */}
-          <div className="border-t border-[#EFE9DC] pt-4 text-center">
-            <p className="text-xs text-[#4A5B53]">
+          <div className="border-t border-[#E8E2D5] pt-4 text-center">
+            <p className="text-xs text-slate-600">
               পণ্য কেনার জন্য লগইন বাধ্যতামূলক নয়!{' '}
               <Link
                 href="/shop"
-                className="text-[#C86D3B] font-bold hover:underline"
+                className="text-amber-800 font-bold hover:underline"
               >
                 সরাসরি অর্ডার করতে এখানে ক্লিক করুন →
               </Link>
@@ -309,7 +320,7 @@ function LoginForm() {
         <div className="text-center">
           <Link
             href="/track-order"
-            className="text-xs font-bold text-[#1B4D3E] hover:underline inline-flex items-center gap-1"
+            className="text-xs font-bold text-[#0F3D2E] hover:text-[#D97706] hover:underline inline-flex items-center gap-1"
           >
             <span>পূর্ববর্তী অর্ডার ট্র্যাক করতে চান? এখানে যান</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -324,8 +335,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FAF8F4]">
-          <div className="w-10 h-10 border-4 border-[#1B4D3E] border-t-[#E5A93C] rounded-full animate-spin" />
+        <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
+          <div className="w-10 h-10 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin" />
         </div>
       }
     >

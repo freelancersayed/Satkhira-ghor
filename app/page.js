@@ -8,8 +8,8 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 
 import SpecialBanner from '@/components/home/SpecialBanner';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Enable ISR (Incremental Static Regeneration) for instant <30ms load time
+export const revalidate = 30;
 
 export default function HomePage() {
   return (

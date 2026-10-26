@@ -29,16 +29,16 @@ export default function Testimonials() {
   ];
 
   return (
-    <section className="py-16 sm:py-24 bg-[#FCFBF7]">
+    <section className="py-16 sm:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="text-xs font-bold text-[#C86D3B] uppercase tracking-widest">
+          <span className="text-xs font-bold text-[#B45309] uppercase tracking-widest">
             গ্রাহক পর্যালোচনা
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1B4D3E] mt-1">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F3D2E] mt-1">
             গ্রাহকদের ভালোবাসায় ‘সাতক্ষীরা ঘর’
           </h2>
-          <p className="text-xs sm:text-sm text-[#4A5B53] mt-2">
+          <p className="text-xs sm:text-sm text-[#4B5563] mt-2">
             হাজারো পরিবারের বিশ্বাস ও আস্থার গল্প
           </p>
         </div>
@@ -47,28 +47,28 @@ export default function Testimonials() {
           {reviews.map((rev, idx) => (
             <div
               key={idx}
-              className="bg-white p-7 rounded-3xl border border-[#EFE9DC] shadow-sm hover:shadow-lg transition-all duration-300 relative flex flex-col justify-between"
+              className="bg-white p-7 rounded-3xl border border-[#E8E2D5] shadow-sm hover:shadow-lg transition-all duration-300 relative flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex text-[#E5A93C]">
+                  <div className="flex text-[#F59E0B]">
                     {[...Array(rev.rating)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 fill-current" />
                     ))}
                   </div>
-                  <Quote className="w-6 h-6 text-[#FAF0D4]" />
+                  <Quote className="w-6 h-6 text-[#FEF3C7]" />
                 </div>
-                <p className="text-xs sm:text-sm text-[#14241E] leading-relaxed italic">
+                <p className="text-xs sm:text-sm text-[#111827] leading-relaxed italic">
                   &ldquo;{rev.comment}&rdquo;
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-[#EFE9DC]/70 flex items-center justify-between">
+              <div className="mt-6 pt-4 border-t border-[#E8E2D5]/70 flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-xs text-[#1B4D3E]">{rev.name}</h4>
-                  <p className="text-[11px] text-[#4A5B53]">{rev.location}</p>
+                  <h4 className="font-bold text-xs text-[#0F3D2E]">{rev.name}</h4>
+                  <p className="text-[11px] text-[#4B5563]">{rev.location}</p>
                 </div>
-                <span className="text-[10px] bg-[#F0F7F4] text-[#1B4D3E] font-semibold px-2 py-0.5 rounded-full">
+                <span className="text-[10px] bg-[#F0FDF4] text-[#0F3D2E] font-semibold px-2 py-0.5 rounded-full">
                   {rev.product}
                 </span>
               </div>

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
-import { requireAdmin } from '@/lib/auth';
+import { requireManagerOrAdmin } from '@/lib/auth';
 import { products as fallbackProducts } from '@/data/products';
 
 export async function GET(request, { params }) {
@@ -29,7 +29,7 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
-    const adminCheck = await requireAdmin(request);
+    const adminCheck = await requireManagerOrAdmin(request);
     if (adminCheck.error) {
       return NextResponse.json(
         { message: adminCheck.error },
@@ -72,7 +72,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const adminCheck = await requireAdmin(request);
+    const adminCheck = await requireManagerOrAdmin(request);
     if (adminCheck.error) {
       return NextResponse.json(
         { message: adminCheck.error },

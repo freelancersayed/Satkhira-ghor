@@ -108,10 +108,59 @@ const ProductSchema = new mongoose.Schema(
       default: false,
       index: true,
     },
+    // Multi-attribute variation matrix (Size, Color, Weight, SKU, discrete pricing, stock)
+    hasVariations: {
+      type: Boolean,
+      default: false,
+    },
+    variations: [
+      {
+        sku: {
+          type: String,
+          default: '',
+          trim: true,
+        },
+        size: {
+          type: String,
+          default: '',
+          trim: true,
+        },
+        color: {
+          type: String,
+          default: '',
+          trim: true,
+        },
+        weight: {
+          type: String,
+          default: '',
+          trim: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+          default: 0,
+        },
+        originalPrice: {
+          type: Number,
+          default: null,
+        },
+        stock: {
+          type: Number,
+          default: 0,
+        },
+        image: {
+          type: String,
+          default: '',
+        },
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
+
+ProductSchema.index({ isDeleted: 1, createdAt: -1 });
+ProductSchema.index({ isDeleted: 1, category: 1 });
 
 export default mongoose.models.Product || mongoose.model('Product', ProductSchema);

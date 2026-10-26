@@ -82,14 +82,14 @@ export default function ImageUploadInput({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="block text-xs font-bold text-[#1B4D3E]">
+        <label className="block text-xs font-bold text-[#0F3D2E]">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
         {allowUrlPaste && (
           <button
             type="button"
             onClick={() => setShowUrlMode(!showUrlMode)}
-            className="text-[11px] font-bold text-[#C86D3B] hover:text-[#1B4D3E] transition-colors flex items-center gap-1"
+            className="text-[11px] font-bold text-amber-700 hover:text-[#0F3D2E] transition-colors flex items-center gap-1"
           >
             {showUrlMode ? (
               <>
@@ -127,7 +127,7 @@ export default function ImageUploadInput({
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder="https://... (ছবির সরাসরি ওয়েব লিংক)"
-            className="w-full px-3 py-2.5 rounded-xl border border-[#EFE9DC] bg-[#FAF8F4] text-xs font-mono text-[#102E25] focus:outline-none focus:border-[#1B4D3E]"
+            className="w-full px-3 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] text-xs font-mono text-slate-900 focus:outline-none focus:border-[#0F3D2E]"
           />
         </div>
       ) : (
@@ -135,8 +135,8 @@ export default function ImageUploadInput({
         <div>
           {value ? (
             /* Uploaded Preview State */
-            <div className="relative border border-[#EFE9DC] rounded-2xl p-3 bg-white shadow-sm flex items-center gap-3">
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-[#FAF0D4] border border-[#EFE9DC] flex-shrink-0">
+            <div className="relative border border-[#E8E2D5] rounded-2xl p-3 bg-white shadow-sm flex items-center gap-3">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-[#FEF3C7] border border-[#E8E2D5] flex-shrink-0">
                 <img
                   src={value}
                   alt="Uploaded preview"
@@ -152,7 +152,7 @@ export default function ImageUploadInput({
                   <Check className="w-4 h-4" />
                   <span>ছবি সংযুক্ত হয়েছে</span>
                 </div>
-                <p className="text-[11px] text-[#8C9C93] truncate font-mono">
+                <p className="text-[11px] text-slate-400 truncate font-mono">
                   {value}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
@@ -160,7 +160,7 @@ export default function ImageUploadInput({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="px-2.5 py-1 rounded-lg bg-[#FAF0D4] text-[#1B4D3E] text-[11px] font-bold hover:bg-[#ebdcb4] transition-colors flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-lg bg-[#FEF3C7] text-[#0F3D2E] text-[11px] font-bold hover:bg-amber-200 transition-colors flex items-center gap-1"
                   >
                     <Upload className="w-3 h-3" />
                     <span>ছবি পরিবর্তন করুন</span>
@@ -187,31 +187,31 @@ export default function ImageUploadInput({
               onClick={() => !uploading && fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-2xl p-5 sm:p-6 text-center cursor-pointer transition-all duration-200 select-none ${
                 dragActive
-                  ? 'border-[#E5A93C] bg-[#FAF0D4]/60 scale-[1.01]'
-                  : 'border-[#C8D8D0] bg-[#FAF8F4] hover:border-[#1B4D3E] hover:bg-[#F0F5F2]'
+                  ? 'border-[#F59E0B] bg-[#FEF3C7]/60 scale-[1.01]'
+                  : 'border-emerald-200 bg-[#FDFBF7] hover:border-[#0F3D2E] hover:bg-emerald-50/50'
               } ${uploading ? 'opacity-70 pointer-events-none' : ''}`}
             >
               {uploading ? (
                 <div className="flex flex-col items-center justify-center py-2 gap-2">
-                  <Loader2 className="w-7 h-7 text-[#1B4D3E] animate-spin" />
-                  <span className="text-xs font-bold text-[#1B4D3E]">
+                  <Loader2 className="w-7 h-7 text-[#0F3D2E] animate-spin" />
+                  <span className="text-xs font-bold text-[#0F3D2E]">
                     ছবি আপলোড হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন
                   </span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center gap-2">
-                  <div className="w-12 h-12 rounded-2xl bg-[#1B4D3E]/10 text-[#1B4D3E] flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-2xl bg-[#0F3D2E]/10 text-[#0F3D2E] flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Upload className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[#1B4D3E]">
+                    <p className="text-xs font-bold text-[#0F3D2E]">
                       ক্লিক করে ছবি নির্বাচন করুন
                     </p>
-                    <p className="text-[11px] text-[#4A5B53] mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-0.5">
                       অথবা ফাইল টেনে এখানে ছেড়ে দিন
                     </p>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FAF0D4] text-[#7E4E18] text-[10px] font-bold">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FEF3C7] text-amber-900 text-[10px] font-bold">
                     <Smartphone className="w-3 h-3" />
                     <span>ফোন গ্যালারি / ফোল্ডার সমর্থনযোগ্য</span>
                   </div>

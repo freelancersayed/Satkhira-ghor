@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
-import { getSessionUser, requireAdmin } from '@/lib/auth';
+import { getSessionUser, requireStaffOrAdmin } from '@/lib/auth';
+import { extractClientIp, getIpGeoInfo } from '@/lib/geo';
+import { checkCourierHistoryAndFraud } from '@/lib/courierFraudCheck';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +32,17 @@ export async function POST(request) {
     // Check if user is logged in
     const session = await getSessionUser(request);
     const userId = session ? session.id : null;
+
+    // 1. Customer IP & Geolocation Extraction (Requirement 2)
+    const clientIp = extractClientIp(request);
+    const userAgent = request.headers.get('user-agent') || '';
+    const geoInfo = await getIpGeoInfo(clientIp);
+
+    // 2. Automated Courier History Check & Anti-Fraud Engine (Requirement 3)
+    const fraudAssessment = await checkCourierHistoryAndFraud(customer.phone);
+
+    // If High Risk, automatically set order status to 'hold', otherwise 'pending'
+    const initialOrderStatus = fraudAssessment.suggestedOrderStatus || 'pending';
 
     // Generate unique order number (e.g. SKG-748392)
     const randomDigits = Math.floor(100000 + Math.random() * 900000);
@@ -61,7 +74,19 @@ export async function POST(request) {
       totalAmount,
       paymentMethod,
       paymentStatus: 'unpaid',
-      orderStatus: 'pending',
+      orderStatus: initialOrderStatus,
+      // Security & Geolocation
+      securityInfo: {
+        ipAddress: geoInfo.ipAddress || clientIp,
+        city: geoInfo.city || 'ঢাকা',
+        country: geoInfo.country || 'বাংলাদেশ',
+        isp: geoInfo.isp || 'Telecom / ISP Gateway',
+        userAgent,
+      },
+      // Courier History & Fraud Metrics
+      courierHistory: fraudAssessment.courierHistory,
+      fraudRisk: fraudAssessment.fraudRisk,
+      fraudReason: fraudAssessment.fraudReason,
     });
 
     // Optionally decrement product stock if product exists in MongoDB
@@ -80,13 +105,16 @@ export async function POST(request) {
     return NextResponse.json(
       {
         success: true,
-        message: 'অর্ডার সফলভাবে সম্পন্ন হয়েছে!',
+        message: initialOrderStatus === 'hold'
+          ? 'অর্ডার গৃহীত হয়েছে (নিরাপত্তা যাচাইয়ের জন্য পর্যালোচনাধীন)'
+          : 'অর্ডার সফলভাবে সম্পন্ন হয়েছে!',
         order: {
           id: newOrder._id.toString(),
           orderNumber: newOrder.orderNumber,
           totalAmount: newOrder.totalAmount,
           customer: newOrder.customer,
           orderStatus: newOrder.orderStatus,
+          fraudRisk: newOrder.fraudRisk,
           createdAt: newOrder.createdAt,
         },
       },
@@ -103,11 +131,11 @@ export async function POST(request) {
 
 export async function GET(request) {
   try {
-    const adminCheck = await requireAdmin(request);
-    if (adminCheck.error) {
+    const authCheck = await requireStaffOrAdmin(request);
+    if (authCheck.error) {
       return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status }
+        { message: authCheck.error },
+        { status: authCheck.status }
       );
     }
 
@@ -132,7 +160,7 @@ export async function GET(request) {
 
     const orders = await Order.find(query).sort({ createdAt: -1 }).limit(limit);
 
-    return NextResponse.json({ orders });
+    return NextResponse.json({ orders, userRole: authCheck.user.role });
   } catch (error) {
     console.error('Fetch orders error:', error);
     return NextResponse.json(

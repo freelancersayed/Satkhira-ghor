@@ -4,6 +4,7 @@ import Footer from '@/components/common/Footer';
 import CartDrawer from '@/components/common/CartDrawer';
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app'),
   title: 'সাতক্ষীরা ঘর | Satkhira Ghor - খাঁটি ও প্রাকৃতিক পণ্যের ঠিকানা',
   description:
     'সুন্দরবনের খাঁটি মধু, প্রাচীন বিলোনা পদ্ধতির খাঁটি গাওয়া ঘি, ঘানি ভাঙা সরিষার তেল এবং সাতক্ষীরার ঐতিহ্যবাহী ক্ষীর সন্দেশ। ১০০% নিরাপদ ও কেমিক্যালমুক্ত প্রাকৃতিক খাদ্য সম্ভার।',

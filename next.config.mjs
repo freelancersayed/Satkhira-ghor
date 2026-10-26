@@ -4,14 +4,17 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Disable client-side router cache to ensure DB changes (product add/delete) are immediately visible
+  compress: true,
+  poweredByHeader: false,
   experimental: {
     staleTimes: {
-      dynamic: 0,   // Never cache dynamic pages (force-dynamic) in the router cache
-      static: 30,   // Static pages can be cached 30 seconds
+      dynamic: 30, // Instant client navigation (cached for 30s)
+      static: 180, // Static pages cached 3 mins
     },
   },
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86400, // 24 hours caching for images
     remotePatterns: [
       {
         protocol: 'https',

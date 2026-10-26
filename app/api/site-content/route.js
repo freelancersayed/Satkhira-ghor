@@ -14,6 +14,38 @@ export const defaultSiteContent = {
       'সাতক্ষীরার গভীর সুন্দরবনের খাঁটি খলসী ফুলের মধু, প্রাচীন বিলোনা পদ্ধতির দেশি গাওয়া ঘি এবং খাঁটি ঘানি ভাঙা সরিষার তেল। ১০০% বিশুদ্ধ ও কেমিক্যালমুক্ত।',
     image:
       'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800',
+    slides: [
+      {
+        url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=90&w=1920',
+        label: 'সুন্দরবনের খাঁটি মধু',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=90&w=1920',
+        label: 'জেলেদের তাজা মাছ আহরণ',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1565031491910-e57fac031c41?auto=format&fit=crop&q=90&w=1920',
+        label: 'উপকূলের তাজা চিংড়ি',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&q=90&w=1920',
+        label: 'সাতক্ষীরার বিখ্যাত হিমসাগর আম',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=90&w=1920',
+        label: 'খাঁটি দেশি খাদ্য সম্ভার',
+      },
+    ],
+    primaryBtnText: 'পণ্য কিনুন',
+    primaryBtnLink: '/shop',
+    secondaryBtnText: 'আমাদের গল্প শুনুন',
+    secondaryBtnLink: '/about-us',
+    stat1Number: '১০০%',
+    stat1Label: 'প্রাকৃতিক ও খাঁটি',
+    stat2Number: '১২,৫০০+',
+    stat2Label: 'সন্তুষ্ট পরিবার',
+    stat3Number: '২৪-৪৮ ঘণ্টা',
+    stat3Label: 'সারাদেশে ডেলিভারি',
     floatingBadge1Title: 'ল্যাব টেস্টে পরীক্ষিত',
     floatingBadge1Sub: 'শূন্য ভেজাল গ্যারান্টি',
     floatingBadge2Title: 'খাঁটি গাওয়া ঘি',

@@ -36,10 +36,9 @@ export async function GET(request) {
       id: p._id ? p._id.toString() : p.slug,
     }));
 
-    // Find all known slugs in DB (both active and deleted)
-    // A deleted product must NEVER be resurrected from fallback!
-    const allKnown = await Product.find({}, { slug: 1, isDeleted: 1 }).lean();
-    const blockedSlugs = new Set(allKnown.map((p) => p.slug));
+    // Only query deleted slugs (extremely lightweight)
+    const deletedDocs = await Product.find({ isDeleted: true }, { slug: 1 }).lean();
+    const blockedSlugs = new Set(deletedDocs.map((p) => p.slug));
 
     const matchingFallbacks = fallbackProducts.filter((fb) => {
       if (blockedSlugs.has(fb.slug)) return false;
@@ -64,9 +63,7 @@ export async function GET(request) {
       },
       {
         headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-          Pragma: 'no-cache',
-          Expires: '0',
+          'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
         },
       }
     );

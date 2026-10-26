@@ -73,8 +73,8 @@ export default function ImageUploader({ onInsert, label = 'ছবি আপল�
         onClick={() => fileRef.current?.click()}
         className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all
           ${dragOver
-            ? 'border-[#E5A93C] bg-[#FAF0D4]/50 scale-[1.02]'
-            : 'border-[#C8D8D0] bg-[#FAF8F4] hover:border-[#1B4D3E] hover:bg-[#F0F5F2]'
+            ? 'border-[#F59E0B] bg-[#FEF3C7]/50 scale-[1.02]'
+            : 'border-emerald-200 bg-[#FDFBF7] hover:border-[#0F3D2E] hover:bg-emerald-50/50'
           }`}
       >
         <input
@@ -88,20 +88,20 @@ export default function ImageUploader({ onInsert, label = 'ছবি আপল�
 
         {uploading ? (
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-10 h-10 text-[#1B4D3E] animate-spin" />
-            <p className="text-sm font-semibold text-[#1B4D3E]">আপলোড হচ্ছে…</p>
+            <Loader2 className="w-10 h-10 text-[#0F3D2E] animate-spin" />
+            <p className="text-sm font-semibold text-[#0F3D2E]">আপলোড হচ্ছে…</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-[#1B4D3E]/10 flex items-center justify-center">
-              <Upload className="w-7 h-7 text-[#1B4D3E]" />
+            <div className="w-14 h-14 rounded-2xl bg-[#0F3D2E]/10 flex items-center justify-center">
+              <Upload className="w-7 h-7 text-[#0F3D2E]" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#1B4D3E]">{label}</p>
-              <p className="text-xs text-[#8C9C93] mt-1">
+              <p className="text-sm font-bold text-[#0F3D2E]">{label}</p>
+              <p className="text-xs text-slate-400 mt-1">
                 ক্লিক করুন অথবা ছবি টেনে এখানে ছাড়ুন
               </p>
-              <p className="text-[11px] text-[#8C9C93] mt-0.5">
+              <p className="text-[11px] text-slate-400 mt-0.5">
                 JPG · PNG · WEBP · সর্বোচ্চ ৮MB
               </p>
             </div>
@@ -120,10 +120,10 @@ export default function ImageUploader({ onInsert, label = 'ছবি আপল�
       {/* Uploaded Images */}
       {uploaded.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-bold text-[#1B4D3E]">আপলোড করা ছবি</p>
+          <p className="text-xs font-bold text-[#0F3D2E]">আপলোড করা ছবি</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {uploaded.map((img, i) => (
-              <div key={i} className="group relative rounded-xl overflow-hidden border border-[#EFE9DC] bg-gray-50">
+              <div key={i} className="group relative rounded-xl overflow-hidden border border-[#E8E2D5] bg-gray-50">
                 {/* Preview */}
                 <div className="aspect-video relative">
                   <img
@@ -135,19 +135,19 @@ export default function ImageUploader({ onInsert, label = 'ছবি আপল�
 
                 {/* URL bar */}
                 <div className="p-2 bg-white flex items-center gap-1">
-                  <LinkIcon className="w-3 h-3 text-[#8C9C93] flex-shrink-0" />
-                  <p className="text-[10px] text-[#4A5B53] truncate flex-1 font-mono">
+                  <LinkIcon className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                  <p className="text-[10px] text-slate-600 truncate flex-1 font-mono">
                     {img.url}
                   </p>
                   <button
                     onClick={() => copyUrl(img.url)}
                     title="URL কপি করুন"
-                    className="p-1 rounded-lg hover:bg-[#FAF0D4] transition-colors flex-shrink-0"
+                    className="p-1 rounded-lg hover:bg-[#FEF3C7] transition-colors flex-shrink-0"
                   >
                     {copied === img.url ? (
                       <Check className="w-3.5 h-3.5 text-emerald-600" />
                     ) : (
-                      <Copy className="w-3.5 h-3.5 text-[#8C9C93]" />
+                      <Copy className="w-3.5 h-3.5 text-slate-400" />
                     )}
                   </button>
                 </div>

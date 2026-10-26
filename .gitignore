@@ -27,6 +27,8 @@ yarn-error.log*
 
 # Vercel
 .vercel
+/public/uploads/*
+!/public/uploads/.gitkeep
 
 # TypeScript
 *.tsbuildinfo

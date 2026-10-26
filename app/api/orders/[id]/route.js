@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Order from '@/models/Order';
-import { requireAdmin, getSessionUser } from '@/lib/auth';
+import { requireStaffOrAdmin, getSessionUser } from '@/lib/auth';
 
 export async function GET(request, { params }) {
   try {
@@ -27,11 +27,11 @@ export async function GET(request, { params }) {
 
 export async function PATCH(request, { params }) {
   try {
-    const adminCheck = await requireAdmin(request);
-    if (adminCheck.error) {
+    const staffCheck = await requireStaffOrAdmin(request);
+    if (staffCheck.error) {
       return NextResponse.json(
-        { message: adminCheck.error },
-        { status: adminCheck.status }
+        { message: staffCheck.error },
+        { status: staffCheck.status }
       );
     }
 
