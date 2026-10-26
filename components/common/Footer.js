@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShieldCheck, Truck, Sparkles, MapPin, Phone, Mail, Award } from 'lucide-react';
 
 export default function Footer() {
@@ -63,8 +64,17 @@ export default function Footer() {
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#F59E0B] flex items-center justify-center text-[#111827] font-bold text-xl shadow-md">
-                স
+              <div className="w-11 h-11 rounded-xl bg-[#0F3D2E] border border-emerald-500/30 flex items-center justify-center text-[#F59E0B] font-bold text-xl shadow-md overflow-hidden relative">
+                <Image
+                  src="/assets/logo-1.png"
+                  alt="সাতক্ষীরা ঘর লোগো"
+                  fill
+                  className="object-contain p-1"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <span className="font-serif text-xl font-bold text-[#F59E0B]">স</span>
               </div>
               <span className="text-2xl font-bold tracking-tight text-white">
                 সাতক্ষীরা ঘর

@@ -90,17 +90,18 @@ export default function Header() {
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center gap-3 group">
-                <div className="w-11 h-11 rounded-2xl bg-[#0F3D2E] flex items-center justify-center text-[#F59E0B] shadow-md group-hover:scale-105 transition-transform duration-200 overflow-hidden relative">
-                  <span className="font-serif text-2xl font-bold select-none">স</span>
+                <div className="w-12 h-12 rounded-2xl bg-[#0F3D2E] flex items-center justify-center text-[#F59E0B] shadow-md group-hover:scale-105 transition-transform duration-200 overflow-hidden relative border border-[#E8E2D5]/30 flex-shrink-0">
                   <Image
-                    src="/assets/logo.png"
+                    src="/assets/logo-1.png"
                     alt="সাতক্ষীরা ঘর লোগো"
                     fill
+                    priority
                     className="object-contain p-1"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
+                  <span className="font-serif text-2xl font-bold select-none text-[#F59E0B]">স</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xl sm:text-2xl font-bold tracking-tight text-[#0F3D2E] flex items-center gap-1.5">
