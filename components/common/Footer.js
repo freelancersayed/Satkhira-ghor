@@ -70,11 +70,7 @@ export default function Footer() {
                   alt="সাতক্ষীরা ঘর লোগো"
                   fill
                   className="object-contain p-1"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
                 />
-                <span className="font-serif text-xl font-bold text-[#F59E0B]">স</span>
               </div>
               <span className="text-2xl font-bold tracking-tight text-white">
                 সাতক্ষীরা ঘর
