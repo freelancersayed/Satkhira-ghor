@@ -62,11 +62,11 @@ export default function CartDrawer() {
         {/* Drawer Header */}
         <div className="p-5 border-b border-[#E8E2D5] flex items-center justify-between bg-[#F7F5F0]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-[#0F3D2E] text-[#F59E0B] rounded-lg">
+            <div className="p-2 bg-[#016831] text-[#F59E0B] rounded-lg">
               <ShoppingBag className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-[#0F3D2E] text-base">আপনার শপিং ব্যাগ</h3>
+              <h3 className="font-bold text-[#016831] text-base">আপনার শপিং ব্যাগ</h3>
               <p className="text-xs text-[#4B5563]">
                 {items.length} টি পণ্য কার্টে রয়েছে
               </p>
@@ -75,7 +75,7 @@ export default function CartDrawer() {
           <button
             onClick={closeCart}
             id="close-cart-btn"
-            className="p-2 text-[#4B5563] hover:text-[#0F3D2E] hover:bg-[#E8E2D5] rounded-xl transition-colors"
+            className="p-2 text-[#4B5563] hover:text-[#016831] hover:bg-[#E8E2D5] rounded-xl transition-colors"
             aria-label="Close cart"
           >
             <X className="w-5 h-5" />
@@ -85,11 +85,11 @@ export default function CartDrawer() {
         {/* Free Shipping Tracker */}
         <div className="bg-[#F0FDF4] px-5 py-3 border-b border-[#DCFCE7]">
           {remainingForFreeShipping > 0 ? (
-            <p className="text-xs text-[#0A2B20]">
-              আর মাত্র <strong className="text-[#B45309]">৳{remainingForFreeShipping}</strong> টাকার পণ্য অর্ডার করলেই পাচ্ছেন <strong className="text-[#0F3D2E]">ফ্রি ডেলিভারি!</strong>
+            <p className="text-xs text-[#014D24]">
+              আর মাত্র <strong className="text-[#B45309]">৳{remainingForFreeShipping}</strong> টাকার পণ্য অর্ডার করলেই পাচ্ছেন <strong className="text-[#016831]">ফ্রি ডেলিভারি!</strong>
             </p>
           ) : (
-            <p className="text-xs font-semibold text-[#0F3D2E] flex items-center gap-1.5">
+            <p className="text-xs font-semibold text-[#016831] flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-[#F59E0B]" />
               অভিনন্দন! আপনি পাচ্ছেন ফ্রি হোম ডেলিভারি!
             </p>
@@ -110,7 +110,7 @@ export default function CartDrawer() {
                 <ShoppingBag className="w-10 h-10" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-[#0F3D2E]">কার্ট সম্পূর্ণ খালি</h4>
+                <h4 className="text-base font-bold text-[#016831]">কার্ট সম্পূর্ণ খালি</h4>
                 <p className="text-xs text-[#4B5563] mt-1">
                   সাতক্ষীরার খাঁটি মধু বা গাওয়া ঘি যোগ করুন
                 </p>
@@ -118,7 +118,7 @@ export default function CartDrawer() {
               <Link
                 href="/shop"
                 onClick={closeCart}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0F3D2E] text-white rounded-xl font-bold text-xs hover:bg-[#0A2B20] transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#016831] text-white rounded-xl font-bold text-xs hover:bg-[#014D24] transition-colors"
               >
                 পণ্য দেখুন <ArrowRight className="w-4 h-4" />
               </Link>
@@ -139,7 +139,7 @@ export default function CartDrawer() {
                   <Link
                     href={`/products/${item.slug}`}
                     onClick={closeCart}
-                    className="text-xs font-bold text-[#0F3D2E] hover:text-[#D97706] line-clamp-1 transition-colors"
+                    className="text-xs font-bold text-[#016831] hover:text-[#D97706] line-clamp-1 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -153,7 +153,7 @@ export default function CartDrawer() {
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="px-2.5 text-xs font-bold text-[#0F3D2E]">
+                      <span className="px-2.5 text-xs font-bold text-[#016831]">
                         {item.quantity}
                       </span>
                       <button
@@ -187,7 +187,7 @@ export default function CartDrawer() {
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs text-[#4B5563]">
                 <span>সাবটোটাল</span>
-                <span className="font-semibold text-[#0F3D2E]">৳{totalPrice}</span>
+                <span className="font-semibold text-[#016831]">৳{totalPrice}</span>
               </div>
               <div className="flex justify-between text-xs text-[#4B5563]">
                 <span>ডেলিভারি চার্জ</span>
@@ -199,7 +199,7 @@ export default function CartDrawer() {
                   )}
                 </span>
               </div>
-              <div className="flex justify-between text-sm font-bold text-[#0F3D2E] pt-2 border-t border-[#E8E2D5]">
+              <div className="flex justify-between text-sm font-bold text-[#016831] pt-2 border-t border-[#E8E2D5]">
                 <span>সর্বমোট</span>
                 <span className="text-[#B45309] text-base">
                   ৳{totalPrice + (remainingForFreeShipping === 0 ? 0 : 70)}
@@ -218,7 +218,7 @@ export default function CartDrawer() {
 
             <button
               onClick={closeCart}
-              className="w-full text-center text-xs text-[#4B5563] hover:text-[#0F3D2E] py-1 transition-colors"
+              className="w-full text-center text-xs text-[#4B5563] hover:text-[#016831] py-1 transition-colors"
             >
               আরো পণ্য বাছাই করুন
             </button>

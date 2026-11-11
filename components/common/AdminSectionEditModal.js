@@ -79,11 +79,11 @@ export default function AdminSectionEditModal({
         onClick={handleOpen}
         type="button"
         title="এই সেকশনের লেখা বা ছবি পরিবর্তন করুন"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF3C7] hover:bg-amber-200 text-[#0F3D2E] rounded-xl text-xs font-black shadow-md border-2 border-[#0F3D2E]/30 transition-all hover:scale-105 group z-20"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF3C7] hover:bg-amber-200 text-[#016831] rounded-xl text-xs font-black shadow-md border-2 border-[#016831]/30 transition-all hover:scale-105 group z-20"
       >
-        <Edit3 className="w-3.5 h-3.5 text-[#0F3D2E] group-hover:rotate-12 transition-transform" />
+        <Edit3 className="w-3.5 h-3.5 text-[#016831] group-hover:rotate-12 transition-transform" />
         <span>এডিট করুন</span>
-        <span className="bg-[#0F3D2E] text-white text-[9px] px-1 py-0.5 rounded-full font-bold">
+        <span className="bg-[#016831] text-white text-[9px] px-1 py-0.5 rounded-full font-bold">
           Admin
         </span>
       </button>
@@ -96,11 +96,11 @@ export default function AdminSectionEditModal({
             {/* Header */}
             <div className="flex justify-between items-center pb-3 border-b border-[#E8E2D5]">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#0F3D2E] text-[#F59E0B] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-[#016831] text-[#F59E0B] flex items-center justify-center">
                   <Edit3 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-[#0F3D2E]">{sectionTitle}</h3>
+                  <h3 className="text-sm sm:text-base font-bold text-[#016831]">{sectionTitle}</h3>
                   <p className="text-[11px] text-slate-400">সরাসরি লাইভ সাইটে লেখা ও ছবি পরিবর্তন করুন</p>
                 </div>
               </div>
@@ -125,7 +125,7 @@ export default function AdminSectionEditModal({
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               {fields.map((field) => (
                 <div key={field.name}>
-                  <label className="block font-bold text-[#0F3D2E] mb-1">{field.label}</label>
+                  <label className="block font-bold text-[#016831] mb-1">{field.label}</label>
 
                   {/* TEXTAREA */}
                   {field.type === 'textarea' ? (
@@ -134,7 +134,7 @@ export default function AdminSectionEditModal({
                       value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
                       placeholder={field.placeholder || ''}
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] text-slate-900 outline-none focus:border-[#0F3D2E] bg-[#FDFBF7]"
+                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] text-slate-900 outline-none focus:border-[#016831] bg-[#FDFBF7]"
                     />
 
                   /* IMAGE — Direct folder / gallery upload with ImageUploadInput */
@@ -154,7 +154,7 @@ export default function AdminSectionEditModal({
                       value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
                       placeholder={field.placeholder || ''}
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] text-slate-900 outline-none focus:border-[#0F3D2E] bg-[#FDFBF7]"
+                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] text-slate-900 outline-none focus:border-[#016831] bg-[#FDFBF7]"
                     />
                   )}
                 </div>

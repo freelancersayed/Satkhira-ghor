@@ -193,7 +193,7 @@ export default function MyOrdersPage() {
   if (isLoading || (!user && loadingOrders)) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center py-20 bg-[#FDFBF7]">
-        <div className="w-10 h-10 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin mb-3" />
+        <div className="w-10 h-10 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin mb-3" />
         <p className="text-xs text-slate-600">প্রোফাইল লোড হচ্ছে...</p>
       </div>
     );
@@ -207,7 +207,7 @@ export default function MyOrdersPage() {
     <div className="py-12 sm:py-16 bg-[#FDFBF7] min-h-screen">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#0F3D2E] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in slide-in-from-bottom duration-200">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#016831] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in slide-in-from-bottom duration-200">
           <Check className="w-4 h-4 text-[#F59E0B]" />
           <span>{toastMessage}</span>
         </div>
@@ -218,9 +218,9 @@ export default function MyOrdersPage() {
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E2D5] shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black text-[#0F3D2E]">{user.name}</h1>
+              <h1 className="text-2xl font-black text-[#016831]">{user.name}</h1>
               {user.role === 'admin' && (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#0F3D2E] text-white">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#016831] text-white">
                   অ্যাডমিন
                 </span>
               )}
@@ -260,7 +260,7 @@ export default function MyOrdersPage() {
             onClick={() => setActiveTab('orders')}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'orders'
-                ? 'bg-[#0F3D2E] text-white shadow-sm'
+                ? 'bg-[#016831] text-white shadow-sm'
                 : 'text-slate-600 hover:bg-emerald-50/50'
             }`}
           >
@@ -273,7 +273,7 @@ export default function MyOrdersPage() {
             onClick={() => setActiveTab('reviews')}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'reviews'
-                ? 'bg-[#0F3D2E] text-white shadow-sm'
+                ? 'bg-[#016831] text-white shadow-sm'
                 : 'text-slate-600 hover:bg-emerald-50/50'
             }`}
           >
@@ -286,7 +286,7 @@ export default function MyOrdersPage() {
         {activeTab === 'orders' && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-bold text-[#0F3D2E] flex items-center gap-2">
+              <h2 className="text-lg font-bold text-[#016831] flex items-center gap-2">
                 <Package className="w-5 h-5 text-[#F59E0B]" />
                 <span>আপনার অর্ডারসমূহ</span>
               </h2>
@@ -307,15 +307,15 @@ export default function MyOrdersPage() {
 
             {loadingOrders ? (
               <div className="py-16 text-center bg-white rounded-3xl border border-[#E8E2D5]">
-                <div className="w-8 h-8 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-2" />
+                <div className="w-8 h-8 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-2" />
                 <p className="text-xs text-slate-500">অর্ডার তালিকা লোড হচ্ছে...</p>
               </div>
             ) : orders.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-3xl border border-[#E8E2D5] p-8 space-y-4">
-                <div className="w-16 h-16 rounded-full bg-[#FEF3C7] text-[#0F3D2E] flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-full bg-[#FEF3C7] text-[#016831] flex items-center justify-center mx-auto">
                   <ShoppingBag className="w-8 h-8" />
                 </div>
-                <h3 className="text-base font-bold text-[#0F3D2E]">
+                <h3 className="text-base font-bold text-[#016831]">
                   আপনি এখনো কোনো অর্ডার করেননি
                 </h3>
                 <p className="text-xs text-slate-600 max-w-sm mx-auto">
@@ -334,14 +334,14 @@ export default function MyOrdersPage() {
                 {orders.map((order) => (
                   <div
                     key={order._id || order.orderNumber}
-                    className="bg-white rounded-3xl p-6 border border-[#E8E2D5] shadow-sm hover:border-[#0F3D2E]/30 transition-all space-y-4"
+                    className="bg-white rounded-3xl p-6 border border-[#E8E2D5] shadow-sm hover:border-[#016831]/30 transition-all space-y-4"
                   >
                     {/* Order Top Bar */}
                     <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#E8E2D5]">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-slate-500">অর্ডার আইডি:</span>
-                          <span className="font-mono font-bold text-[#0F3D2E] text-sm">
+                          <span className="font-mono font-bold text-[#016831] text-sm">
                             #{order.orderNumber}
                           </span>
                         </div>
@@ -383,7 +383,7 @@ export default function MyOrdersPage() {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <h4 className="text-xs font-bold text-[#0F3D2E] truncate">
+                              <h4 className="text-xs font-bold text-[#016831] truncate">
                                 {item.name}
                               </h4>
                               <p className="text-[11px] text-slate-500 mt-0.5">
@@ -394,14 +394,14 @@ export default function MyOrdersPage() {
                           </div>
 
                           <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                            <span className="text-xs font-bold text-[#0F3D2E]">
+                            <span className="text-xs font-bold text-[#016831]">
                               ৳{item.price * item.quantity}
                             </span>
                             {/* LIVE REVIEW BUTTON FOR PRODUCT */}
                             <button
                               type="button"
                               onClick={() => handleOpenReviewModal(item, order.orderNumber)}
-                              className="inline-flex items-center gap-1 px-3 py-1 bg-[#FEF3C7] hover:bg-amber-200 text-[#0F3D2E] rounded-lg text-[11px] font-bold border border-amber-300 transition-all hover:scale-105 shadow-sm"
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-[#FEF3C7] hover:bg-amber-200 text-[#016831] rounded-lg text-[11px] font-bold border border-amber-300 transition-all hover:scale-105 shadow-sm"
                             >
                               <Star className="w-3 h-3 fill-[#F59E0B] text-[#F59E0B]" />
                               <span>রিভিউ দিন</span>
@@ -423,7 +423,7 @@ export default function MyOrdersPage() {
                         </div>
                       </div>
 
-                      <div className="text-right font-black text-sm text-[#0F3D2E] bg-[#FDFBF7] px-4 py-2 rounded-xl border border-[#E8E2D5]">
+                      <div className="text-right font-black text-sm text-[#016831] bg-[#FDFBF7] px-4 py-2 rounded-xl border border-[#E8E2D5]">
                         মোট পরিশোধযোগ্য: ৳{order.totalAmount}
                       </div>
                     </div>
@@ -439,7 +439,7 @@ export default function MyOrdersPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-bold text-[#0F3D2E] flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#016831] flex items-center gap-2">
                   <Star className="w-5 h-5 text-[#F59E0B] fill-current" />
                   <span>আপনার পণ্য ফিডব্যাক ও মতামত</span>
                 </h2>
@@ -460,15 +460,15 @@ export default function MyOrdersPage() {
 
             {loadingReviews ? (
               <div className="py-16 text-center bg-white rounded-3xl border border-[#E8E2D5]">
-                <div className="w-8 h-8 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-2" />
+                <div className="w-8 h-8 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-2" />
                 <p className="text-xs text-slate-500">রিভিউ লোড হচ্ছে...</p>
               </div>
             ) : reviews.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-3xl border border-[#E8E2D5] p-8 space-y-4">
-                <div className="w-16 h-16 rounded-full bg-[#FEF3C7] text-[#0F3D2E] flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-full bg-[#FEF3C7] text-[#016831] flex items-center justify-center mx-auto">
                   <MessageSquare className="w-8 h-8" />
                 </div>
-                <h3 className="text-base font-bold text-[#0F3D2E]">
+                <h3 className="text-base font-bold text-[#016831]">
                   আপনি এখনো কোনো পণ্যের রিভিউ দেননি
                 </h3>
                 <p className="text-xs text-slate-600 max-w-sm mx-auto">
@@ -488,7 +488,7 @@ export default function MyOrdersPage() {
                 {reviews.map((rev) => (
                   <div
                     key={rev._id}
-                    className="bg-white rounded-3xl p-5 border border-[#E8E2D5] shadow-sm space-y-3 hover:border-[#0F3D2E]/30 transition-all flex flex-col justify-between"
+                    className="bg-white rounded-3xl p-5 border border-[#E8E2D5] shadow-sm space-y-3 hover:border-[#016831]/30 transition-all flex flex-col justify-between"
                   >
                     <div className="space-y-3">
                       {/* Product Header */}
@@ -507,7 +507,7 @@ export default function MyOrdersPage() {
                         <div className="min-w-0 flex-1">
                           <Link
                             href={`/products/${rev.productSlug}`}
-                            className="text-xs font-bold text-[#0F3D2E] hover:text-amber-700 truncate block"
+                            className="text-xs font-bold text-[#016831] hover:text-amber-700 truncate block"
                           >
                             {rev.productName}
                           </Link>
@@ -520,7 +520,7 @@ export default function MyOrdersPage() {
                                 }`}
                               />
                             ))}
-                            <span className="text-[10px] font-bold text-[#0F3D2E] ml-1">
+                            <span className="text-[10px] font-bold text-[#016831] ml-1">
                               ({rev.rating}/৫)
                             </span>
                           </div>
@@ -566,7 +566,7 @@ export default function MyOrdersPage() {
                         <button
                           type="button"
                           onClick={() => handleEditReview(rev)}
-                          className="p-1.5 rounded-lg text-[#0F3D2E] hover:bg-[#FEF3C7] transition-colors"
+                          className="p-1.5 rounded-lg text-[#016831] hover:bg-[#FEF3C7] transition-colors"
                           title="সম্পাদনা করুন"
                         >
                           <Edit3 className="w-3.5 h-3.5" />

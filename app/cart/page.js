@@ -66,7 +66,7 @@ export default function CartPage() {
   if (!mounted) {
     return (
       <div className="py-24 text-center">
-        <div className="w-10 h-10 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-3" />
+        <div className="w-10 h-10 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-3" />
         <p className="text-xs text-[#4B5563]">কার্ট লোড হচ্ছে...</p>
       </div>
     );
@@ -153,16 +153,16 @@ export default function CartPage() {
           <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto">
             <CheckCircle className="w-10 h-10" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F3D2E]">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#016831]">
             অর্ডার সফলভাবে গৃহীত হয়েছে!
           </h1>
-          <div className="inline-block bg-[#FEF3C7] px-4 py-1.5 rounded-full text-xs font-bold text-[#0F3D2E] border border-[#FCD34D]/60">
+          <div className="inline-block bg-[#FEF3C7] px-4 py-1.5 rounded-full text-xs font-bold text-[#016831] border border-[#FCD34D]/60">
             অর্ডার ট্র্যাকিং আইডি: #{confirmedOrder.orderNumber}
           </div>
           <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed">
             ধন্যবাদ <strong>{formData.name}</strong>! আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই আমাদের প্রতিনিধি <strong>{formData.phone}</strong> নম্বরে কল করে অর্ডার নিশ্চিত করবেন।
           </p>
-          <div className="bg-[#FDFBF7] p-4 rounded-2xl text-xs text-[#0F3D2E] text-left space-y-1.5 border border-[#E8E2D5]">
+          <div className="bg-[#FDFBF7] p-4 rounded-2xl text-xs text-[#016831] text-left space-y-1.5 border border-[#E8E2D5]">
             <div><strong>ডেলিভারি ঠিকানা:</strong> {formData.address}, {formData.city}</div>
             <div><strong>পেমেন্ট মাধ্যম:</strong> {formData.paymentMethod === 'cod' ? 'ক্যাশ অন ডেলিভারি (পণ্য হাতে পেয়ে মূল্য পরিশোধ)' : 'মোবাইল ব্যাংকিং (bKash/Nagad)'}</div>
             <div><strong>সর্বমোট প্রদেয় টাকা:</strong> ৳{confirmedOrder.totalAmount}</div>
@@ -177,7 +177,7 @@ export default function CartPage() {
             </Link>
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0F3D2E] text-white rounded-xl text-xs font-bold hover:bg-[#0A2B20] transition-colors shadow-sm"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#016831] text-white rounded-xl text-xs font-bold hover:bg-[#014D24] transition-colors shadow-sm"
             >
               <span>আরও কেনাকাটা করুন</span>
               <ArrowRight className="w-4 h-4 text-[#F59E0B]" />
@@ -190,9 +190,9 @@ export default function CartPage() {
 
   return (
     <div className="py-12 sm:py-16 bg-[#FDFBF7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F3D2E]">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#016831]">
             আপনার শপিং ব্যাগ ও চেকআউট
           </h1>
           <p className="text-xs sm:text-sm text-[#4B5563] mt-1">
@@ -205,7 +205,7 @@ export default function CartPage() {
             <div className="w-20 h-20 bg-[#FEF3C7] rounded-full flex items-center justify-center text-[#D97706] mx-auto">
               <ShoppingBag className="w-10 h-10" />
             </div>
-            <h2 className="text-lg font-bold text-[#0F3D2E]">আপনার কার্টে কোনো পণ্য নেই</h2>
+            <h2 className="text-lg font-bold text-[#016831]">আপনার কার্টে কোনো পণ্য নেই</h2>
             <p className="text-xs text-[#4B5563]">
               সুন্দরবনের খাঁটি মধু ও গাওয়া ঘি দিয়ে আপনার ঝুড়ি ভরুন।
             </p>
@@ -223,7 +223,7 @@ export default function CartPage() {
             <div className="lg:col-span-7 space-y-6">
               <div className="bg-white rounded-3xl border border-[#E8E2D5] p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D5]">
-                  <h2 className="font-bold text-[#0F3D2E] text-base">
+                  <h2 className="font-bold text-[#016831] text-base">
                     ব্যাগে থাকা পণ্যসমূহ ({items.length})
                   </h2>
                   <button
@@ -237,8 +237,8 @@ export default function CartPage() {
 
                 <div className="divide-y divide-[#E8E2D5]">
                   {items.map((item) => (
-                    <div key={item.id} className="py-4 flex gap-4 items-center">
-                      <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-[#FEF3C7] flex-shrink-0 border border-[#E8E2D5]">
+                    <div key={item.id} className="py-3 sm:py-4 flex gap-2.5 sm:gap-4 items-center">
+                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-[#FEF3C7] flex-shrink-0 border border-[#E8E2D5]">
                         <Image
                           src={item.image}
                           alt={item.name}
@@ -250,12 +250,12 @@ export default function CartPage() {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/products/${item.slug}`}
-                          className="text-xs sm:text-sm font-bold text-[#0F3D2E] hover:text-[#D97706] line-clamp-1 transition-colors"
+                          className="text-xs sm:text-sm font-bold text-[#016831] hover:text-[#D97706] line-clamp-1 transition-colors"
                         >
                           {item.name}
                         </Link>
-                        <p className="text-[11px] text-[#4B5563] mt-0.5">{item.unit}</p>
-                        <p className="text-xs font-black text-[#B45309] mt-1">
+                        <p className="text-[10px] sm:text-[11px] text-[#4B5563] mt-0.5">{item.unit}</p>
+                        <p className="text-xs sm:text-sm font-black text-[#B45309] mt-0.5">
                           ৳{item.price}
                         </p>
                       </div>
@@ -269,7 +269,7 @@ export default function CartPage() {
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="px-3 text-xs font-bold text-[#0F3D2E]">
+                        <span className="px-3 text-xs font-bold text-[#016831]">
                           {item.quantity}
                         </span>
                         <button
@@ -282,7 +282,7 @@ export default function CartPage() {
                       </div>
 
                       <div className="text-right">
-                        <span className="text-xs sm:text-sm font-black text-[#0F3D2E]">
+                        <span className="text-xs sm:text-sm font-black text-[#016831]">
                           ৳{item.price * item.quantity}
                         </span>
                         <button
@@ -300,7 +300,7 @@ export default function CartPage() {
 
               {/* Coupon Code Box */}
               <div className="bg-white rounded-3xl border border-[#E8E2D5] p-6 shadow-sm">
-                <h3 className="text-xs font-bold text-[#0F3D2E] uppercase tracking-wider mb-2">
+                <h3 className="text-xs font-bold text-[#016831] uppercase tracking-wider mb-2">
                   ডিসকাউন্ট বা প্রমো কোড
                 </h3>
                 <form onSubmit={handleApplyCoupon} className="flex gap-2">
@@ -309,11 +309,11 @@ export default function CartPage() {
                     placeholder="কুপন কোড লিখুন (যেমন: SUNDARBAN)..."
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-[#FDFBF7] border border-[#E8E2D5] text-xs uppercase font-bold text-[#0F3D2E] focus:outline-none focus:border-[#0F3D2E]"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-[#FDFBF7] border border-[#E8E2D5] text-xs uppercase font-bold text-[#016831] focus:outline-none focus:border-[#016831]"
                   />
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-[#0F3D2E] hover:bg-[#0A2B20] text-white font-bold text-xs rounded-xl transition-colors shadow-sm"
+                    className="px-5 py-2.5 bg-[#016831] hover:bg-[#014D24] text-white font-bold text-xs rounded-xl transition-colors shadow-sm"
                   >
                     প্রয়োগ করুন
                   </button>
@@ -329,13 +329,13 @@ export default function CartPage() {
             {/* Right: Checkout Shipping Form & Order Summary */}
             <div className="lg:col-span-5 space-y-6">
               <div className="bg-white rounded-3xl border border-[#E8E2D5] p-6 sm:p-7 shadow-sm space-y-5">
-                <h2 className="font-bold text-base text-[#0F3D2E] pb-3 border-b border-[#E8E2D5]">
+                <h2 className="font-bold text-base text-[#016831] pb-3 border-b border-[#E8E2D5]">
                   ডেলিভারি ঠিকানা ও তথ্য
                 </h2>
 
                 <form onSubmit={handleCheckoutSubmit} className="space-y-4 text-xs">
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       আপনার পূর্ণ নাম <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -346,12 +346,12 @@ export default function CartPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] focus:outline-none focus:border-[#0F3D2E]"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] focus:outline-none focus:border-[#016831]"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       মোবাইল নম্বর <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -362,12 +362,12 @@ export default function CartPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] focus:outline-none focus:border-[#0F3D2E]"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] focus:outline-none focus:border-[#016831]"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       ইমেইল (ঐচ্ছিক - অর্ডার আপডেটের জন্য)
                     </label>
                     <input
@@ -377,12 +377,12 @@ export default function CartPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] focus:outline-none focus:border-[#0F3D2E]"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] focus:outline-none focus:border-[#016831]"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       সম্পূর্ণ ডেলিভারি ঠিকানা <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -393,18 +393,18 @@ export default function CartPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, address: e.target.value })
                       }
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] focus:outline-none focus:border-[#0F3D2E]"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] focus:outline-none focus:border-[#016831]"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       পেমেন্ট পদ্ধতি
                     </label>
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       <label className={`p-3 rounded-xl border flex items-center gap-2 cursor-pointer transition-colors ${
                         formData.paymentMethod === 'cod'
-                          ? 'border-[#0F3D2E] bg-[#F0FDF4] text-[#0F3D2E] font-bold'
+                          ? 'border-[#016831] bg-[#F0FDF4] text-[#016831] font-bold'
                           : 'border-[#E8E2D5] bg-white'
                       }`}>
                         <input
@@ -415,14 +415,14 @@ export default function CartPage() {
                           onChange={() =>
                             setFormData({ ...formData, paymentMethod: 'cod' })
                           }
-                          className="accent-[#0F3D2E]"
+                          className="accent-[#016831]"
                         />
                         <span>ক্যাশ অন ডেলিভারি</span>
                       </label>
 
                       <label className={`p-3 rounded-xl border flex items-center gap-2 cursor-pointer transition-colors ${
                         formData.paymentMethod === 'bkash'
-                          ? 'border-[#0F3D2E] bg-[#F0FDF4] text-[#0F3D2E] font-bold'
+                          ? 'border-[#016831] bg-[#F0FDF4] text-[#016831] font-bold'
                           : 'border-[#E8E2D5] bg-white'
                       }`}>
                         <input
@@ -433,7 +433,7 @@ export default function CartPage() {
                           onChange={() =>
                             setFormData({ ...formData, paymentMethod: 'bkash' })
                           }
-                          className="accent-[#0F3D2E]"
+                          className="accent-[#016831]"
                         />
                         <span>bKash / Nagad</span>
                       </label>
@@ -444,7 +444,7 @@ export default function CartPage() {
                   <div className="pt-4 border-t border-[#E8E2D5] space-y-2 text-xs">
                     <div className="flex justify-between text-[#4B5563]">
                       <span>পণ্যের মোট মূল্য:</span>
-                      <span className="font-semibold text-[#0F3D2E]">৳{subtotal}</span>
+                      <span className="font-semibold text-[#016831]">৳{subtotal}</span>
                     </div>
 
                     {discount > 0 && (
@@ -465,7 +465,7 @@ export default function CartPage() {
                       </span>
                     </div>
 
-                    <div className="flex justify-between text-base font-black text-[#0F3D2E] pt-2 border-t border-[#E8E2D5]">
+                    <div className="flex justify-between text-base font-black text-[#016831] pt-2 border-t border-[#E8E2D5]">
                       <span>সর্বমোট প্রদেয়:</span>
                       <span className="text-[#B45309] text-lg font-black">৳{total}</span>
                     </div>

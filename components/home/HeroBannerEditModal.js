@@ -299,11 +299,11 @@ export default function HeroBannerEditModal() {
             {/* Header */}
             <div className="flex justify-between items-center pb-4 border-b border-[#E8E2D5] flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#0F3D2E] text-[#F59E0B] flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 rounded-2xl bg-[#016831] text-[#F59E0B] flex items-center justify-center shadow-md">
                   <Layers className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-[#0F3D2E]">
+                  <h3 className="text-base sm:text-lg font-black text-[#016831]">
                     হিরো ব্যানার ম্যানেজার
                   </h3>
                   <p className="text-[11px] sm:text-xs text-slate-500">
@@ -335,8 +335,8 @@ export default function HeroBannerEditModal() {
                 onClick={() => setActiveTab('slides')}
                 className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                   activeTab === 'slides'
-                    ? 'bg-[#0F3D2E] text-white shadow-md'
-                    : 'text-[#0F3D2E] hover:bg-white/60'
+                    ? 'bg-[#016831] text-white shadow-md'
+                    : 'text-[#016831] hover:bg-white/60'
                 }`}
               >
                 <ImageIcon className="w-4 h-4 text-[#F59E0B]" />
@@ -347,8 +347,8 @@ export default function HeroBannerEditModal() {
                 onClick={() => setActiveTab('text')}
                 className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                   activeTab === 'text'
-                    ? 'bg-[#0F3D2E] text-white shadow-md'
-                    : 'text-[#0F3D2E] hover:bg-white/60'
+                    ? 'bg-[#016831] text-white shadow-md'
+                    : 'text-[#016831] hover:bg-white/60'
                 }`}
               >
                 <Type className="w-4 h-4 text-[#F59E0B]" />
@@ -359,8 +359,8 @@ export default function HeroBannerEditModal() {
                 onClick={() => setActiveTab('badges')}
                 className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                   activeTab === 'badges'
-                    ? 'bg-[#0F3D2E] text-white shadow-md'
-                    : 'text-[#0F3D2E] hover:bg-white/60'
+                    ? 'bg-[#016831] text-white shadow-md'
+                    : 'text-[#016831] hover:bg-white/60'
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 text-[#F59E0B]" />
@@ -377,7 +377,7 @@ export default function HeroBannerEditModal() {
                   {/* Action Bar: Upload from phone/PC gallery */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-[#E8E2D5] shadow-xs">
                     <div>
-                      <div className="text-xs sm:text-sm font-bold text-[#0F3D2E] flex items-center gap-1.5">
+                      <div className="text-xs sm:text-sm font-bold text-[#016831] flex items-center gap-1.5">
                         <Smartphone className="w-4 h-4 text-[#D97706]" />
                         <span>ডিভাইস গ্যালারি / ফোল্ডার থেকে ছবি আপলোড</span>
                       </div>
@@ -409,7 +409,7 @@ export default function HeroBannerEditModal() {
                       <button
                         type="button"
                         onClick={() => setShowUrlAdd(!showUrlAdd)}
-                        className="px-3 py-2.5 bg-[#FEF3C7] text-[#0F3D2E] hover:bg-amber-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                        className="px-3 py-2.5 bg-[#FEF3C7] text-[#016831] hover:bg-amber-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
                       >
                         <LinkIcon className="w-3.5 h-3.5" />
                         <span>URL লিংক</span>
@@ -425,12 +425,12 @@ export default function HeroBannerEditModal() {
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
                         placeholder="https://images.unsplash.com/... অথবা ছবির সরাসরি লিংক পেস্ট করুন"
-                        className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                       <button
                         type="button"
                         onClick={handleAddUrl}
-                        className="px-4 py-2 bg-[#0F3D2E] text-white rounded-xl text-xs font-bold hover:bg-[#0D3528]"
+                        className="px-4 py-2 bg-[#016831] text-white rounded-xl text-xs font-bold hover:bg-[#0D3528]"
                       >
                         যোগ করুন
                       </button>
@@ -460,10 +460,10 @@ export default function HeroBannerEditModal() {
                       {formData.slides.map((slide, index) => (
                         <div
                           key={index}
-                          className="bg-white rounded-2xl p-3 border border-[#E8E2D5] shadow-xs flex items-center gap-3 sm:gap-4 hover:border-[#0F3D2E]/40 transition-all group"
+                          className="bg-white rounded-2xl p-3 border border-[#E8E2D5] shadow-xs flex items-center gap-3 sm:gap-4 hover:border-[#016831]/40 transition-all group"
                         >
                           {/* Slide Index Badge */}
-                          <div className="w-6 h-6 rounded-full bg-[#FEF3C7] text-[#0F3D2E] text-xs font-black flex items-center justify-center flex-shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-[#FEF3C7] text-[#016831] text-xs font-black flex items-center justify-center flex-shrink-0">
                             {index + 1}
                           </div>
 
@@ -487,7 +487,7 @@ export default function HeroBannerEditModal() {
                               value={slide.label || ''}
                               onChange={(e) => handleSlideLabelChange(index, e.target.value)}
                               placeholder="স্লাইড ক্যাপশন / লোকেশন (যেমন: সুন্দরবনের খাঁটি মধু)"
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-900 bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-900 bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                             />
                             <p className="text-[10px] text-slate-400 truncate font-mono">
                               {slide.url}
@@ -546,7 +546,7 @@ export default function HeroBannerEditModal() {
                 <div className="space-y-4">
                   {/* Top Badge */}
                   <div>
-                    <label className="block text-xs font-bold text-[#0F3D2E] mb-1">
+                    <label className="block text-xs font-bold text-[#016831] mb-1">
                       টপ ব্যাজ লেখা
                     </label>
                     <input
@@ -554,13 +554,13 @@ export default function HeroBannerEditModal() {
                       value={formData.badgeText}
                       onChange={(e) => setFormData({ ...formData, badgeText: e.target.value })}
                       placeholder="সুন্দরবন ও সাতক্ষীরার খাঁটি খাদ্য সম্ভার"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white text-xs text-slate-900 focus:outline-none focus:border-[#0F3D2E]"
+                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white text-xs text-slate-900 focus:outline-none focus:border-[#016831]"
                     />
                   </div>
 
                   {/* Main Title */}
                   <div>
-                    <label className="block text-xs font-bold text-[#0F3D2E] mb-1">
+                    <label className="block text-xs font-bold text-[#016831] mb-1">
                       প্রধান শিরোনাম (Enter দিয়ে নতুন লাইন দিতে পারবেন)
                     </label>
                     <textarea
@@ -568,13 +568,13 @@ export default function HeroBannerEditModal() {
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="প্রকৃতির সেরা উপহার, \nসরাসরি আপনার খাবার টেবিলে"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white text-xs text-slate-900 focus:outline-none focus:border-[#0F3D2E]"
+                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white text-xs text-slate-900 focus:outline-none focus:border-[#016831]"
                     />
                   </div>
 
                   {/* Description */}
                   <div>
-                    <label className="block text-xs font-bold text-[#0F3D2E] mb-1">
+                    <label className="block text-xs font-bold text-[#016831] mb-1">
                       বিস্তারিত বিবরণ
                     </label>
                     <textarea
@@ -582,14 +582,14 @@ export default function HeroBannerEditModal() {
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="সাতক্ষীরার গভীর সুন্দরবনের খাঁটি খলসী ফুলের মধু..."
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white text-xs text-slate-900 focus:outline-none focus:border-[#0F3D2E]"
+                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white text-xs text-slate-900 focus:outline-none focus:border-[#016831]"
                     />
                   </div>
 
                   {/* Primary CTA Button */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-white rounded-2xl border border-[#E8E2D5]">
                     <div>
-                      <label className="block text-xs font-bold text-[#0F3D2E] mb-1">
+                      <label className="block text-xs font-bold text-[#016831] mb-1">
                         ১ম বাটন টেক্সট (Primary CTA)
                       </label>
                       <input
@@ -597,11 +597,11 @@ export default function HeroBannerEditModal() {
                         value={formData.primaryBtnText}
                         onChange={(e) => setFormData({ ...formData, primaryBtnText: e.target.value })}
                         placeholder="পণ্য কিনুন"
-                        className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FCFAF7] text-xs text-slate-900 focus:outline-none focus:border-[#0F3D2E]"
+                        className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FCFAF7] text-xs text-slate-900 focus:outline-none focus:border-[#016831]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#0F3D2E] mb-1">
+                      <label className="block text-xs font-bold text-[#016831] mb-1">
                         ১ম বাটন লিংক
                       </label>
                       <input
@@ -609,7 +609,7 @@ export default function HeroBannerEditModal() {
                         value={formData.primaryBtnLink}
                         onChange={(e) => setFormData({ ...formData, primaryBtnLink: e.target.value })}
                         placeholder="/shop"
-                        className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FCFAF7] text-xs text-slate-900 focus:outline-none focus:border-[#0F3D2E]"
+                        className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FCFAF7] text-xs text-slate-900 focus:outline-none focus:border-[#016831]"
                       />
                     </div>
                   </div>
@@ -617,7 +617,7 @@ export default function HeroBannerEditModal() {
                   {/* Secondary CTA Button */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-white rounded-2xl border border-[#E8E2D5]">
                     <div>
-                      <label className="block text-xs font-bold text-[#0F3D2E] mb-1">
+                      <label className="block text-xs font-bold text-[#016831] mb-1">
                         ২য় বাটন টেক্সট (Secondary CTA)
                       </label>
                       <input
@@ -625,11 +625,11 @@ export default function HeroBannerEditModal() {
                         value={formData.secondaryBtnText}
                         onChange={(e) => setFormData({ ...formData, secondaryBtnText: e.target.value })}
                         placeholder="আমাদের গল্প শুনুন"
-                        className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FCFAF7] text-xs text-slate-900 focus:outline-none focus:border-[#0F3D2E]"
+                        className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FCFAF7] text-xs text-slate-900 focus:outline-none focus:border-[#016831]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#0F3D2E] mb-1">
+                      <label className="block text-xs font-bold text-[#016831] mb-1">
                         ২য় বাটন লিংক
                       </label>
                       <input
@@ -637,7 +637,7 @@ export default function HeroBannerEditModal() {
                         value={formData.secondaryBtnLink}
                         onChange={(e) => setFormData({ ...formData, secondaryBtnLink: e.target.value })}
                         placeholder="/about-us"
-                        className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FCFAF7] text-xs text-slate-900 focus:outline-none focus:border-[#0F3D2E]"
+                        className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FCFAF7] text-xs text-slate-900 focus:outline-none focus:border-[#016831]"
                       />
                     </div>
                   </div>
@@ -649,7 +649,7 @@ export default function HeroBannerEditModal() {
                 <div className="space-y-4">
                   {/* Floating Trust Badges */}
                   <div className="p-3.5 bg-white rounded-2xl border border-[#E8E2D5] space-y-3">
-                    <h4 className="text-xs font-bold text-[#0F3D2E] flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold text-[#016831] flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4 text-[#D97706]" />
                       <span>ডানপাশের ফ্লোটিং ট্রাস্ট ব্যাজ (ডেস্কটপ)</span>
                     </h4>
@@ -661,14 +661,14 @@ export default function HeroBannerEditModal() {
                         value={formData.floatingBadge1Title}
                         onChange={(e) => setFormData({ ...formData, floatingBadge1Title: e.target.value })}
                         placeholder="১ম ব্যাজ শিরোনাম (যেমন: ল্যাব টেস্টে পরীক্ষিত)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                       <input
                         type="text"
                         value={formData.floatingBadge1Sub}
                         onChange={(e) => setFormData({ ...formData, floatingBadge1Sub: e.target.value })}
                         placeholder="১ম ব্যাজ সাবটাইটেল (যেমন: শূন্য ভেজাল গ্যারান্টি)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                     </div>
 
@@ -679,21 +679,21 @@ export default function HeroBannerEditModal() {
                         value={formData.floatingBadge2Title}
                         onChange={(e) => setFormData({ ...formData, floatingBadge2Title: e.target.value })}
                         placeholder="২য় ব্যাজ শিরোনাম (যেমন: খাঁটি গাওয়া ঘি)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                       <input
                         type="text"
                         value={formData.floatingBadge2Sub}
                         onChange={(e) => setFormData({ ...formData, floatingBadge2Sub: e.target.value })}
                         placeholder="২য় ব্যাজ সাবটাইটেল (যেমন: দেশি গরুর দুধের ননী)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                     </div>
                   </div>
 
                   {/* 3 Quick Stats */}
                   <div className="p-3.5 bg-white rounded-2xl border border-[#E8E2D5] space-y-3">
-                    <h4 className="text-xs font-bold text-[#0F3D2E] flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold text-[#016831] flex items-center gap-1.5">
                       <BarChart2 className="w-4 h-4 text-[#D97706]" />
                       <span>৩টি কুইক স্ট্যাটাস (Quick Statistics)</span>
                     </h4>
@@ -705,14 +705,14 @@ export default function HeroBannerEditModal() {
                         value={formData.stat1Number}
                         onChange={(e) => setFormData({ ...formData, stat1Number: e.target.value })}
                         placeholder="স্ট্যাট ১ মান (১০০%)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                       <input
                         type="text"
                         value={formData.stat1Label}
                         onChange={(e) => setFormData({ ...formData, stat1Label: e.target.value })}
                         placeholder="স্ট্যাট ১ লেবেল (প্রাকৃতিক ও খাঁটি)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                     </div>
 
@@ -723,14 +723,14 @@ export default function HeroBannerEditModal() {
                         value={formData.stat2Number}
                         onChange={(e) => setFormData({ ...formData, stat2Number: e.target.value })}
                         placeholder="স্ট্যাট ২ মান (১২,৫০০+)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                       <input
                         type="text"
                         value={formData.stat2Label}
                         onChange={(e) => setFormData({ ...formData, stat2Label: e.target.value })}
                         placeholder="স্ট্যাট ২ লেবেল (সন্তুষ্ট পরিবার)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                     </div>
 
@@ -741,14 +741,14 @@ export default function HeroBannerEditModal() {
                         value={formData.stat3Number}
                         onChange={(e) => setFormData({ ...formData, stat3Number: e.target.value })}
                         placeholder="স্ট্যাট ৩ মান (২৪-৪৮ ঘণ্টা)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                       <input
                         type="text"
                         value={formData.stat3Label}
                         onChange={(e) => setFormData({ ...formData, stat3Label: e.target.value })}
                         placeholder="স্ট্যাট ৩ লেবেল (সারাদেশে ডেলিভারি)"
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#0F3D2E]"
+                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                     </div>
                   </div>

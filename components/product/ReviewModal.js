@@ -122,7 +122,7 @@ export default function ReviewModal({
               <Star className="w-5 h-5 fill-current" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-[#0F3D2E]">
+              <h3 className="text-base font-extrabold text-[#016831]">
                 {existingReview ? 'রিভিউ সম্পাদনা করুন' : 'পণ্য সম্পর্কে লাইভ রিভিউ দিন'}
               </h3>
               <p className="text-[11px] text-slate-500">
@@ -150,7 +150,7 @@ export default function ReviewModal({
             </div>
             <Link
               href="/login"
-              className="px-3 py-1.5 bg-[#0F3D2E] text-white rounded-xl font-bold flex items-center gap-1 flex-shrink-0 hover:bg-[#0A2B20]"
+              className="px-3 py-1.5 bg-[#016831] text-white rounded-xl font-bold flex items-center gap-1 flex-shrink-0 hover:bg-[#014D24]"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>লগইন</span>
@@ -173,7 +173,7 @@ export default function ReviewModal({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-[#0F3D2E] truncate">{product.name}</p>
+              <p className="text-xs font-bold text-[#016831] truncate">{product.name}</p>
               <div className="flex items-center gap-1.5 text-[10px] text-emerald-800 font-medium">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>যাচাইকৃত পণ্য রিভিউ</span>
@@ -182,7 +182,7 @@ export default function ReviewModal({
           </div>
         ) : productsList.length > 0 ? (
           <div>
-            <label className="block text-xs font-bold text-[#0F3D2E] mb-1">
+            <label className="block text-xs font-bold text-[#016831] mb-1">
               কোন পণ্যের রিভিউ দিতে চান? <span className="text-red-500">*</span>
             </label>
             <select
@@ -191,7 +191,7 @@ export default function ReviewModal({
                 const found = productsList.find((p) => (p._id || p.id) === e.target.value);
                 setSelectedProduct(found);
               }}
-              className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] text-xs font-bold text-slate-900 outline-none focus:border-[#0F3D2E]"
+              className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] text-xs font-bold text-slate-900 outline-none focus:border-[#016831]"
             >
               {productsList.map((p) => (
                 <option key={p._id || p.id} value={p._id || p.id}>
@@ -205,7 +205,7 @@ export default function ReviewModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Star Rating Selection */}
           <div className="text-center py-2 bg-[#FDFBF7] rounded-2xl border border-[#E8E2D5] space-y-2">
-            <span className="text-xs font-bold text-[#0F3D2E] block">
+            <span className="text-xs font-bold text-[#016831] block">
               আপনার রেটিং নির্বাচন করুন:
             </span>
             <div className="flex items-center justify-center gap-2">
@@ -239,7 +239,7 @@ export default function ReviewModal({
 
           {/* Comment Box */}
           <div>
-            <label className="block text-xs font-bold text-[#0F3D2E] mb-1">
+            <label className="block text-xs font-bold text-[#016831] mb-1">
               আপনার মতামত ও পর্যালোচনা <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -248,7 +248,7 @@ export default function ReviewModal({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="পণ্যটি আপনার কেমন লেগেছে? খাঁটি স্বাদ, ঘ্রাণ, প্যাকেজিং ও ডেলিভারি সম্পর্কে লিখুন..."
-              className="w-full px-3 py-2.5 rounded-2xl border border-[#E8E2D5] bg-[#FDFBF7] text-xs text-slate-900 focus:outline-none focus:border-[#0F3D2E] resize-none"
+              className="w-full px-3 py-2.5 rounded-2xl border border-[#E8E2D5] bg-[#FDFBF7] text-xs text-slate-900 focus:outline-none focus:border-[#016831] resize-none"
             />
           </div>
 

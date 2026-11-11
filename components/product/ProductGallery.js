@@ -20,7 +20,7 @@ export default function ProductGallery({ images = [], name = 'Product Image' }) 
           sizes="(max-width: 768px) 100vw, 50vw"
         />
 
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-semibold text-[#0F3D2E] shadow-sm border border-[#E8E2D5]">
+        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-semibold text-[#016831] shadow-sm border border-[#E8E2D5]">
           <ShieldCheck className="w-4 h-4 text-[#F59E0B]" />
           <span>খাঁটি ও প্রাকৃতিক গুণমান</span>
         </div>
@@ -35,8 +35,8 @@ export default function ProductGallery({ images = [], name = 'Product Image' }) 
               onClick={() => setSelectedImage(img)}
               className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all ${
                 selectedImage === img
-                  ? 'border-[#0F3D2E] ring-2 ring-[#0F3D2E]/20 scale-105'
-                  : 'border-[#E8E2D5] hover:border-[#0F3D2E]/50'
+                  ? 'border-[#016831] ring-2 ring-[#016831]/20 scale-105'
+                  : 'border-[#E8E2D5] hover:border-[#016831]/50'
               }`}
             >
               <Image

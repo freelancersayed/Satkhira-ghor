@@ -82,14 +82,14 @@ export default function ImageUploadInput({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="block text-xs font-bold text-[#0F3D2E]">
+        <label className="block text-xs font-bold text-[#016831]">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
         {allowUrlPaste && (
           <button
             type="button"
             onClick={() => setShowUrlMode(!showUrlMode)}
-            className="text-[11px] font-bold text-amber-700 hover:text-[#0F3D2E] transition-colors flex items-center gap-1"
+            className="text-[11px] font-bold text-amber-700 hover:text-[#016831] transition-colors flex items-center gap-1"
           >
             {showUrlMode ? (
               <>
@@ -127,7 +127,7 @@ export default function ImageUploadInput({
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder="https://... (ছবির সরাসরি ওয়েব লিংক)"
-            className="w-full px-3 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] text-xs font-mono text-slate-900 focus:outline-none focus:border-[#0F3D2E]"
+            className="w-full px-3 py-2.5 rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] text-xs font-mono text-slate-900 focus:outline-none focus:border-[#016831]"
           />
         </div>
       ) : (
@@ -160,7 +160,7 @@ export default function ImageUploadInput({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="px-2.5 py-1 rounded-lg bg-[#FEF3C7] text-[#0F3D2E] text-[11px] font-bold hover:bg-amber-200 transition-colors flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-lg bg-[#FEF3C7] text-[#016831] text-[11px] font-bold hover:bg-amber-200 transition-colors flex items-center gap-1"
                   >
                     <Upload className="w-3 h-3" />
                     <span>ছবি পরিবর্তন করুন</span>
@@ -188,23 +188,23 @@ export default function ImageUploadInput({
               className={`border-2 border-dashed rounded-2xl p-5 sm:p-6 text-center cursor-pointer transition-all duration-200 select-none ${
                 dragActive
                   ? 'border-[#F59E0B] bg-[#FEF3C7]/60 scale-[1.01]'
-                  : 'border-emerald-200 bg-[#FDFBF7] hover:border-[#0F3D2E] hover:bg-emerald-50/50'
+                  : 'border-emerald-200 bg-[#FDFBF7] hover:border-[#016831] hover:bg-emerald-50/50'
               } ${uploading ? 'opacity-70 pointer-events-none' : ''}`}
             >
               {uploading ? (
                 <div className="flex flex-col items-center justify-center py-2 gap-2">
-                  <Loader2 className="w-7 h-7 text-[#0F3D2E] animate-spin" />
-                  <span className="text-xs font-bold text-[#0F3D2E]">
+                  <Loader2 className="w-7 h-7 text-[#016831] animate-spin" />
+                  <span className="text-xs font-bold text-[#016831]">
                     ছবি আপলোড হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন
                   </span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center gap-2">
-                  <div className="w-12 h-12 rounded-2xl bg-[#0F3D2E]/10 text-[#0F3D2E] flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-2xl bg-[#016831]/10 text-[#016831] flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Upload className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[#0F3D2E]">
+                    <p className="text-xs font-bold text-[#016831]">
                       ক্লিক করে ছবি নির্বাচন করুন
                     </p>
                     <p className="text-[11px] text-slate-500 mt-0.5">

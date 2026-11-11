@@ -140,7 +140,7 @@ export default function CouponsAndCartView() {
           onClick={() => setSubTab('coupons')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
             subTab === 'coupons'
-              ? 'bg-[#0F3D2E] text-white'
+              ? 'bg-[#016831] text-white'
               : 'text-slate-600 hover:bg-emerald-50'
           }`}
         >
@@ -152,7 +152,7 @@ export default function CouponsAndCartView() {
           onClick={() => setSubTab('abandoned')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
             subTab === 'abandoned'
-              ? 'bg-[#0F3D2E] text-white'
+              ? 'bg-[#016831] text-white'
               : 'text-slate-600 hover:bg-emerald-50'
           }`}
         >
@@ -166,7 +166,7 @@ export default function CouponsAndCartView() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Coupon Form */}
           <div className="bg-white p-5 sm:p-6 rounded-3xl border border-[#E8E2D5] shadow-sm space-y-4">
-            <h4 className="font-bold text-sm text-[#0F3D2E] flex items-center gap-2">
+            <h4 className="font-bold text-sm text-[#016831] flex items-center gap-2">
               <Plus className="w-4 h-4 text-amber-500" />
               <span>নতুন কুপন কোড তৈরি করুন</span>
             </h4>
@@ -256,7 +256,7 @@ export default function CouponsAndCartView() {
               <button
                 type="submit"
                 disabled={creatingCoupon}
-                className="w-full py-2.5 bg-[#0F3D2E] hover:bg-[#15533f] text-white font-bold rounded-xl shadow-sm transition-all text-xs"
+                className="w-full py-2.5 bg-[#016831] hover:bg-[#15533f] text-white font-bold rounded-xl shadow-sm transition-all text-xs"
               >
                 {creatingCoupon ? 'তৈরি হচ্ছে...' : 'কুপন সক্রিয় করুন'}
               </button>
@@ -266,7 +266,7 @@ export default function CouponsAndCartView() {
           {/* Coupons List */}
           <div className="lg:col-span-2 bg-white rounded-3xl border border-[#E8E2D5] shadow-sm overflow-hidden">
             <div className="p-4 border-b border-[#E8E2D5] flex justify-between items-center">
-              <h4 className="font-bold text-xs text-[#0F3D2E]">সক্রিয় কুপন তালিকা</h4>
+              <h4 className="font-bold text-xs text-[#016831]">সক্রিয় কুপন তালিকা</h4>
               <span className="text-[11px] text-slate-400">মোট {coupons.length} টি</span>
             </div>
 
@@ -297,7 +297,7 @@ export default function CouponsAndCartView() {
                             {c.code}
                           </span>
                         </td>
-                        <td className="p-3 font-bold text-[#0F3D2E]">
+                        <td className="p-3 font-bold text-[#016831]">
                           {c.discountType === 'percentage' ? `${c.discountAmount}%` : `৳${c.discountAmount}`}
                         </td>
                         <td className="p-3 text-slate-600">
@@ -333,7 +333,7 @@ export default function CouponsAndCartView() {
         <div className="bg-white rounded-3xl border border-[#E8E2D5] shadow-sm overflow-hidden">
           <div className="p-4 border-b border-[#E8E2D5] flex justify-between items-center">
             <div>
-              <h4 className="font-bold text-xs text-[#0F3D2E]">
+              <h4 className="font-bold text-xs text-[#016831]">
                 অসম্পূর্ণ কার্ট ও ড্রপ-অফ ক্রেতা তালিকা (Abandoned Cart Logs)
               </h4>
               <p className="text-[11px] text-slate-400">
@@ -377,7 +377,7 @@ export default function CouponsAndCartView() {
                         </a>
                       </td>
                       <td className="p-3">{cart.items?.length || 1} টি</td>
-                      <td className="p-3 font-bold text-[#0F3D2E]">৳{cart.cartTotal}</td>
+                      <td className="p-3 font-bold text-[#016831]">৳{cart.cartTotal}</td>
                       <td className="p-3 text-slate-500 capitalize">{cart.step}</td>
                       <td className="p-3">
                         <span

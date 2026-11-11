@@ -28,7 +28,7 @@ export default function CustomerSecurityCard({ securityInfo, courierHistory, fra
       {/* 1. Customer Security Info (IP & Geolocation Log) */}
       <div className="bg-[#F8F9FA] border border-[#E8E2D5] rounded-2xl p-4 text-xs space-y-3">
         <div className="flex items-center justify-between border-b border-[#E8E2D5] pb-2">
-          <div className="flex items-center gap-2 font-bold text-[#0F3D2E]">
+          <div className="flex items-center gap-2 font-bold text-[#016831]">
             <Globe className="w-4 h-4 text-emerald-600" />
             <span>গ্রাহক আইপি ও সিকিউরিটি লগ (Customer Security Info)</span>
           </div>

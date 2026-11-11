@@ -3,92 +3,106 @@
 
 :root {
   /* ==========================================================================
-     1. CORE BRAND COLORS (Forest Green Theme)
+     1. CORE BRAND COLORS (From Satkhira Ghor Logo: Leaf Green & Honey Gold)
      ========================================================================== */
-  --brand-primary: #0F3D2E;         /* Deep Forest Green */
-  --brand-primary-dark: #072219;    /* Ultra Dark Forest */
-  --brand-primary-light: #1A5440;   /* Muted Leaf Green */
+  --brand-primary: #016831;         /* Satkhira Pure Organic Leaf Green (Logo Hex) */
+  --brand-primary-dark: #014D24;    /* Deep Forest Evergreen */
+  --brand-primary-light: #02833E;   /* Fresh Vibrant Leaf Green */
 
   /* ==========================================================================
-     2. HIGH-CONVERSION ACCENTS
+     2. HIGH-CONVERSION HONEY & AMBER ACCENTS
      ========================================================================== */
-  --brand-accent: #E06A28;          /* Vibrant Terracotta/Warm Ochre */
-  --brand-accent-hover: #C55314;    /* Deeper Burnt Amber */
-  --brand-accent-light: #FBEFE8;    /* Soft Tint Background */
+  --brand-accent: #FAB116;          /* Dripping Honeycomb Gold (Logo Hex) */
+  --brand-accent-hover: #E08E00;    /* Deep Rich Honey Amber */
+  --brand-accent-light: #FEF3C7;    /* Warm Soft Creamy Gold */
 
   /* ==========================================================================
      3. SURFACES & BACKGROUNDS
      ========================================================================== */
-  --brand-bg: #FAF8F5;              /* Cream / Off-White */
+  --brand-bg: #FAF9F5;              /* Clean Ivory Off-White */
   --brand-card: #FFFFFF;            /* Pure White */
-  --brand-border: #EAE3D8;          /* Soft Sand-Grey Border */
+  --brand-border: #E8E2D5;          /* Soft Sand-Grey Border */
 
   /* ==========================================================================
      4. TYPOGRAPHY
      ========================================================================== */
-  --text-primary: #1C2421;          /* Deep Charcoal with Green Tint */
-  --text-secondary: #56625D;        /* Medium Sage Grey */
-  --text-muted: #8E9C96;            /* Light Muted Grey */
+  --text-primary: #122118;          /* Deep Forest-Tinted Charcoal for Readability */
+  --text-secondary: #4A5B52;        /* Medium Organic Grey */
+  --text-muted: #829289;            /* Light Muted Grey */
 
   /* ==========================================================================
      5. COMPLEMENTARY VARIATIONS
      ========================================================================== */
   --brand-green: var(--brand-primary);
-  --brand-terracotta: var(--brand-accent);
-  --brand-honey-gold: #D4A373;
+  --brand-honey-gold: var(--brand-accent);
+  --brand-bee-brown: #49260A;       /* Honey Bee Chocolate Brown from Logo */
 }
 
+html,
 body {
   background-color: var(--brand-bg);
   color: var(--text-primary);
-  font-family: 'SolaimanLipi', var(--font-hind-siliguri), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-hind-siliguri), 'Hind Siliguri', 'SolaimanLipi', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Prevent unwanted iOS auto-zoom on input focus */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
 /* Custom Tailwind theme definitions */
 @theme {
-  --color-brand-primary: #0F3D2E;
-  --color-brand-primary-dark: #0A2B20;
-  --color-brand-primary-light: #164E3B;
-  --color-brand-accent: #D97706;
-  --color-brand-accent-hover: #B45309;
-  --color-brand-accent-light: #F59E0B;
-  --color-brand-bg: #FDFBF7;
+  --color-brand-primary: #016831;
+  --color-brand-primary-dark: #014D24;
+  --color-brand-primary-light: #02833E;
+  --color-brand-accent: #FAB116;
+  --color-brand-accent-hover: #E08E00;
+  --color-brand-accent-light: #FEF3C7;
+  --color-brand-bg: #FAF9F5;
 
-  --color-brandGreen: #0F3D2E;
-  --color-brandHoney: #D97706;
-  --color-brandMustard: #C25E2E;
-  --color-brandOrganic: #FDFBF7;
+  --color-brandGreen: #016831;
+  --color-brandHoney: #FAB116;
+  --color-brandMustard: #E08E00;
+  --color-brandOrganic: #FAF9F5;
 
-  --color-brand-green: #0F3D2E;
-  --color-brand-honey: #D97706;
-  --color-brand-mustard: #C25E2E;
-  --color-brand-organic: #FDFBF7;
+  --color-brand-green: #016831;
+  --color-brand-honey: #FAB116;
+  --color-brand-mustard: #E08E00;
+  --color-brand-organic: #FAF9F5;
 
   --color-forest-50: #f0fdf4;
   --color-forest-100: #dcfce7;
   --color-forest-200: #bbf7d0;
   --color-forest-300: #86efac;
   --color-forest-400: #4ade80;
-  --color-forest-500: #22c55e;
-  --color-forest-600: #16a34a;
-  --color-forest-700: #15803d;
-  --color-forest-800: #164e3b;
-  --color-forest-900: #0f3d2e;
-  --color-forest-950: #0a2b20;
-  --color-forest: #0f3d2e;
+  --color-forest-500: #02833e;
+  --color-forest-600: #016831;
+  --color-forest-700: #015629;
+  --color-forest-800: #014d24;
+  --color-forest-900: #013c1c;
+  --color-forest-950: #002913;
+  --color-forest: #016831;
 
   --color-honey-50: #fffbeb;
   --color-honey-100: #fef3c7;
   --color-honey-200: #fde68a;
   --color-honey-300: #fcd34d;
   --color-honey-400: #fbbf24;
-  --color-honey-500: #f59e0b;
-  --color-honey-600: #d97706;
-  --color-honey-700: #b45309;
+  --color-honey-500: #fab116;
+  --color-honey-600: #e08e00;
+  --color-honey-700: #b86d00;
   --color-honey-800: #92400e;
-  --color-honey: #d97706;
+  --color-honey: #fab116;
 
   --color-ochre-50: #fdf4ef;
   --color-ochre-100: #fae5da;
@@ -127,6 +141,62 @@ html {
   animation: floatSlow 4s ease-in-out infinite;
 }
 
+@keyframes slideRight {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slideRight {
+  animation: slideRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Glassmorphism helpers */
 .glass-nav {
   background: rgba(250, 249, 246, 0.88);
@@ -163,7 +233,7 @@ html {
 
 /* Deep Forest Primary Action Buttons */
 .btn-cta-forest {
-  background-color: #0F3D2E;
+  background-color: #016831;
   color: #FFFFFF;
   font-weight: 700;
   box-shadow: 0 4px 14px 0 rgba(15, 61, 46, 0.25);
@@ -171,7 +241,7 @@ html {
 }
 
 .btn-cta-forest:hover {
-  background-color: #0A2B20;
+  background-color: #014D24;
   box-shadow: 0 8px 20px 0 rgba(15, 61, 46, 0.35);
   transform: translateY(-1px) scale(1.01);
 }

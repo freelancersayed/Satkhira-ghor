@@ -92,7 +92,7 @@ function TrackOrderContent() {
           <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">
             লাইভ অর্ডার ট্র্যাকিং
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F3D2E]">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#016831]">
             আপনার পার্সেলের বর্তমান অবস্থান জানুন
           </h1>
           <p className="text-xs sm:text-sm text-slate-600">
@@ -156,7 +156,7 @@ function TrackOrderContent() {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-slate-500">অর্ডার নম্বর:</span>
-                        <span className="font-mono font-bold text-[#0F3D2E] text-base">
+                        <span className="font-mono font-bold text-[#016831] text-base">
                           #{order.orderNumber}
                         </span>
                       </div>
@@ -167,7 +167,7 @@ function TrackOrderContent() {
 
                     <div className="text-right">
                       <div className="text-xs text-slate-500">সর্বমোট টাকা:</div>
-                      <div className="text-base font-black text-[#0F3D2E]">
+                      <div className="text-base font-black text-[#016831]">
                         ৳{order.totalAmount}
                       </div>
                     </div>
@@ -190,7 +190,7 @@ function TrackOrderContent() {
                               key={st.key}
                               className={`p-4 rounded-2xl border text-center transition-all ${
                                 isCurrent
-                                  ? 'bg-[#0F3D2E] text-white border-[#0F3D2E] shadow-md'
+                                  ? 'bg-[#016831] text-white border-[#016831] shadow-md'
                                   : isDone
                                   ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
                                   : 'bg-[#FDFBF7] border-[#E8E2D5] text-slate-400'
@@ -201,7 +201,7 @@ function TrackOrderContent() {
                                   isCurrent
                                     ? 'bg-[#F59E0B] text-slate-950 font-black'
                                     : isDone
-                                    ? 'bg-[#0F3D2E] text-white'
+                                    ? 'bg-[#016831] text-white'
                                     : 'bg-[#E8E2D5] text-slate-600'
                                 }`}
                               >
@@ -224,16 +224,16 @@ function TrackOrderContent() {
 
                   {/* Items Ordered */}
                   <div className="bg-[#FDFBF7] rounded-2xl p-4 border border-[#E8E2D5] space-y-3">
-                    <h4 className="text-xs font-bold text-[#0F3D2E]">
+                    <h4 className="text-xs font-bold text-[#016831]">
                       অর্ডারের পণ্যসমূহ ({order.items?.length}):
                     </h4>
                     <div className="divide-y divide-[#E8E2D5]">
                       {order.items?.map((it, idx) => (
                         <div key={idx} className="py-2 flex items-center justify-between text-xs">
-                          <span className="font-medium text-[#0F3D2E]">
+                          <span className="font-medium text-[#016831]">
                             {it.name} <span className="text-slate-500">× {it.quantity}</span>
                           </span>
-                          <span className="font-bold text-[#0F3D2E]">
+                          <span className="font-bold text-[#016831]">
                             ৳{it.price * it.quantity}
                           </span>
                         </div>
@@ -241,7 +241,7 @@ function TrackOrderContent() {
                     </div>
                     <div className="pt-2 border-t border-[#E8E2D5] flex justify-between text-xs text-slate-600">
                       <span>ডেলিভারি ঠিকানা: {order.customer?.address}, {order.customer?.city}</span>
-                      <span className="font-bold text-[#0F3D2E]">
+                      <span className="font-bold text-[#016831]">
                         পেমেন্ট: {order.paymentMethod === 'cod' ? 'ক্যাশ অন ডেলিভারি' : 'অনলাইন'}
                       </span>
                     </div>
@@ -261,7 +261,7 @@ export default function TrackOrderPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
-          <div className="w-10 h-10 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin" />
         </div>
       }
     >

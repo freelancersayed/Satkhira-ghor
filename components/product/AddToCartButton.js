@@ -34,13 +34,13 @@ export default function AddToCartButton({ product }) {
   };
 
   const handleAddToCart = () => {
-    addItem(getProductForCart(), quantity);
+    addItem(getProductForCart(), quantity, false);
     setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+    setTimeout(() => setIsAdded(false), 2500);
   };
 
   const handleBuyNow = () => {
-    addItem(getProductForCart(), quantity);
+    addItem(getProductForCart(), quantity, false);
     openCart();
   };
 
@@ -49,7 +49,7 @@ export default function AddToCartButton({ product }) {
       {/* Variations Selection Matrix (Requirement 5) */}
       {hasVars && (
         <div className="space-y-2 pb-2">
-          <label className="text-xs font-bold text-[#0F3D2E] uppercase tracking-wider flex items-center gap-1.5">
+          <label className="text-xs font-bold text-[#016831] uppercase tracking-wider flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-amber-600" />
             <span>সাইজ / পরিমাপ নির্বাচন করুন:</span>
           </label>
@@ -59,14 +59,13 @@ export default function AddToCartButton({ product }) {
                 key={idx}
                 type="button"
                 onClick={() => setSelectedVarIndex(idx)}
-                className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${
-                  selectedVarIndex === idx
-                    ? 'bg-[#0F3D2E] text-white border-[#0F3D2E] shadow-sm scale-105'
-                    : 'bg-white text-slate-800 border-[#E8E2D5] hover:border-[#0F3D2E]'
-                }`}
+                className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${selectedVarIndex === idx
+                    ? 'bg-[#016831] text-white border-[#016831] shadow-sm scale-105'
+                    : 'bg-white text-slate-800 border-[#E8E2D5] hover:border-[#016831]'
+                  }`}
               >
                 <span>{v.size || v.weight || `প্যাক ${idx + 1}`}</span>
-                <span className={selectedVarIndex === idx ? 'text-[#F59E0B]' : 'text-[#0F3D2E]'}>
+                <span className={selectedVarIndex === idx ? 'text-[#F59E0B]' : 'text-[#016831]'}>
                   ৳{v.price}
                 </span>
               </button>
@@ -76,31 +75,31 @@ export default function AddToCartButton({ product }) {
       )}
 
       {/* Quantity Stepper */}
-      <div className="flex items-center gap-4">
-        <span className="text-xs font-bold text-[#0F3D2E] uppercase tracking-wider">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+        <span className="text-xs font-bold text-[#016831] uppercase tracking-wider">
           পরিমাণ:
         </span>
         <div className="flex items-center border border-[#E8E2D5] bg-white rounded-2xl overflow-hidden shadow-sm">
           <button
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            className="p-3 text-[#4B5563] hover:bg-[#F7F5F0] hover:text-[#0F3D2E] transition-colors"
+            className="p-3 text-[#4B5563] hover:bg-[#F7F5F0] hover:text-[#016831] transition-colors"
             aria-label="Decrease quantity"
           >
             <Minus className="w-4 h-4" />
           </button>
-          <span className="px-5 font-bold text-sm text-[#0F3D2E]">
+          <span className="px-5 font-bold text-sm text-[#016831]">
             {quantity}
           </span>
           <button
             onClick={() => setQuantity((q) => q + 1)}
-            className="p-3 text-[#4B5563] hover:bg-[#F7F5F0] hover:text-[#0F3D2E] transition-colors"
+            className="p-3 text-[#4B5563] hover:bg-[#F7F5F0] hover:text-[#016831] transition-colors"
             aria-label="Increase quantity"
           >
             <Plus className="w-4 h-4" />
           </button>
         </div>
         <span className="text-xs text-[#4B5563]">
-          (মোট: <strong className="text-[#0F3D2E]">৳{currentPrice * quantity}</strong> • {currentUnit})
+          (মোট: <strong className="text-[#016831]">৳{currentPrice * quantity}</strong> • {currentUnit})
         </span>
       </div>
 
@@ -108,11 +107,10 @@ export default function AddToCartButton({ product }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
         <button
           onClick={handleAddToCart}
-          className={`py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${
-            isAdded
+          className={`py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${isAdded
               ? 'bg-emerald-800 text-white'
-              : 'bg-[#0F3D2E] hover:bg-[#0A2B20] text-white border border-[#0F3D2E]'
-          }`}
+              : 'bg-[#016831] hover:bg-[#014D24] text-white border border-[#016831]'
+            }`}
         >
           {isAdded ? (
             <>

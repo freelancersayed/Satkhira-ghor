@@ -40,6 +40,8 @@ import {
   Check,
   X,
   Layers,
+  FolderPlus,
+  Flame,
 } from 'lucide-react';
 
 import { useAuthStore } from '@/store/authStore';
@@ -53,6 +55,8 @@ import CustomerCRMView from '@/components/admin/CustomerCRMView';
 import CouponsAndCartView from '@/components/admin/CouponsAndCartView';
 import BulkProductUploadModal from '@/components/admin/BulkProductUploadModal';
 import ProductVariationEditor from '@/components/admin/ProductVariationEditor';
+import AdminCategoriesView from '@/components/admin/AdminCategoriesView';
+import AdminFlashSaleView from '@/components/admin/AdminFlashSaleView';
 import {
   initAudioOnUserGesture,
   playCashRegisterSound,
@@ -419,7 +423,7 @@ export default function AdminDashboardPage() {
   if (isLoading || !user || !isPrivileged) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
-        <div className="w-10 h-10 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin" />
       </div>
     );
   }
@@ -455,7 +459,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col text-slate-900">
       {/* ================= ADMIN TOP NAVIGATION ================= */}
-      <header className="bg-[#0A2B20] text-white sticky top-0 z-40 shadow-md">
+      <header className="bg-[#014D24] text-white sticky top-0 z-40 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
@@ -534,7 +538,7 @@ export default function AdminDashboardPage() {
 
       {/* ================= REAL-TIME PUSH NOTIFICATION TOAST ================= */}
       {newOrderAlert && (
-        <div className="fixed top-20 right-4 z-50 max-w-sm w-full bg-[#0A2B20] text-white p-4 rounded-3xl shadow-2xl border-2 border-[#F59E0B] animate-in slide-in-from-top-4 space-y-2">
+        <div className="fixed top-20 right-4 z-50 max-w-sm w-full bg-[#014D24] text-white p-4 rounded-3xl shadow-2xl border-2 border-[#F59E0B] animate-in slide-in-from-top-4 space-y-2">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
@@ -579,7 +583,7 @@ export default function AdminDashboardPage() {
       {actionMessage.text && (
         <div
           className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all flex items-center gap-2 ${
-            actionMessage.type === 'error' ? 'bg-red-600 text-white' : 'bg-[#0F3D2E] text-white'
+            actionMessage.type === 'error' ? 'bg-red-600 text-white' : 'bg-[#016831] text-white'
           }`}
         >
           <CheckCircle className="w-4 h-4 text-[#F59E0B]" />
@@ -638,8 +642,8 @@ export default function AdminDashboardPage() {
               onClick={() => setActiveTab('overview')}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 activeTab === 'overview'
-                  ? 'bg-[#0F3D2E] text-white shadow-sm'
-                  : 'text-slate-600 hover:text-[#0F3D2E] hover:bg-emerald-50/50'
+                  ? 'bg-[#016831] text-white shadow-sm'
+                  : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
               }`}
             >
               <LayoutDashboard className="w-4 h-4" />
@@ -650,8 +654,8 @@ export default function AdminDashboardPage() {
               onClick={() => setActiveTab('orders')}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 activeTab === 'orders'
-                  ? 'bg-[#0F3D2E] text-white shadow-sm'
-                  : 'text-slate-600 hover:text-[#0F3D2E] hover:bg-emerald-50/50'
+                  ? 'bg-[#016831] text-white shadow-sm'
+                  : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
               }`}
             >
               <ShoppingBag className="w-4 h-4" />
@@ -662,8 +666,8 @@ export default function AdminDashboardPage() {
               onClick={() => setActiveTab('products')}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 activeTab === 'products'
-                  ? 'bg-[#0F3D2E] text-white shadow-sm'
-                  : 'text-slate-600 hover:text-[#0F3D2E] hover:bg-emerald-50/50'
+                  ? 'bg-[#016831] text-white shadow-sm'
+                  : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
               }`}
             >
               <Package className="w-4 h-4" />
@@ -676,8 +680,8 @@ export default function AdminDashboardPage() {
                 onClick={() => setActiveTab('reports')}
                 className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'reports'
-                    ? 'bg-[#0F3D2E] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#0F3D2E] hover:bg-emerald-50/50'
+                    ? 'bg-[#016831] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
                 }`}
               >
                 <DollarSign className="w-4 h-4 text-[#F59E0B]" />
@@ -691,8 +695,8 @@ export default function AdminDashboardPage() {
                 onClick={() => setActiveTab('crm')}
                 className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'crm'
-                    ? 'bg-[#0F3D2E] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#0F3D2E] hover:bg-emerald-50/50'
+                    ? 'bg-[#016831] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
                 }`}
               >
                 <Users className="w-4 h-4" />
@@ -706,8 +710,8 @@ export default function AdminDashboardPage() {
                 onClick={() => setActiveTab('marketing')}
                 className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'marketing'
-                    ? 'bg-[#0F3D2E] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#0F3D2E] hover:bg-emerald-50/50'
+                    ? 'bg-[#016831] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
                 }`}
               >
                 <Tag className="w-4 h-4" />
@@ -715,12 +719,42 @@ export default function AdminDashboardPage() {
               </button>
             )}
 
+            {/* RBAC: Dynamic Category Management */}
+            {isManagerOrAdmin && (
+              <button
+                onClick={() => setActiveTab('categories')}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  activeTab === 'categories'
+                    ? 'bg-[#016831] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
+                }`}
+              >
+                <FolderPlus className="w-4 h-4 text-[#FAB116]" />
+                <span>ক্যাটাগরি সমূহ</span>
+              </button>
+            )}
+
+            {/* RBAC: Flash Sale & Dhamaka Offer Management */}
+            {isManagerOrAdmin && (
+              <button
+                onClick={() => setActiveTab('flash-sale')}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  activeTab === 'flash-sale'
+                    ? 'bg-[#016831] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
+                }`}
+              >
+                <Flame className="w-4 h-4 text-red-500 fill-current" />
+                <span>ধামাকা অফার</span>
+              </button>
+            )}
+
             <button
               onClick={() => setActiveTab('reviews')}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 activeTab === 'reviews'
-                  ? 'bg-[#0F3D2E] text-white shadow-sm'
-                  : 'text-slate-600 hover:text-[#0F3D2E] hover:bg-emerald-50/50'
+                  ? 'bg-[#016831] text-white shadow-sm'
+                  : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
               }`}
             >
               <Star className="w-4 h-4 text-[#F59E0B] fill-current" />
@@ -731,7 +765,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={loadDashboardData}
-              className="p-2 text-slate-500 hover:text-[#0F3D2E] hover:bg-emerald-50 rounded-xl transition-colors"
+              className="p-2 text-slate-500 hover:text-[#016831] hover:bg-emerald-50 rounded-xl transition-colors"
               title="তথ্য রিফ্রেশ করুন"
             >
               <RefreshCw className="w-4 h-4" />
@@ -792,7 +826,7 @@ export default function AdminDashboardPage() {
                     <TrendingUp className="w-4 h-4" />
                   </div>
                 </div>
-                <div className="text-2xl font-black text-[#0F3D2E]">
+                <div className="text-2xl font-black text-[#016831]">
                   ৳{stats?.todaySales ? stats.todaySales.toLocaleString('bn-BD') : 0}
                 </div>
                 <div className="text-[11px] text-slate-400">
@@ -839,7 +873,7 @@ export default function AdminDashboardPage() {
                       <DollarSign className="w-4 h-4" />
                     </div>
                   </div>
-                  <div className="text-2xl font-black text-[#0F3D2E]">
+                  <div className="text-2xl font-black text-[#016831]">
                     ৳{stats?.totalRevenue ? stats.totalRevenue.toLocaleString('bn-BD') : 0}
                   </div>
                   <div className="text-[11px] text-slate-400">
@@ -854,7 +888,7 @@ export default function AdminDashboardPage() {
                       <Package className="w-4 h-4" />
                     </div>
                   </div>
-                  <div className="text-2xl font-black text-[#0F3D2E]">
+                  <div className="text-2xl font-black text-[#016831]">
                     {stats?.totalProducts || products.length} টি
                   </div>
                   <div className="text-[11px] text-red-600 font-bold">
@@ -877,7 +911,7 @@ export default function AdminDashboardPage() {
             {/* Recent Orders in Overview */}
             <div className="bg-white rounded-3xl p-6 border border-[#E8E2D5] shadow-sm space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-base font-bold text-[#0F3D2E] flex items-center gap-2">
+                <h3 className="text-base font-bold text-[#016831] flex items-center gap-2">
                   <Clock className="w-4 h-4 text-[#F59E0B]" />
                   <span>সাম্প্রতিক লাইভ অর্ডারসমূহ</span>
                 </h3>
@@ -916,7 +950,7 @@ export default function AdminDashboardPage() {
                                 : 'hover:bg-emerald-50/20'
                             }`}
                           >
-                            <td className="py-3 px-4 font-mono font-bold text-[#0F3D2E]">
+                            <td className="py-3 px-4 font-mono font-bold text-[#016831]">
                               #{order.orderNumber}
                             </td>
                             <td className="py-3 px-4">
@@ -931,7 +965,7 @@ export default function AdminDashboardPage() {
                                 compact={true}
                               />
                             </td>
-                            <td className="py-3 px-4 font-bold text-[#0F3D2E]">
+                            <td className="py-3 px-4 font-bold text-[#016831]">
                               ৳{order.totalAmount}
                             </td>
                             <td className="py-3 px-4">
@@ -957,7 +991,7 @@ export default function AdminDashboardPage() {
                               </button>
                               <button
                                 onClick={() => setSelectedOrderDetails(order)}
-                                className="px-2.5 py-1 bg-[#0F3D2E] text-white rounded-lg text-[11px] font-bold hover:bg-emerald-800"
+                                className="px-2.5 py-1 bg-[#016831] text-white rounded-lg text-[11px] font-bold hover:bg-emerald-800"
                               >
                                 বিস্তারিত
                               </button>
@@ -985,7 +1019,7 @@ export default function AdminDashboardPage() {
                   value={orderSearch}
                   onChange={(e) => setOrderSearch(e.target.value)}
                   placeholder="অর্ডার আইডি (#SKG-...), গ্রাহক বা মোবাইল নম্বর দিয়ে খুঁজুন..."
-                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#E8E2D5] text-xs outline-none focus:border-[#0F3D2E]"
+                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#E8E2D5] text-xs outline-none focus:border-[#016831]"
                 />
               </div>
 
@@ -1041,7 +1075,7 @@ export default function AdminDashboardPage() {
                                 : 'hover:bg-emerald-50/20'
                             }`}
                           >
-                            <td className="py-3 px-4 font-mono font-bold text-[#0F3D2E]">
+                            <td className="py-3 px-4 font-mono font-bold text-[#016831]">
                               #{order.orderNumber}
                             </td>
                             <td className="py-3 px-4 text-slate-400">
@@ -1072,7 +1106,7 @@ export default function AdminDashboardPage() {
                             <td className="py-3 px-4 max-w-xs truncate" title={order.customer?.address}>
                               {order.customer?.address}, {order.customer?.city}
                             </td>
-                            <td className="py-3 px-4 font-bold text-[#0F3D2E]">
+                            <td className="py-3 px-4 font-bold text-[#016831]">
                               ৳{order.totalAmount}
                             </td>
                             <td className="py-3 px-4">
@@ -1113,7 +1147,7 @@ export default function AdminDashboardPage() {
                               </button>
                               <button
                                 onClick={() => setSelectedOrderDetails(order)}
-                                className="p-1.5 text-[#0F3D2E] hover:bg-[#FEF3C7] rounded-lg transition-colors"
+                                className="p-1.5 text-[#016831] hover:bg-[#FEF3C7] rounded-lg transition-colors"
                                 title="সিকিউরিটি লগ ও বিস্তারিত দেখুন"
                               >
                                 <Eye className="w-4 h-4" />
@@ -1142,7 +1176,7 @@ export default function AdminDashboardPage() {
                   value={productSearch}
                   onChange={(e) => setProductSearch(e.target.value)}
                   placeholder="পণ্যের নাম দিয়ে খুঁজুন..."
-                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#E8E2D5] text-xs outline-none focus:border-[#0F3D2E]"
+                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#E8E2D5] text-xs outline-none focus:border-[#016831]"
                 />
               </div>
 
@@ -1207,7 +1241,7 @@ export default function AdminDashboardPage() {
                             </div>
                           </td>
                           <td className="py-3 px-4">
-                            <div className="font-bold text-[#0F3D2E] text-xs">{prod.name}</div>
+                            <div className="font-bold text-[#016831] text-xs">{prod.name}</div>
                             <div className="text-[11px] text-slate-400">{prod.unit}</div>
                             {prod.hasVariations && prod.variations?.length > 0 && (
                               <div className="mt-1 flex items-center gap-1">
@@ -1223,7 +1257,7 @@ export default function AdminDashboardPage() {
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            <div className="font-bold text-[#0F3D2E]">৳{prod.price}</div>
+                            <div className="font-bold text-[#016831]">৳{prod.price}</div>
                             {prod.originalPrice && (
                               <div className="text-[11px] text-slate-400 line-through">
                                 ৳{prod.originalPrice}
@@ -1297,7 +1331,7 @@ export default function AdminDashboardPage() {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 sm:p-6 rounded-3xl border border-[#E8E2D5] shadow-sm">
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-[#0F3D2E] flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold text-[#016831] flex items-center gap-2">
                   <Star className="w-5 h-5 text-[#F59E0B] fill-current" />
                   <span>গ্রাহকদের লাইভ প্রোডাক্ট রিভিউ ও ফিডব্যাক ({adminReviews.length})</span>
                 </h3>
@@ -1313,7 +1347,7 @@ export default function AdminDashboardPage() {
                   placeholder="পণ্য বা গ্রাহকের নাম..."
                   value={reviewSearch}
                   onChange={(e) => setReviewSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] outline-none focus:border-[#0F3D2E]"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-[#E8E2D5] bg-[#FDFBF7] outline-none focus:border-[#016831]"
                 />
               </div>
             </div>
@@ -1321,7 +1355,7 @@ export default function AdminDashboardPage() {
             <div className="bg-white rounded-3xl border border-[#E8E2D5] shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#FDFBF7] text-[#0F3D2E] border-b border-[#E8E2D5] font-bold">
+                  <thead className="bg-[#FDFBF7] text-[#016831] border-b border-[#E8E2D5] font-bold">
                     <tr>
                       <th className="p-4">পণ্য</th>
                       <th className="p-4">গ্রাহক</th>
@@ -1356,7 +1390,7 @@ export default function AdminDashboardPage() {
                         .map((rev) => (
                           <tr key={rev._id} className="hover:bg-emerald-50/20 transition-colors">
                             <td className="p-4">
-                              <span className="font-bold text-[#0F3D2E]">{rev.productName}</span>
+                              <span className="font-bold text-[#016831]">{rev.productName}</span>
                             </td>
                             <td className="p-4">
                               <div className="font-bold text-slate-900">{rev.userName}</div>
@@ -1400,12 +1434,22 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
+        {/* ===================== TAB 8: CATEGORIES MANAGEMENT ===================== */}
+        {activeTab === 'categories' && isManagerOrAdmin && (
+          <AdminCategoriesView />
+        )}
+
+        {/* ===================== TAB 9: FLASH SALE & DHAMAKA OFFERS ===================== */}
+        {activeTab === 'flash-sale' && isManagerOrAdmin && (
+          <AdminFlashSaleView allProducts={products} />
+        )}
+
         {/* ===================== PRODUCT CREATE / EDIT MODAL ===================== */}
         {productModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
             <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-[#E8E2D5] shadow-2xl my-8 space-y-4">
               <div className="flex justify-between items-center pb-3 border-b border-[#E8E2D5]">
-                <h3 className="text-base font-bold text-[#0F3D2E]">
+                <h3 className="text-base font-bold text-[#016831]">
                   {editingProduct ? 'পণ্য সম্পাদনা করুন' : 'নতুন পণ্য যুক্ত করুন'}
                 </h3>
                 <button
@@ -1419,7 +1463,7 @@ export default function AdminDashboardPage() {
               <form onSubmit={handleSaveProduct} className="space-y-4 text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       পণ্যের নাম (বাংলা) <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1430,11 +1474,11 @@ export default function AdminDashboardPage() {
                         setProductFormData({ ...productFormData, name: e.target.value })
                       }
                       placeholder="যেমন: সুন্দরবনের খাঁটি মধু"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none focus:border-[#0F3D2E]"
+                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none focus:border-[#016831]"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       পণ্যের নাম (ইংরেজি / URL Slug)
                     </label>
                     <input
@@ -1444,14 +1488,14 @@ export default function AdminDashboardPage() {
                         setProductFormData({ ...productFormData, nameEn: e.target.value })
                       }
                       placeholder="যেমন: Sundarbans Raw Honey"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none focus:border-[#0F3D2E]"
+                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none focus:border-[#016831]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       ক্যাটাগরি <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -1482,7 +1526,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       ডিফল্ট পরিমাপ ইউনিট
                     </label>
                     <input
@@ -1499,7 +1543,7 @@ export default function AdminDashboardPage() {
 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       বিক্রয় মূল্য (৳) <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1515,7 +1559,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       মূল মূল্য (ছাড় থাকলে)
                     </label>
                     <input
@@ -1533,7 +1577,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div>
-                    <label className="block font-bold text-[#0F3D2E] mb-1">
+                    <label className="block font-bold text-[#016831] mb-1">
                       মোট স্টক সংখ্যা <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1575,7 +1619,7 @@ export default function AdminDashboardPage() {
                 />
 
                 <div>
-                  <label className="block font-bold text-[#0F3D2E] mb-1">
+                  <label className="block font-bold text-[#016831] mb-1">
                     সংক্ষিপ্ত বিবরণ
                   </label>
                   <textarea
@@ -1618,7 +1662,7 @@ export default function AdminDashboardPage() {
             <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-[#E8E2D5] shadow-2xl space-y-4 my-6">
               <div className="flex justify-between items-center pb-3 border-b border-[#E8E2D5]">
                 <div>
-                  <h3 className="text-base font-bold text-[#0F3D2E]">
+                  <h3 className="text-base font-bold text-[#016831]">
                     অর্ডার বিস্তারিত: #{selectedOrderDetails.orderNumber}
                   </h3>
                   <span className="text-[11px] text-slate-400">
@@ -1644,7 +1688,7 @@ export default function AdminDashboardPage() {
               {/* Courier One-Click Booking Status */}
               <div className="bg-[#FAF9F5] border border-[#E8E2D5] rounded-2xl p-3.5 text-xs space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-[#0F3D2E] flex items-center gap-1.5">
+                  <span className="font-bold text-[#016831] flex items-center gap-1.5">
                     <Truck className="w-4 h-4 text-amber-600" />
                     <span>কুরিয়ার পার্সেল বুকিং (Steadfast / Pathao)</span>
                   </span>
@@ -1669,7 +1713,7 @@ export default function AdminDashboardPage() {
                   <button
                     disabled={bookingCourierLoading}
                     onClick={() => handleBookCourier(selectedOrderDetails._id)}
-                    className="w-full py-2 bg-[#0F3D2E] hover:bg-emerald-900 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                    className="w-full py-2 bg-[#016831] hover:bg-emerald-900 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
                   >
                     <Truck className="w-3.5 h-3.5 text-[#F59E0B]" />
                     <span>
@@ -1694,7 +1738,7 @@ export default function AdminDashboardPage() {
 
               {/* Items Table */}
               <div className="space-y-2">
-                <h4 className="text-xs font-bold text-[#0F3D2E]">অর্ডারকৃত আইটেম:</h4>
+                <h4 className="text-xs font-bold text-[#016831]">অর্ডারকৃত আইটেম:</h4>
                 <div className="divide-y divide-[#E8E2D5] max-h-40 overflow-y-auto">
                   {selectedOrderDetails.items?.map((it, idx) => (
                     <div key={idx} className="py-2 flex justify-between items-center text-xs">
@@ -1704,7 +1748,7 @@ export default function AdminDashboardPage() {
                           ৳{it.price} × {it.quantity} {it.unit}
                         </div>
                       </div>
-                      <div className="font-bold text-[#0F3D2E]">
+                      <div className="font-bold text-[#016831]">
                         ৳{it.price * it.quantity}
                       </div>
                     </div>
@@ -1712,7 +1756,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-[#E8E2D5] flex justify-between items-center text-sm font-bold text-[#0F3D2E]">
+              <div className="pt-2 border-t border-[#E8E2D5] flex justify-between items-center text-sm font-bold text-[#016831]">
                 <span>সর্বমোট বিল:</span>
                 <span>৳{selectedOrderDetails.totalAmount}</span>
               </div>

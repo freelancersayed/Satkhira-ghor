@@ -137,7 +137,7 @@ export default function BulkProductUploadModal({ isOpen, onClose, onUploadSucces
         <div className="flex justify-between items-center pb-3 border-b border-[#E8E2D5]">
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-emerald-700" />
-            <h3 className="text-base font-bold text-[#0F3D2E]">
+            <h3 className="text-base font-bold text-[#016831]">
               বাল্ক পণ্য আপলোড (Bulk CSV / Excel Import)
             </h3>
           </div>
@@ -155,9 +155,9 @@ export default function BulkProductUploadModal({ isOpen, onClose, onUploadSucces
 
         {/* Upload Controls & Sample Download */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label className="border-2 border-dashed border-[#0F3D2E] rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-emerald-50/50 transition-colors">
-            <Upload className="w-6 h-6 text-[#0F3D2E] mb-1" />
-            <span className="text-xs font-bold text-[#0F3D2E]">
+          <label className="border-2 border-dashed border-[#016831] rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-emerald-50/50 transition-colors">
+            <Upload className="w-6 h-6 text-[#016831] mb-1" />
+            <span className="text-xs font-bold text-[#016831]">
               কম্পিউটার থেকে CSV ফাইল আপলোড করুন
             </span>
             <span className="text-[10px] text-slate-400">.csv বা টেক্সট ফাইল</span>
@@ -173,7 +173,7 @@ export default function BulkProductUploadModal({ isOpen, onClose, onUploadSucces
             </div>
             <button
               onClick={handleDownloadSample}
-              className="mt-2 px-3 py-1.5 bg-[#0F3D2E] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-[#15533f]"
+              className="mt-2 px-3 py-1.5 bg-[#016831] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-[#15533f]"
             >
               <Download className="w-3.5 h-3.5 text-[#F59E0B]" />
               <span>নমুনা CSV নামিয়ে নিন</span>
@@ -208,7 +208,7 @@ export default function BulkProductUploadModal({ isOpen, onClose, onUploadSucces
         {fileData.length > 0 && (
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs">
-              <span className="font-bold text-[#0F3D2E]">
+              <span className="font-bold text-[#016831]">
                 মোট {fileData.length} টি পণ্য পাওয়া গেছে (প্রিভিউ):
               </span>
               <button
@@ -235,7 +235,7 @@ export default function BulkProductUploadModal({ isOpen, onClose, onUploadSucces
                     <tr key={idx} className="hover:bg-emerald-50/20">
                       <td className="p-2 font-bold text-slate-900">{item.name}</td>
                       <td className="p-2 text-slate-600">{item.categoryName || item.category}</td>
-                      <td className="p-2 font-bold text-[#0F3D2E]">৳{item.price}</td>
+                      <td className="p-2 font-bold text-[#016831]">৳{item.price}</td>
                       <td className="p-2">{item.stock} টি</td>
                       <td className="p-2 text-right">
                         <button

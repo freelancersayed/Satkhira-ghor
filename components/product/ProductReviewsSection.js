@@ -54,7 +54,7 @@ export default function ProductReviewsSection({ product }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E8E2D5]">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#0F3D2E]">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#016831]">
               গ্রাহকদের লাইভ মতামত ও রিভিউ
             </h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FEF3C7] text-amber-900">
@@ -78,7 +78,7 @@ export default function ProductReviewsSection({ product }) {
         ) : (
           <Link
             href={`/login?redirect=/products/${product.slug}`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#FEF3C7] hover:bg-amber-200 text-[#0F3D2E] rounded-2xl text-xs font-bold transition-all border border-amber-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#FEF3C7] hover:bg-amber-200 text-[#016831] rounded-2xl text-xs font-bold transition-all border border-amber-300"
           >
             <Sparkles className="w-4 h-4 text-[#F59E0B]" />
             <span>রিভিউ দিতে লগইন করুন</span>
@@ -90,7 +90,7 @@ export default function ProductReviewsSection({ product }) {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 rounded-3xl bg-[#FDFBF7] border border-[#E8E2D5]">
         {/* Big Average Score */}
         <div className="md:col-span-4 flex flex-col items-center justify-center text-center p-4 border-b md:border-b-0 md:border-r border-[#E8E2D5]">
-          <span className="text-5xl font-black text-[#0F3D2E]">
+          <span className="text-5xl font-black text-[#016831]">
             {stats.averageRating ? Number(stats.averageRating).toFixed(1) : '৫.০'}
           </span>
           <div className="flex items-center gap-1 text-[#F59E0B] my-2">
@@ -119,7 +119,7 @@ export default function ProductReviewsSection({ product }) {
             const percent = stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0;
             return (
               <div key={stars} className="flex items-center gap-3 text-xs">
-                <span className="w-12 font-bold text-[#0F3D2E] flex items-center gap-1">
+                <span className="w-12 font-bold text-[#016831] flex items-center gap-1">
                   {stars} <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
                 </span>
                 <div className="flex-1 h-3 rounded-full bg-gray-200 overflow-hidden">
@@ -141,15 +141,15 @@ export default function ProductReviewsSection({ product }) {
       <div className="space-y-4">
         {loading ? (
           <div className="py-12 text-center">
-            <div className="w-8 h-8 border-3 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-2" />
+            <div className="w-8 h-8 border-3 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-slate-400">রিভিউ লোড হচ্ছে...</p>
           </div>
         ) : reviews.length === 0 ? (
           <div className="text-center py-12 px-4 rounded-3xl bg-[#FDFBF7] border border-dashed border-emerald-200 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#FEF3C7] text-[#0F3D2E] flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-2xl bg-[#FEF3C7] text-[#016831] flex items-center justify-center mx-auto">
               <MessageSquare className="w-6 h-6" />
             </div>
-            <h4 className="text-sm font-bold text-[#0F3D2E]">
+            <h4 className="text-sm font-bold text-[#016831]">
               এখনো কোনো গ্রাহক রিভিউ দেননি
             </h4>
             <p className="text-xs text-slate-600 max-w-sm mx-auto">
@@ -173,12 +173,12 @@ export default function ProductReviewsSection({ product }) {
                 {/* User & Rating Meta */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-[#0F3D2E] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                    <div className="w-10 h-10 rounded-2xl bg-[#016831] text-white flex items-center justify-center font-bold text-sm shadow-sm">
                       {rev.userName ? rev.userName.charAt(0).toUpperCase() : 'U'}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-[#0F3D2E]">
+                        <span className="text-xs font-bold text-[#016831]">
                           {rev.userName}
                         </span>
                         {rev.isVerifiedPurchase && (

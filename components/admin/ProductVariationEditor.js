@@ -58,9 +58,9 @@ export default function ProductVariationEditor({ hasVariations, variations = [],
             type="checkbox"
             checked={!!hasVariations}
             onChange={(e) => handleToggle(e.target.checked)}
-            className="w-4 h-4 accent-[#0F3D2E] rounded"
+            className="w-4 h-4 accent-[#016831] rounded"
           />
-          <span className="font-bold text-xs text-[#0F3D2E] flex items-center gap-1.5">
+          <span className="font-bold text-xs text-[#016831] flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-amber-600" />
             <span>বহুমাত্রিক ভ্যারিয়েশন ম্যাট্রিক্স (Size / Weight / Color / SKU) সক্রিয় করুন</span>
           </span>

@@ -18,9 +18,9 @@ export default function SpecialBanner() {
   ];
 
   return (
-    <section className="py-12 bg-[#0F3D2E] text-white relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-[#0F3D2E] via-[#0D3528] to-[#0A2B20] rounded-3xl p-8 sm:p-12 border border-emerald-500/20 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden shadow-2xl">
+    <section className="py-8 sm:py-12 bg-[#016831] text-white relative">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-r from-[#016831] via-[#015629] to-[#014D24] rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 border border-emerald-500/20 flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 relative overflow-hidden shadow-2xl">
           <div className="absolute right-0 top-0 w-80 h-80 bg-[#F59E0B]/10 rounded-full blur-2xl pointer-events-none" />
 
           {/* Admin Edit Trigger */}
@@ -46,10 +46,10 @@ export default function SpecialBanner() {
             </p>
           </div>
 
-          <div className="z-10 flex-shrink-0">
+          <div className="z-10 flex-shrink-0 w-full sm:w-auto">
             <Link
               href={banner.buttonLink || '/products/sundarbans-pure-khalsi-honey'}
-              className="px-7 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs sm:text-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] shadow-lg flex items-center gap-2 group"
+              className="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs sm:text-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 group"
             >
               <span>{banner.buttonText || 'খলসী মধু অর্ডার করুন'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

@@ -60,7 +60,7 @@ export default function SalesReportView() {
       {/* Top Filter and Export Bar */}
       <div className="bg-white p-4 sm:p-5 rounded-3xl border border-[#E8E2D5] shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 className="font-bold text-sm sm:text-base text-[#0F3D2E] flex items-center gap-2">
+          <h3 className="font-bold text-sm sm:text-base text-[#016831] flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-amber-500" />
             <span>আর্থিক ও বিক্রয় রিপোর্ট (Financial & Sales Report)</span>
           </h3>
@@ -75,7 +75,7 @@ export default function SalesReportView() {
             <button
               onClick={() => setRange('daily')}
               className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
-                range === 'daily' ? 'bg-[#0F3D2E] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                range === 'daily' ? 'bg-[#016831] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               আজ (Daily)
@@ -83,7 +83,7 @@ export default function SalesReportView() {
             <button
               onClick={() => setRange('weekly')}
               className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
-                range === 'weekly' ? 'bg-[#0F3D2E] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                range === 'weekly' ? 'bg-[#016831] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               ৭ দিন (Weekly)
@@ -91,7 +91,7 @@ export default function SalesReportView() {
             <button
               onClick={() => setRange('monthly')}
               className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
-                range === 'monthly' ? 'bg-[#0F3D2E] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                range === 'monthly' ? 'bg-[#016831] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               ৩০ দিন (Monthly)
@@ -99,7 +99,7 @@ export default function SalesReportView() {
             <button
               onClick={() => setRange('custom')}
               className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
-                range === 'custom' ? 'bg-[#0F3D2E] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                range === 'custom' ? 'bg-[#016831] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               কাস্টম
@@ -139,7 +139,7 @@ export default function SalesReportView() {
           </div>
           <button
             onClick={fetchReport}
-            className="px-3 py-1.5 bg-[#0F3D2E] text-white rounded-lg font-bold hover:bg-[#15533f]"
+            className="px-3 py-1.5 bg-[#016831] text-white rounded-lg font-bold hover:bg-[#15533f]"
           >
             ফিল্টার প্রয়োগ করুন
           </button>
@@ -155,7 +155,7 @@ export default function SalesReportView() {
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-black text-[#0F3D2E]">
+          <div className="text-2xl font-black text-[#016831]">
             ৳{summary?.totalRevenue ? summary.totalRevenue.toLocaleString('bn-BD') : 0}
           </div>
           <div className="text-[11px] text-slate-400">
@@ -212,7 +212,7 @@ export default function SalesReportView() {
       {/* Orders Breakdown Table */}
       <div className="bg-white rounded-3xl border border-[#E8E2D5] shadow-sm overflow-hidden">
         <div className="p-4 border-b border-[#E8E2D5] flex justify-between items-center">
-          <h4 className="font-bold text-xs text-[#0F3D2E]">
+          <h4 className="font-bold text-xs text-[#016831]">
             রিপোর্টের অন্তর্ভুক্ত অর্ডারসমূহ ({orders.length} টি)
           </h4>
           <span className="text-[11px] text-slate-400">
@@ -250,7 +250,7 @@ export default function SalesReportView() {
               ) : (
                 orders.map((ord) => (
                   <tr key={ord._id} className="hover:bg-emerald-50/20">
-                    <td className="py-3 px-4 font-mono font-bold text-[#0F3D2E]">
+                    <td className="py-3 px-4 font-mono font-bold text-[#016831]">
                       #{ord.orderNumber}
                     </td>
                     <td className="py-3 px-4 text-slate-500">
@@ -269,7 +269,7 @@ export default function SalesReportView() {
                     </td>
                     <td className="py-3 px-4">৳{ord.subtotal}</td>
                     <td className="py-3 px-4">৳{ord.deliveryFee || 0}</td>
-                    <td className="py-3 px-4 font-bold text-[#0F3D2E]">
+                    <td className="py-3 px-4 font-bold text-[#016831]">
                       ৳{ord.totalAmount}
                     </td>
                     <td className="py-3 px-4">

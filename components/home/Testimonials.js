@@ -29,13 +29,13 @@ export default function Testimonials() {
   ];
 
   return (
-    <section className="py-16 sm:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-14">
+    <section className="py-10 sm:py-20 bg-white">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-14">
           <span className="text-xs font-bold text-[#B45309] uppercase tracking-widest">
             গ্রাহক পর্যালোচনা
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F3D2E] mt-1">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#016831] mt-1">
             গ্রাহকদের ভালোবাসায় ‘সাতক্ষীরা ঘর’
           </h2>
           <p className="text-xs sm:text-sm text-[#4B5563] mt-2">
@@ -43,11 +43,11 @@ export default function Testimonials() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
           {reviews.map((rev, idx) => (
             <div
               key={idx}
-              className="bg-white p-7 rounded-3xl border border-[#E8E2D5] shadow-sm hover:shadow-lg transition-all duration-300 relative flex flex-col justify-between"
+              className="bg-white p-5 sm:p-7 rounded-2xl sm:rounded-3xl border border-[#E8E2D5] shadow-sm hover:shadow-lg transition-all duration-300 relative flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -65,10 +65,10 @@ export default function Testimonials() {
 
               <div className="mt-6 pt-4 border-t border-[#E8E2D5]/70 flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-xs text-[#0F3D2E]">{rev.name}</h4>
+                  <h4 className="font-bold text-xs text-[#016831]">{rev.name}</h4>
                   <p className="text-[11px] text-[#4B5563]">{rev.location}</p>
                 </div>
-                <span className="text-[10px] bg-[#F0FDF4] text-[#0F3D2E] font-semibold px-2 py-0.5 rounded-full">
+                <span className="text-[10px] bg-[#F0FDF4] text-[#016831] font-semibold px-2 py-0.5 rounded-full">
                   {rev.product}
                 </span>
               </div>

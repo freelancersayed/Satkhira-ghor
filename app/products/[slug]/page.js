@@ -74,10 +74,14 @@ export default async function ProductDetailPage({ params }) {
     notFound();
   }
 
-  // Related products from other items
-  const relatedProducts = products
-    .filter((p) => p.id !== product.id)
-    .slice(0, 3);
+  // Related products (prefer same category, fallback to others)
+  const relatedSameCat = products.filter(
+    (p) => p.category === product.category && p.slug !== product.slug
+  );
+  const relatedOther = products.filter(
+    (p) => p.category !== product.category && p.slug !== product.slug
+  );
+  const relatedProducts = [...relatedSameCat, ...relatedOther].slice(0, 4);
 
   const discountPercentage = product.originalPrice
     ? Math.round(
@@ -87,20 +91,20 @@ export default async function ProductDetailPage({ params }) {
 
   return (
     <div className="py-10 sm:py-16 bg-[#FDFBF7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-12">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-[#4B5563]">
-          <Link href="/" className="hover:text-[#0F3D2E] transition-colors">
+          <Link href="/" className="hover:text-[#016831] transition-colors">
             হোম
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-[#E8E2D5]" />
-          <Link href="/shop" className="hover:text-[#0F3D2E] transition-colors">
+          <Link href="/shop" className="hover:text-[#016831] transition-colors">
             সব পণ্য
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-[#E8E2D5]" />
           <span className="text-[#B45309] font-semibold">{product.categoryName}</span>
           <ChevronRight className="w-3.5 h-3.5 text-[#E8E2D5]" />
-          <span className="text-[#0F3D2E] font-bold line-clamp-1">
+          <span className="text-[#016831] font-bold line-clamp-1">
             {product.name}
           </span>
         </nav>
@@ -128,7 +132,7 @@ export default async function ProductDetailPage({ params }) {
 
               {/* Title & English Subtitle */}
               <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-[#0F3D2E] leading-snug">
+                <h1 className="text-2xl sm:text-3xl font-black text-[#016831] leading-snug">
                   {product.name}
                 </h1>
                 <p className="text-xs text-[#4B5563] mt-1 font-medium">
@@ -143,7 +147,7 @@ export default async function ProductDetailPage({ params }) {
                     <Star key={i} className="w-4 h-4 fill-current" />
                   ))}
                 </div>
-                <span className="text-xs font-bold text-[#0F3D2E]">
+                <span className="text-xs font-bold text-[#016831]">
                   {product.rating} / ৫.০
                 </span>
                 <span className="text-xs text-[#4B5563]">
@@ -152,12 +156,12 @@ export default async function ProductDetailPage({ params }) {
               </div>
 
               {/* Price Row */}
-              <div className="flex items-baseline gap-4 pt-1">
-                <span className="text-3xl font-black text-[#0F3D2E]">
+              <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-4 pt-1">
+                <span className="text-2xl sm:text-3xl font-black text-[#016831]">
                   ৳{product.price}
                 </span>
                 {product.originalPrice && (
-                  <span className="text-base text-[#4B5563]/70 line-through">
+                  <span className="text-sm sm:text-base text-[#4B5563]/70 line-through">
                     ৳{product.originalPrice}
                   </span>
                 )}
@@ -179,16 +183,16 @@ export default async function ProductDetailPage({ params }) {
               {/* Origin & Harvest Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
                 <div className="flex items-center gap-2 p-3 bg-[#FDFBF7] rounded-2xl border border-[#E8E2D5]">
-                  <MapPin className="w-4 h-4 text-[#0F3D2E] flex-shrink-0" />
+                  <MapPin className="w-4 h-4 text-[#016831] flex-shrink-0" />
                   <div>
-                    <span className="block font-bold text-[#0F3D2E]">উৎস স্থল:</span>
+                    <span className="block font-bold text-[#016831]">উৎস স্থল:</span>
                     <span className="text-[#4B5563]">{product.origin}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-3 bg-[#FDFBF7] rounded-2xl border border-[#E8E2D5]">
                   <Calendar className="w-4 h-4 text-[#F59E0B] flex-shrink-0" />
                   <div>
-                    <span className="block font-bold text-[#0F3D2E]">সংগ্রহ কাল:</span>
+                    <span className="block font-bold text-[#016831]">সংগ্রহ কাল:</span>
                     <span className="text-[#4B5563]">{product.harvestDate}</span>
                   </div>
                 </div>
@@ -203,7 +207,7 @@ export default async function ProductDetailPage({ params }) {
             {/* Delivery Guarantees */}
             <div className="grid grid-cols-3 gap-2 pt-4 border-t border-[#E8E2D5] text-[11px] text-[#4B5563] text-center">
               <div className="flex flex-col items-center gap-1">
-                <Truck className="w-4 h-4 text-[#0F3D2E]" />
+                <Truck className="w-4 h-4 text-[#016831]" />
                 <span>সারাদেশে ক্যাশ অন ডেলিভারি</span>
               </div>
               <div className="flex flex-col items-center gap-1">
@@ -223,7 +227,7 @@ export default async function ProductDetailPage({ params }) {
           {/* Detailed Description & Benefits */}
           <div className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-[#E8E2D5] shadow-sm space-y-6">
             <div>
-              <h2 className="text-lg font-bold text-[#0F3D2E] border-b border-[#E8E2D5] pb-3 mb-4">
+              <h2 className="text-lg font-bold text-[#016831] border-b border-[#E8E2D5] pb-3 mb-4">
                 পণ্যের বিস্তারিত বিবরণ
               </h2>
               <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed">
@@ -234,7 +238,7 @@ export default async function ProductDetailPage({ params }) {
             {/* Health Benefits */}
             {product.benefits && (
               <div>
-                <h3 className="text-sm font-bold text-[#0F3D2E] mb-3">
+                <h3 className="text-sm font-bold text-[#016831] mb-3">
                   মূল স্বাস্থ্য উপকারিতা ও বিশেষত্ব:
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -243,8 +247,8 @@ export default async function ProductDetailPage({ params }) {
                       key={index}
                       className="flex items-start gap-2.5 p-3 rounded-2xl bg-[#F0FDF4] border border-[#DCFCE7]"
                     >
-                      <CheckCircle2 className="w-4 h-4 text-[#0F3D2E] flex-shrink-0 mt-0.5" />
-                      <span className="text-xs text-[#0A2B20] font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-[#016831] flex-shrink-0 mt-0.5" />
+                      <span className="text-xs text-[#014D24] font-medium">
                         {benefit}
                       </span>
                     </div>
@@ -256,7 +260,7 @@ export default async function ProductDetailPage({ params }) {
 
           {/* Nutritional Facts Sidebar */}
           <div className="lg:col-span-4 bg-white p-6 sm:p-8 rounded-3xl border border-[#E8E2D5] shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-[#0F3D2E] border-b border-[#E8E2D5] pb-3">
+            <h2 className="text-base font-bold text-[#016831] border-b border-[#E8E2D5] pb-3">
               পুষ্টি উপাদান (Nutrition Facts)
             </h2>
             {product.nutritionalInfo ? (
@@ -264,7 +268,7 @@ export default async function ProductDetailPage({ params }) {
                 {Object.entries(product.nutritionalInfo).map(([key, value]) => (
                   <div key={key} className="py-2.5 flex justify-between">
                     <span className="text-[#4B5563]">{key}</span>
-                    <span className="font-bold text-[#0F3D2E]">{value}</span>
+                    <span className="font-bold text-[#016831]">{value}</span>
                   </div>
                 ))}
               </div>
@@ -286,19 +290,19 @@ export default async function ProductDetailPage({ params }) {
         {/* Related Products */}
         <div className="space-y-6 pt-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#0F3D2E]">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#016831]">
               আপনার আরও পছন্দ হতে পারে
             </h2>
             <Link
               href="/shop"
-              className="text-xs font-bold text-[#B45309] hover:text-[#0F3D2E] transition-colors"
+              className="text-xs font-bold text-[#B45309] hover:text-[#016831] transition-colors"
             >
               সব পণ্য দেখুন →
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             {relatedProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id || p.slug} product={p} />
             ))}
           </div>
         </div>

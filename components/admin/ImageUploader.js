@@ -74,7 +74,7 @@ export default function ImageUploader({ onInsert, label = 'ছবি আপল�
         className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all
           ${dragOver
             ? 'border-[#F59E0B] bg-[#FEF3C7]/50 scale-[1.02]'
-            : 'border-emerald-200 bg-[#FDFBF7] hover:border-[#0F3D2E] hover:bg-emerald-50/50'
+            : 'border-emerald-200 bg-[#FDFBF7] hover:border-[#016831] hover:bg-emerald-50/50'
           }`}
       >
         <input
@@ -88,16 +88,16 @@ export default function ImageUploader({ onInsert, label = 'ছবি আপল�
 
         {uploading ? (
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-10 h-10 text-[#0F3D2E] animate-spin" />
-            <p className="text-sm font-semibold text-[#0F3D2E]">আপলোড হচ্ছে…</p>
+            <Loader2 className="w-10 h-10 text-[#016831] animate-spin" />
+            <p className="text-sm font-semibold text-[#016831]">আপলোড হচ্ছে…</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-[#0F3D2E]/10 flex items-center justify-center">
-              <Upload className="w-7 h-7 text-[#0F3D2E]" />
+            <div className="w-14 h-14 rounded-2xl bg-[#016831]/10 flex items-center justify-center">
+              <Upload className="w-7 h-7 text-[#016831]" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#0F3D2E]">{label}</p>
+              <p className="text-sm font-bold text-[#016831]">{label}</p>
               <p className="text-xs text-slate-400 mt-1">
                 ক্লিক করুন অথবা ছবি টেনে এখানে ছাড়ুন
               </p>
@@ -120,7 +120,7 @@ export default function ImageUploader({ onInsert, label = 'ছবি আপল�
       {/* Uploaded Images */}
       {uploaded.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-bold text-[#0F3D2E]">আপলোড করা ছবি</p>
+          <p className="text-xs font-bold text-[#016831]">আপলোড করা ছবি</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {uploaded.map((img, i) => (
               <div key={i} className="group relative rounded-xl overflow-hidden border border-[#E8E2D5] bg-gray-50">

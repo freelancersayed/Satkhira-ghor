@@ -6,41 +6,62 @@ export const useCartStore = create(
     (set, get) => ({
       items: [],
       isOpen: false,
+      lastAddedItem: null,
+      showToast: false,
 
       // Drawer visibility
-      openCart: () => set({ isOpen: true }),
+      openCart: () => set({ isOpen: true, showToast: false }),
       closeCart: () => set({ isOpen: false }),
-      toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
+      toggleCart: () => set((state) => ({ isOpen: !state.isOpen, showToast: false })),
+
+      // Toast visibility
+      hideToast: () => set({ showToast: false }),
 
       // Add item to cart
-      addItem: (product, quantity = 1) => {
+      // autoOpen defaults to false so the user can continue shopping without unwanted popups
+      addItem: (product, quantity = 1, autoOpen = false) => {
         set((state) => {
           const existingItemIndex = state.items.findIndex(
             (item) => item.id === product.id
           );
 
+          let updatedItems;
           if (existingItemIndex > -1) {
-            const updatedItems = [...state.items];
+            updatedItems = [...state.items];
             updatedItems[existingItemIndex] = {
               ...updatedItems[existingItemIndex],
               quantity: updatedItems[existingItemIndex].quantity + quantity,
             };
-            return { items: updatedItems, isOpen: true };
+          } else {
+            const newItem = {
+              id: product.id,
+              name: product.name,
+              nameEn: product.nameEn,
+              slug: product.slug,
+              price: product.price,
+              originalPrice: product.originalPrice,
+              image: product.image,
+              unit: product.unit,
+              quantity: quantity,
+            };
+            updatedItems = [...state.items, newItem];
           }
 
-          const newItem = {
-            id: product.id,
-            name: product.name,
-            nameEn: product.nameEn,
-            slug: product.slug,
-            price: product.price,
-            originalPrice: product.originalPrice,
-            image: product.image,
-            unit: product.unit,
-            quantity: quantity,
+          return {
+            items: updatedItems,
+            isOpen: autoOpen ? true : state.isOpen,
+            lastAddedItem: {
+              id: product.id,
+              name: product.name,
+              nameEn: product.nameEn,
+              price: product.price,
+              image: product.image,
+              unit: product.unit,
+              quantity,
+              timestamp: Date.now(),
+            },
+            showToast: true,
           };
-
-          return { items: [...state.items, newItem], isOpen: true };
         });
       },
 

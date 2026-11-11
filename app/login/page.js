@@ -97,11 +97,11 @@ function LoginForm() {
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <div className="w-12 h-12 rounded-2xl bg-[#0F3D2E] flex items-center justify-center text-[#F59E0B] shadow-md group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-[#016831] flex items-center justify-center text-[#F59E0B] shadow-md group-hover:scale-105 transition-transform">
               <span className="font-serif text-2xl font-bold">স</span>
             </div>
           </Link>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F3D2E]">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#016831]">
             {isRegister ? 'নতুন অ্যাকাউন্ট খুলুন' : 'লগইন করুন'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600">
@@ -119,7 +119,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => handleFillCredentials('01700000000', 'admin123')}
-              className="px-2 py-1.5 bg-[#0F3D2E] hover:bg-emerald-950 text-white rounded-xl text-[11px] font-bold shadow-2xs transition-all text-center"
+              className="px-2 py-1.5 bg-[#016831] hover:bg-emerald-950 text-white rounded-xl text-[11px] font-bold shadow-2xs transition-all text-center"
             >
               👑 অ্যাডমিন
             </button>
@@ -152,8 +152,8 @@ function LoginForm() {
               }}
               className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
                 !isRegister
-                  ? 'bg-white text-[#0F3D2E] shadow-sm'
-                  : 'text-slate-600 hover:text-[#0F3D2E]'
+                  ? 'bg-white text-[#016831] shadow-sm'
+                  : 'text-slate-600 hover:text-[#016831]'
               }`}
             >
               লগইন
@@ -166,8 +166,8 @@ function LoginForm() {
               }}
               className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
                 isRegister
-                  ? 'bg-white text-[#0F3D2E] shadow-sm'
-                  : 'text-slate-600 hover:text-[#0F3D2E]'
+                  ? 'bg-white text-[#016831] shadow-sm'
+                  : 'text-slate-600 hover:text-[#016831]'
               }`}
             >
               নতুন রেজিস্ট্রেশন
@@ -191,7 +191,7 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {isRegister && (
               <div>
-                <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
+                <label className="block text-xs font-bold text-[#016831] mb-1.5">
                   আপনার পূর্ণ নাম <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -204,14 +204,14 @@ function LoginForm() {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     placeholder="যেমন: মোঃ সাকিব হোসেন"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#016831] focus:ring-1 focus:ring-[#016831] outline-none text-xs text-slate-900"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
+              <label className="block text-xs font-bold text-[#016831] mb-1.5">
                 মোবাইল নম্বর <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -224,14 +224,14 @@ function LoginForm() {
                     setFormData({ ...formData, phone: e.target.value })
                   }
                   placeholder="017XXXXXXXX"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#016831] focus:ring-1 focus:ring-[#016831] outline-none text-xs text-slate-900"
                 />
               </div>
             </div>
 
             {isRegister && (
               <div>
-                <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
+                <label className="block text-xs font-bold text-[#016831] mb-1.5">
                   ইমেইল (ঐচ্ছিক)
                 </label>
                 <div className="relative">
@@ -243,14 +243,14 @@ function LoginForm() {
                       setFormData({ ...formData, email: e.target.value })
                     }
                     placeholder="example@gmail.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#016831] focus:ring-1 focus:ring-[#016831] outline-none text-xs text-slate-900"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
+              <label className="block text-xs font-bold text-[#016831] mb-1.5">
                 পাসওয়ার্ড <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -264,14 +264,14 @@ function LoginForm() {
                     setFormData({ ...formData, password: e.target.value })
                   }
                   placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#016831] focus:ring-1 focus:ring-[#016831] outline-none text-xs text-slate-900"
                 />
               </div>
             </div>
 
             {isRegister && (
               <div>
-                <label className="block text-xs font-bold text-[#0F3D2E] mb-1.5">
+                <label className="block text-xs font-bold text-[#016831] mb-1.5">
                   ডেলিভারি ঠিকানা (ঐচ্ছিক)
                 </label>
                 <textarea
@@ -281,7 +281,7 @@ function LoginForm() {
                     setFormData({ ...formData, address: e.target.value })
                   }
                   placeholder="বাড়ি, রোড নং, এলাকা, জেলা"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] outline-none text-xs text-slate-900"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#E8E2D5] focus:border-[#016831] focus:ring-1 focus:ring-[#016831] outline-none text-xs text-slate-900"
                 />
               </div>
             )}
@@ -320,7 +320,7 @@ function LoginForm() {
         <div className="text-center">
           <Link
             href="/track-order"
-            className="text-xs font-bold text-[#0F3D2E] hover:text-[#D97706] hover:underline inline-flex items-center gap-1"
+            className="text-xs font-bold text-[#016831] hover:text-[#D97706] hover:underline inline-flex items-center gap-1"
           >
             <span>পূর্ববর্তী অর্ডার ট্র্যাক করতে চান? এখানে যান</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -336,7 +336,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
-          <div className="w-10 h-10 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin" />
         </div>
       }
     >

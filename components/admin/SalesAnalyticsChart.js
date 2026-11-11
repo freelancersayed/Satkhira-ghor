@@ -113,7 +113,7 @@ export default function SalesAnalyticsChart({ salesTrend = [], bestSellingProduc
               <path
                 d={linePath}
                 fill="none"
-                stroke="#0F3D2E"
+                stroke="#016831"
                 strokeWidth="3.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -132,7 +132,7 @@ export default function SalesAnalyticsChart({ salesTrend = [], bestSellingProduc
                   cx={p.x}
                   cy={p.y}
                   r="5.5"
-                  className="fill-[#F59E0B] stroke-[#0F3D2E] stroke-2 hover:r-7 transition-all"
+                  className="fill-[#F59E0B] stroke-[#016831] stroke-2 hover:r-7 transition-all"
                 />
                 <text
                   x={p.x}
@@ -148,7 +148,7 @@ export default function SalesAnalyticsChart({ salesTrend = [], bestSellingProduc
 
           {/* Hover Tooltip Overlay */}
           {hoveredPoint && (
-            <div className="absolute top-3 right-3 bg-[#0F3D2E] text-white p-2.5 rounded-xl shadow-xl text-xs space-y-0.5 border border-amber-400/30 animate-in fade-in">
+            <div className="absolute top-3 right-3 bg-[#016831] text-white p-2.5 rounded-xl shadow-xl text-xs space-y-0.5 border border-amber-400/30 animate-in fade-in">
               <div className="font-bold text-amber-400">{hoveredPoint.date} ({hoveredPoint.day})</div>
               <div>বিক্রয়: <strong>৳{hoveredPoint.revenue.toLocaleString('bn-BD')}</strong></div>
               <div className="text-emerald-300">অর্ডার সংখ্যা: <strong>{hoveredPoint.orders} টি</strong></div>
@@ -162,7 +162,7 @@ export default function SalesAnalyticsChart({ salesTrend = [], bestSellingProduc
         {/* Widget A: Best-Selling Products */}
         <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#E8E2D5] shadow-sm space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="font-bold text-sm text-[#0F3D2E] flex items-center gap-2">
+            <h4 className="font-bold text-sm text-[#016831] flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-500 fill-current" />
               <span>টপ-সেলিং পণ্য (Best-Selling Items)</span>
             </h4>
@@ -193,7 +193,7 @@ export default function SalesAnalyticsChart({ salesTrend = [], bestSellingProduc
                   </div>
 
                   <div className="text-right">
-                    <div className="font-black text-[#0F3D2E]">
+                    <div className="font-black text-[#016831]">
                       ৳{prod.totalRevenue?.toLocaleString('bn-BD')}
                     </div>
                     <div className="text-[11px] font-bold text-emerald-700">
@@ -209,7 +209,7 @@ export default function SalesAnalyticsChart({ salesTrend = [], bestSellingProduc
         {/* Widget B: Stagnant Inventory (Low Movement) */}
         <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#E8E2D5] shadow-sm space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="font-bold text-sm text-[#0F3D2E] flex items-center gap-2">
+            <h4 className="font-bold text-sm text-[#016831] flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
               <span>ধীরগতির বা স্তূপীকৃত স্টক (Stagnant Stock)</span>
             </h4>

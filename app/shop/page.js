@@ -9,23 +9,41 @@ import ProductGrid from '@/components/product/ProductGrid';
 function ShopContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('cat') || 'all';
+  const initialSearch = searchParams.get('search') || '';
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [sortBy, setSortBy] = useState('featured');
-  const [productList, setProductList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [productList, setProductList] = useState(products);
+  const [categoriesList, setCategoriesList] = useState(categories);
+  const [loading, setLoading] = useState(false);
+
+  // Sync state if URL query params change
+  useEffect(() => {
+    const cat = searchParams.get('cat');
+    if (cat) setSelectedCategory(cat);
+    const s = searchParams.get('search');
+    if (s !== null) setSearchQuery(s);
+  }, [searchParams]);
 
   useEffect(() => {
     fetch('/api/products')
       .then((res) => res.json())
       .then((data) => {
-        if (data.products) {
+        if (data.products && data.products.length > 0) {
           setProductList(data.products);
         }
       })
-      .catch((e) => console.warn('Products fetch error:', e))
-      .finally(() => setLoading(false));
+      .catch((e) => console.warn('Products fetch error:', e));
+
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.categories && data.categories.length > 0) {
+          setCategoriesList(data.categories);
+        }
+      })
+      .catch((e) => console.warn('Categories fetch error:', e));
   }, []);
 
   // Filter & sort products
@@ -57,13 +75,13 @@ function ShopContent() {
 
   return (
     <div className="py-10 sm:py-16 bg-[#FDFBF7] min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-8">
         {/* Page Title & Breadcrumb Header */}
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-bold text-[#B45309] uppercase tracking-widest">
             প্রাকৃতিক পণ্য ভান্ডার
           </span>
-          <h1 className="text-3xl sm:text-4xl font-black text-[#0F3D2E]">
+          <h1 className="text-3xl sm:text-4xl font-black text-[#016831]">
             সাতক্ষীরা ঘরের সকল খাঁটি পণ্য
           </h1>
           <p className="text-xs sm:text-sm text-[#4B5563]">
@@ -82,7 +100,7 @@ function ShopContent() {
                 placeholder="পণ্যের নাম দিয়ে খুঁজুন (যেমন: মধু, ঘি, তেল)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#FDFBF7] border border-[#E8E2D5] text-xs sm:text-sm text-[#0F3D2E] focus:outline-none focus:border-[#0F3D2E] transition-colors"
+                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#FDFBF7] border border-[#E8E2D5] text-xs sm:text-sm text-[#016831] focus:outline-none focus:border-[#016831] transition-colors"
               />
             </div>
 
@@ -91,7 +109,7 @@ function ShopContent() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full py-3 px-4 rounded-2xl bg-[#FDFBF7] border border-[#E8E2D5] text-xs sm:text-sm text-[#0F3D2E] focus:outline-none focus:border-[#0F3D2E] font-medium transition-colors"
+                className="w-full py-3 px-4 rounded-2xl bg-[#FDFBF7] border border-[#E8E2D5] text-xs sm:text-sm text-[#016831] focus:outline-none focus:border-[#016831] font-medium transition-colors"
               >
                 <option value="featured">ফিচার্ড পণ্য (Featured)</option>
                 <option value="price-low">মূল্য: কম থেকে বেশি (Price: Low to High)</option>
@@ -114,20 +132,20 @@ function ShopContent() {
 
           {/* Category Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-2 scrollbar-none">
-            <span className="text-xs font-bold text-[#0F3D2E] whitespace-nowrap flex items-center gap-1 mr-2">
+            <span className="text-xs font-bold text-[#016831] whitespace-nowrap flex items-center gap-1 mr-2">
               <SlidersHorizontal className="w-3.5 h-3.5 text-[#D97706]" />
               ক্যাটাগরি:
             </span>
-            {categories.map((cat) => {
-              const isSelected = selectedCategory === cat.id;
+            {categoriesList.map((cat) => {
+              const isSelected = selectedCategory === cat.slug || selectedCategory === cat.id;
               return (
                 <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
+                  key={cat.id || cat.slug}
+                  onClick={() => setSelectedCategory(cat.slug || cat.id)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
                     isSelected
-                      ? 'bg-[#0F3D2E] text-white shadow-md scale-105'
-                      : 'bg-[#FDFBF7] text-[#4B5563] hover:bg-[#FEF3C7] hover:text-[#0F3D2E] border border-[#E8E2D5]'
+                      ? 'bg-[#016831] text-white shadow-md scale-105'
+                      : 'bg-[#FDFBF7] text-[#4B5563] hover:bg-[#FEF3C7] hover:text-[#016831] border border-[#E8E2D5]'
                   }`}
                 >
                   {cat.icon && <span className="mr-1">{cat.icon}</span>}
@@ -141,11 +159,11 @@ function ShopContent() {
         {/* Results Count Header */}
         <div className="flex items-center justify-between text-xs text-[#4B5563] px-1">
           <span>
-            সর্বমোট <strong className="text-[#0F3D2E] font-bold">{filteredProducts.length}</strong> টি পণ্য পাওয়া গেছে
+            সর্বমোট <strong className="text-[#016831] font-bold">{filteredProducts.length}</strong> টি পণ্য পাওয়া গেছে
           </span>
           {selectedCategory !== 'all' && (
             <span className="text-[#B45309] font-semibold">
-              ফিল্টার: {categories.find((c) => c.id === selectedCategory)?.name}
+              ফিল্টার: {categoriesList.find((c) => c.slug === selectedCategory || c.id === selectedCategory)?.name}
             </span>
           )}
         </div>
@@ -153,7 +171,7 @@ function ShopContent() {
         {/* Product Grid / Loading */}
         {loading ? (
           <div className="py-20 text-center">
-            <div className="w-10 h-10 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-3" />
+            <div className="w-10 h-10 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-3" />
             <p className="text-xs text-[#6B7280]">পণ্য লোড হচ্ছে...</p>
           </div>
         ) : (
@@ -169,8 +187,8 @@ export default function ShopPage() {
     <Suspense
       fallback={
         <div className="py-24 text-center">
-          <div className="w-12 h-12 border-4 border-[#0F3D2E] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm font-bold text-[#0F3D2E]">পণ্য লোড হচ্ছে...</p>
+          <div className="w-12 h-12 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm font-bold text-[#016831]">পণ্য লোড হচ্ছে...</p>
         </div>
       }
     >

@@ -9,50 +9,50 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Specific Brand Theme Colors
-        brandGreen: '#0F3D2E',   // রিচ ফরেস্ট / এমারেল্ড সবুজ (Deep Forest Green)
-        brandHoney: '#D97706',   // মধুর সোনালী / অ্যাম্বার রঙ (Honey Gold / Amber CTA)
-        brandMustard: '#C25E2E', // সরিষা বা কাঁকড়ার টেক্সচার রঙ
-        brandOrganic: '#FDFBF7', // অফ-হোয়াইট ব্যাকগ্রাউন্ড (Warm Creamy Off-white)
+        // Specific Brand Theme Colors (Matching Satkhira Ghor Logo: Leaf Green & Honeycomb Gold)
+        brandGreen: '#016831',   // রিচ অর্গানিক গ্রিন (Satkhira Leaf Green from logo)
+        brandHoney: '#FAB116',   // মধুর সোনালী / অ্যাম্বার রঙ (Honey Gold from logo)
+        brandMustard: '#E08E00', // মধুর ঘন রঙ
+        brandOrganic: '#FAF9F5', // অফ-হোয়াইট ব্যাকগ্রাউন্ড (Warm Clean Backdrop)
 
         // Brand Design Tokens
         brand: {
-          primary: '#0F3D2E',
-          primaryDark: '#0A2B20',
-          primaryLight: '#164E3B',
-          accent: '#D97706',
-          accentHover: '#B45309',
-          accentLight: '#F59E0B',
-          bg: '#FDFBF7',
+          primary: '#016831',
+          primaryDark: '#014D24',
+          primaryLight: '#02833E',
+          accent: '#FAB116',
+          accentHover: '#E08E00',
+          accentLight: '#FEF3C7',
+          bg: '#FAF9F5',
           card: '#FFFFFF',
           text: '#111827',
         },
 
         // Extended Palette Scales
         forest: {
-          DEFAULT: '#0F3D2E',
+          DEFAULT: '#016831',
           50: '#F0FDF4',
           100: '#DCFCE7',
           200: '#BBF7D0',
           300: '#86EFAC',
           400: '#4ADE80',
-          500: '#22C55E',
-          600: '#16A34A',
-          700: '#15803D',
-          800: '#164E3B',
-          900: '#0F3D2E',
-          950: '#0A2B20',
+          500: '#02833E',
+          600: '#016831',
+          700: '#015629',
+          800: '#014D24',
+          900: '#013C1C',
+          950: '#002913',
         },
         honey: {
-          DEFAULT: '#D97706',
+          DEFAULT: '#FAB116',
           50: '#FFFBEB',
           100: '#FEF3C7',
           200: '#FDE68A',
           300: '#FCD34D',
           400: '#FBBF24',
-          500: '#F59E0B',
-          600: '#D97706',
-          700: '#B45309',
+          500: '#FAB116',
+          600: '#E08E00',
+          700: '#B86D00',
           800: '#92400E',
           900: '#78350F',
         },

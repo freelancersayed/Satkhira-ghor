@@ -1,7 +1,28 @@
 import './globals.css';
+import '@fortawesome/fontawesome-svg-core/styles.css';
+import { config } from '@fortawesome/fontawesome-svg-core';
+config.autoAddCss = false;
+
+import { Hind_Siliguri } from 'next/font/google';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import CartDrawer from '@/components/common/CartDrawer';
+import MobileBottomNav from '@/components/common/MobileBottomNav';
+import AddToCartToast from '@/components/common/AddToCartToast';
+
+const hindSiliguri = Hind_Siliguri({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['bengali'],
+  display: 'swap',
+  variable: '--font-hind-siliguri',
+});
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#016831',
+};
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app'),
@@ -16,6 +37,7 @@ export const metadata = {
     'Satkhira Ghor',
     'Sundarbans Honey',
     'Organic Bangladesh',
+    'সাতক্ষীরা ঘর',
   ],
   authors: [{ name: 'Satkhira Ghor' }],
   openGraph: {
@@ -30,12 +52,23 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="bn" className="scroll-smooth">
-      <body className="min-h-screen flex flex-col bg-[#FCFBF7] text-[#14241E] antialiased">
+    <html lang="bn" className={`scroll-smooth ${hindSiliguri.variable}`}>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+          integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
+      </head>
+      <body className="min-h-screen flex flex-col bg-[#FCFBF7] text-[#14241E] antialiased font-sans pb-20 md:pb-0 overflow-x-hidden w-full">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
         <CartDrawer />
+        <AddToCartToast />
+        <MobileBottomNav />
       </body>
     </html>
   );

@@ -4,12 +4,12 @@ import { ShieldCheck, Truck, Sparkles, MapPin, Phone, Mail, Award } from 'lucide
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0A2B20] text-[#FDFBF7] pt-16 pb-10 border-t border-[#0F3D2E]">
+    <footer className="bg-[#014D24] text-[#FDFBF7] pt-12 sm:pt-16 pb-24 md:pb-12 border-t border-[#016831]">
       {/* Organic Value Proposition Row */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 border-b border-[#0F3D2E]/80">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 border-b border-[#016831]/80">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="flex items-start gap-3.5">
-            <div className="p-3 bg-[#0F3D2E] text-[#F59E0B] rounded-2xl shadow-sm">
+            <div className="p-3 bg-[#016831] text-[#F59E0B] rounded-2xl shadow-sm">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
@@ -21,7 +21,7 @@ export default function Footer() {
           </div>
 
           <div className="flex items-start gap-3.5">
-            <div className="p-3 bg-[#0F3D2E] text-[#F59E0B] rounded-2xl shadow-sm">
+            <div className="p-3 bg-[#016831] text-[#F59E0B] rounded-2xl shadow-sm">
               <Sparkles className="w-6 h-6" />
             </div>
             <div>
@@ -33,7 +33,7 @@ export default function Footer() {
           </div>
 
           <div className="flex items-start gap-3.5">
-            <div className="p-3 bg-[#0F3D2E] text-[#F59E0B] rounded-2xl shadow-sm">
+            <div className="p-3 bg-[#016831] text-[#F59E0B] rounded-2xl shadow-sm">
               <Truck className="w-6 h-6" />
             </div>
             <div>
@@ -45,7 +45,7 @@ export default function Footer() {
           </div>
 
           <div className="flex items-start gap-3.5">
-            <div className="p-3 bg-[#0F3D2E] text-[#F59E0B] rounded-2xl shadow-sm">
+            <div className="p-3 bg-[#016831] text-[#F59E0B] rounded-2xl shadow-sm">
               <Award className="w-6 h-6" />
             </div>
             <div>
@@ -64,7 +64,7 @@ export default function Footer() {
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-[#0F3D2E] border border-emerald-500/30 flex items-center justify-center text-[#F59E0B] font-bold text-xl shadow-md overflow-hidden relative">
+              <div className="w-12 h-12 rounded-xl bg-white border border-emerald-500/30 flex items-center justify-center shadow-md overflow-hidden relative flex-shrink-0">
                 <Image
                   src="/assets/logo-1.png"
                   alt="সাতক্ষীরা ঘর লোগো"
@@ -72,8 +72,8 @@ export default function Footer() {
                   className="object-contain p-1"
                 />
               </div>
-              <span className="text-2xl font-bold tracking-tight text-white">
-                সাতক্ষীরা ঘর
+              <span className="text-2xl font-bold tracking-tight text-white flex items-center gap-1.5">
+                সাতক্ষীরা <span className="text-[#FAB116]">ঘর</span>
               </span>
             </div>
             <p className="text-xs text-[#FDFBF7]/80 leading-relaxed max-w-sm">
@@ -153,7 +153,7 @@ export default function Footer() {
       </div>
 
       {/* Copyright */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-[#0F3D2E] text-center text-xs text-[#FDFBF7]/60">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-[#016831] text-center text-xs text-[#FDFBF7]/60">
         <p>© {new Date().getFullYear()} সাতক্ষীরা ঘর (Satkhira Ghor). সর্বস্বত্ব সংরক্ষিত। Organic & Pure Agro Platform.</p>
       </div>
     </footer>

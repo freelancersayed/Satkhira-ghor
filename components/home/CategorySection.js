@@ -1,163 +1,144 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
-import { categories } from '@/data/products';
+import Image from 'next/image';
+import { Sparkles, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
+import { categories as fallbackCategories, products } from '@/data/products';
 import { useSiteContentStore } from '@/store/siteContentStore';
 import AdminSectionEditModal from '@/components/common/AdminSectionEditModal';
+import CategoryEditModal from '@/components/home/CategoryEditModal';
 
 export default function CategorySection() {
-  const displayCategories = categories.filter((c) => c.id !== 'all');
   const { content } = useSiteContentStore();
   const catContent = content?.categorySection || {};
 
-  // Duplicate items 4 times to ensure seamless infinite looping
-  const loopedCategories = [
-    ...displayCategories,
-    ...displayCategories,
-    ...displayCategories,
-    ...displayCategories,
-  ];
+  // Extract dynamic categories from database, fallback to initial categories
+  const categoriesList = useMemo(() => {
+    if (Array.isArray(content?.categories) && content.categories.length > 0) {
+      return content.categories;
+    }
+    return fallbackCategories;
+  }, [content?.categories]);
 
-  const scrollRef = useRef(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const displayCategories = categoriesList.filter((c) => c.id !== 'all' && c.slug !== 'all');
 
-  // Auto-swipe right-to-left every 1 second (1000ms delay)
-  useEffect(() => {
-    if (isPaused) return;
-
-    const interval = setInterval(() => {
-      const container = scrollRef.current;
-      if (!container) return;
-
-      const firstItem = container.firstElementChild;
-      const stepWidth = firstItem ? firstItem.offsetWidth + 16 : 180; // 16px gap
-      const singleCycleWidth = container.scrollWidth / 4;
-
-      // Seamless wrap-around without visual jump
-      if (container.scrollLeft >= singleCycleWidth * 2) {
-        container.scrollLeft -= singleCycleWidth;
-      }
-
-      container.scrollBy({
-        left: stepWidth,
-        behavior: 'smooth',
-      });
-    }, 2000); // 1-second delay
-
-    return () => clearInterval(interval);
-  }, [isPaused, displayCategories.length]);
-
-  const handlePrev = () => {
-    const container = scrollRef.current;
-    if (!container) return;
-    const firstItem = container.firstElementChild;
-    const stepWidth = firstItem ? firstItem.offsetWidth + 16 : 180;
-    container.scrollBy({ left: -stepWidth, behavior: 'smooth' });
+  // Dynamically compute product counts per category
+  const getCategoryCount = (slug) => {
+    return products.filter((p) => p.category === slug).length;
   };
 
-  const handleNext = () => {
-    const container = scrollRef.current;
-    if (!container) return;
-    const firstItem = container.firstElementChild;
-    const stepWidth = firstItem ? firstItem.offsetWidth + 16 : 180;
-    container.scrollBy({ left: stepWidth, behavior: 'smooth' });
+  const toBanglaNum = (num) => {
+    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    return String(num).replace(/\d/g, (d) => bnDigits[d]);
   };
 
   const editFields = [
-    { name: 'subtitle', label: 'সাবটাইটেল / টপ ট্যাগ', placeholder: 'ক্যাটাগরি সমূহ' },
-    { name: 'title', label: 'প্রধান শিরোনাম', placeholder: 'উপকূলের তাজা ও ঐতিহ্যবাহী স্বাদ' },
+    { name: 'subtitle', label: 'সাবটাইটেল / টপ ট্যাগ', placeholder: 'পণ্য ক্যাটাগরি' },
+    { name: 'title', label: 'প্রধান শিরোনাম', placeholder: 'উপকূল ও সুন্দরবনের সেরা ক্যাটাগরি' },
     { name: 'description', label: 'সংক্ষিপ্ত বিবরণ', type: 'textarea', rows: 2 },
   ];
 
   return (
-    <section className="py-10 sm:py-14 bg-[#FDFBF7] relative border-b border-[#E8E2D5]/60 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-8 sm:py-14 bg-[#FCFBF7] relative border-b border-[#E8E2D5]/70">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8 relative">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEF3C7] text-[#B45309] text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-[#D97706]" />
-              {catContent.subtitle || 'ক্যাটাগরি সমূহ'}
-            </span>
-            <AdminSectionEditModal
-              sectionKey="categorySection"
-              sectionTitle="ক্যাটাগরি সেকশন এডিট করুন"
-              fields={editFields}
-            />
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 mb-6 sm:mb-8">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEF3C7] text-[#B45309] text-xs font-bold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5 text-[#D97706]" />
+                {catContent.subtitle || 'পণ্য ক্যাটাগরি'}
+              </span>
+
+              {/* Admin Section Title Editor */}
+              <AdminSectionEditModal
+                sectionKey="categorySection"
+                sectionTitle="ক্যাটাগরি সেকশন এডিট করুন"
+                fields={editFields}
+              />
+
+              {/* Admin Dynamic Category Manager & Logo/Image Uploader */}
+              <CategoryEditModal />
+            </div>
+
+            <h2 className="text-xl sm:text-3xl font-black text-[#016831] tracking-tight">
+              {catContent.title || 'উপকূল ও সুন্দরবনের প্রাকৃতিক খাদ্য সম্ভার'}
+            </h2>
+            <p className="text-xs sm:text-sm text-[#56625D] mt-1 max-w-xl">
+              {catContent.description ||
+                'খাঁটি মধু, দানাদার ঘি, কাঠের ঘানি ভাঙা তেল ও ঐতিহ্যবাহী সন্দেশ—সরাসরি মূল কারিগর থেকে'}
+            </p>
           </div>
 
-          <h2 className="text-xl sm:text-3xl font-extrabold text-[#0F3D2E] mt-1">
-            {catContent.title || 'উপকূলের তাজা ও ঐতিহ্যবাহী স্বাদ'}
-          </h2>
-          <p className="text-xs sm:text-sm text-[#4B5563] mt-1.5">
-            {catContent.description ||
-              'প্রতিটি পণ্য নিজস্ব তদারকিতে প্রস্তুত ও শতভাগ খাঁটি হওয়ার নিশ্চয়তা'}
-          </p>
+          <Link
+            href="/shop"
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#016831] hover:text-[#D97706] transition-colors group"
+          >
+            <span>সব পণ্য একসাথে দেখুন</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
 
-        {/* Carousel Container */}
-        <div
-          className="relative group"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
-        >
-          {/* Edge Fade Overlays */}
-          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-r from-[#FDFBF7] to-transparent z-10" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-l from-[#FDFBF7] to-transparent z-10" />
-
-          {/* Left / Right Navigation Buttons (visible on md+) */}
-          <button
-            type="button"
-            onClick={handlePrev}
-            aria-label="Previous Category"
-            className="hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-white shadow-md border border-[#E8E2D5] text-[#0F3D2E] hover:bg-[#0F3D2E] hover:text-white transition-all opacity-0 group-hover:opacity-100"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            type="button"
-            onClick={handleNext}
-            aria-label="Next Category"
-            className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-white shadow-md border border-[#E8E2D5] text-[#0F3D2E] hover:bg-[#0F3D2E] hover:text-white transition-all opacity-0 group-hover:opacity-100"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-
-          {/* Single-Line Auto-Swiping List */}
-          <div
-            ref={scrollRef}
-            className="flex flex-nowrap gap-3 sm:gap-4 overflow-x-auto py-2 px-2 scroll-smooth cursor-grab active:cursor-grabbing select-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-          >
-            {loopedCategories.map((cat, index) => (
+        {/* ── Category Cards Grid (Responsive: Horizontal scroll on small mobile, grid on md/lg) ── */}
+        <div className="flex sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 sm:pb-0 -mx-3 px-3 sm:mx-0 sm:px-0">
+          {displayCategories.map((cat) => {
+            const count = getCategoryCount(cat.slug);
+            return (
               <Link
-                key={`${cat.id}-${index}`}
-                href={`/shop?cat=${cat.id}`}
-                className="flex-shrink-0 w-[130px] sm:w-[170px] md:w-[195px] bg-white rounded-2xl p-3 sm:p-5 text-center border border-[#E8E2D5] shadow-xs hover:shadow-lg hover:border-[#0F3D2E]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center group/card"
+                key={cat.id || cat.slug}
+                href={`/shop?cat=${cat.slug}`}
+                className="group flex-shrink-0 w-32 xs:w-36 sm:w-auto bg-white rounded-2xl p-2.5 sm:p-3.5 border border-[#E8E2D5] hover:border-[#016831]/50 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden"
               >
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#FEF3C7] flex items-center justify-center text-2xl sm:text-3xl mb-2 group-hover/card:scale-110 group-hover/card:bg-[#FDE68A] transition-all">
-                  {cat.icon}
+                {/* Visual Category Thumbnail with Rounded Container */}
+                <div className="relative w-18 h-18 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#FAF8F5] mb-2 sm:mb-3 border border-[#E8E2D5]/70 group-hover:scale-105 transition-transform duration-300">
+                  {cat.image ? (
+                    <Image
+                      src={cat.image}
+                      alt={cat.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 120px, 150px"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-3xl">
+                      {cat.icon || '🌿'}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                  <span className="absolute bottom-1 right-1 text-base sm:text-lg select-none">
+                    {cat.icon}
+                  </span>
                 </div>
-                <h3 className="text-xs sm:text-sm font-bold text-[#0F3D2E] group-hover/card:text-[#D97706] transition-colors line-clamp-1 w-full text-center">
-                  {cat.name.split(' (')[0]}
-                </h3>
-                <span className="text-[10px] sm:text-[11px] text-[#6B7280] group-hover/card:text-[#0F3D2E] mt-0.5 sm:mt-1 font-medium transition-colors">
-                  পণ্য দেখুন →
-                </span>
-              </Link>
-            ))}
-          </div>
 
-          {/* Auto-Slide Indicator Bar / Badge */}
-          <div className="flex items-center justify-center gap-1.5 mt-4">
-            <span className="w-2 h-2 rounded-full bg-[#D97706] animate-pulse" />
-            <span className="text-[11px] font-medium text-[#78716C]">
-              স্বয়ংক্রিয়ভাবে পরিবর্তিত হচ্ছে (হোভার বা স্পর্শ করলে থামবে)
-            </span>
-          </div>
+                {/* Category Name */}
+                <h3 className="text-xs sm:text-sm font-extrabold text-[#016831] group-hover:text-[#D97706] transition-colors line-clamp-1">
+                  {cat.name}
+                </h3>
+
+                {/* English Subtitle */}
+                <p className="text-[10px] text-[#8E9C96] mt-0.5 line-clamp-1">
+                  {cat.nameEn}
+                </p>
+
+                {/* Item Count Badge */}
+                <div className="mt-2 text-[10px] font-bold text-[#016831] bg-[#F0FDF4] px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  {count > 0 ? `${toBanglaNum(count)} টি পণ্য` : 'উপলব্ধ'}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Mobile View All Link */}
+        <div className="mt-4 text-center sm:hidden">
+          <Link
+            href="/shop"
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#016831] bg-white px-4 py-2 rounded-xl border border-[#E8E2D5] shadow-xs"
+          >
+            <span>সব পণ্য ব্রাউজ করুন</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
     </section>

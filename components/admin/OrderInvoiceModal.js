@@ -43,7 +43,7 @@ export default function OrderInvoiceModal({ order, onClose }) {
       {/* Container - Printable Sheet */}
       <div className="bg-white rounded-3xl max-w-2xl w-full my-6 border border-[#E8E2D5] shadow-2xl overflow-hidden flex flex-col">
         {/* Modal Action Header (Hidden during print) */}
-        <div className="no-print bg-[#0A2B20] text-white px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="no-print bg-[#014D24] text-white px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div className="flex items-center gap-2">
             <Printer className="w-5 h-5 text-[#F59E0B]" />
             <div>
@@ -103,13 +103,13 @@ export default function OrderInvoiceModal({ order, onClose }) {
         {printMode === 'invoice' && (
           <div className="p-6 sm:p-8 space-y-6 text-slate-900 print-area bg-white text-xs">
             {/* Brand Header */}
-            <div className="flex justify-between items-start border-b-2 border-[#0F3D2E] pb-5">
+            <div className="flex justify-between items-start border-b-2 border-[#016831] pb-5">
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-[#0F3D2E] flex items-center justify-center text-[#F59E0B] font-serif font-black text-3xl shadow-sm">
+                <div className="w-14 h-14 rounded-2xl bg-[#016831] flex items-center justify-center text-[#F59E0B] font-serif font-black text-3xl shadow-sm">
                   স
                 </div>
                 <div>
-                  <h1 className="text-2xl font-black text-[#0F3D2E] tracking-tight">
+                  <h1 className="text-2xl font-black text-[#016831] tracking-tight">
                     সাতক্ষীরা ঘর
                   </h1>
                   <p className="text-[11px] font-bold text-amber-700 tracking-wider uppercase">
@@ -122,10 +122,10 @@ export default function OrderInvoiceModal({ order, onClose }) {
               </div>
 
               <div className="text-right space-y-1">
-                <div className="inline-block bg-[#0F3D2E] text-white px-3 py-1 rounded-lg text-xs font-black">
+                <div className="inline-block bg-[#016831] text-white px-3 py-1 rounded-lg text-xs font-black">
                   পার্সেল চালান ও মেমো
                 </div>
-                <div className="font-mono font-black text-sm text-[#0F3D2E]">
+                <div className="font-mono font-black text-sm text-[#016831]">
                   #{order.orderNumber}
                 </div>
                 <div className="text-[10px] text-gray-500">{formattedDate}</div>
@@ -135,13 +135,13 @@ export default function OrderInvoiceModal({ order, onClose }) {
             {/* Shipping Addresses Box */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Delivery To */}
-              <div className="border-2 border-[#0F3D2E] rounded-2xl p-4 bg-[#FDFBF7] space-y-2 relative">
-                <div className="absolute top-0 right-0 bg-[#0F3D2E] text-white text-[9px] font-black px-2.5 py-0.5 rounded-bl-xl uppercase">
+              <div className="border-2 border-[#016831] rounded-2xl p-4 bg-[#FDFBF7] space-y-2 relative">
+                <div className="absolute top-0 right-0 bg-[#016831] text-white text-[9px] font-black px-2.5 py-0.5 rounded-bl-xl uppercase">
                   প্রাপক (Delivery To)
                 </div>
                 <div>
                   <span className="text-[10px] text-gray-500">গ্রাহকের নাম:</span>
-                  <h2 className="text-base font-black text-[#0F3D2E]">
+                  <h2 className="text-base font-black text-[#016831]">
                     {order.customer?.name}
                   </h2>
                 </div>
@@ -170,10 +170,10 @@ export default function OrderInvoiceModal({ order, onClose }) {
 
               {/* Sent From */}
               <div className="border border-gray-200 rounded-2xl p-4 space-y-2 bg-gray-50/50">
-                <div className="text-[10px] font-black text-[#0F3D2E] uppercase tracking-wider">
+                <div className="text-[10px] font-black text-[#016831] uppercase tracking-wider">
                   প্রেরক (Sender / Brand Office)
                 </div>
-                <div className="font-bold text-sm text-[#0F3D2E]">
+                <div className="font-bold text-sm text-[#016831]">
                   সাতক্ষীরা ঘর (হেড অফিস)
                 </div>
                 <p className="text-[11px] text-gray-600">
@@ -189,11 +189,11 @@ export default function OrderInvoiceModal({ order, onClose }) {
 
             {/* Items Table */}
             <div className="space-y-2">
-              <h3 className="font-bold text-xs text-[#0F3D2E] uppercase tracking-wider">
+              <h3 className="font-bold text-xs text-[#016831] uppercase tracking-wider">
                 অর্ডারকৃত পণ্যের বিবরণ (Order Items)
               </h3>
               <table className="w-full text-xs text-left border-collapse border border-gray-200 rounded-xl overflow-hidden">
-                <thead className="bg-[#FDFBF7] text-[#0F3D2E] font-bold border-b border-gray-200">
+                <thead className="bg-[#FDFBF7] text-[#016831] font-bold border-b border-gray-200">
                   <tr>
                     <th className="py-2.5 px-3 border-r border-gray-200">ক্রমিক</th>
                     <th className="py-2.5 px-3 border-r border-gray-200">পণ্যের নাম</th>
@@ -236,7 +236,7 @@ export default function OrderInvoiceModal({ order, onClose }) {
               <div className="text-right space-y-1 text-xs">
                 <div>সাবটোটাল: ৳{order.subtotal}</div>
                 <div>ডেলিভারি চার্জ: ৳{order.deliveryFee || 0}</div>
-                <div className="text-base font-black text-[#0F3D2E] pt-1 border-t border-gray-300">
+                <div className="text-base font-black text-[#016831] pt-1 border-t border-gray-300">
                   সর্বমোট: ৳{order.totalAmount}
                 </div>
               </div>
@@ -252,7 +252,7 @@ export default function OrderInvoiceModal({ order, onClose }) {
               {/* Header */}
               <div className="flex justify-between items-center border-b-2 border-slate-950 pb-3">
                 <div>
-                  <div className="text-xl font-black tracking-tight text-[#0F3D2E]">
+                  <div className="text-xl font-black tracking-tight text-[#016831]">
                     সাতক্ষীরা ঘর
                   </div>
                   <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
@@ -274,13 +274,13 @@ export default function OrderInvoiceModal({ order, onClose }) {
                 <div className="font-mono text-2xl tracking-[0.25em] font-black select-none text-slate-900 leading-none">
                   ||||| | |||| ||| |||| | ||||| ||||
                 </div>
-                <div className="font-mono text-xs font-black tracking-widest text-[#0F3D2E]">
+                <div className="font-mono text-xs font-black tracking-widest text-[#016831]">
                   {trackingNumber}
                 </div>
               </div>
 
               {/* COD Amount Banner */}
-              <div className="bg-[#0F3D2E] text-white p-3 rounded-xl flex justify-between items-center">
+              <div className="bg-[#016831] text-white p-3 rounded-xl flex justify-between items-center">
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">
                     ক্যাশ অন ডেলিভারি (COD Collect)

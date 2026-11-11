@@ -60,12 +60,12 @@ export default function CustomerCRMView({ isManagerOrAdmin }) {
         <div className="bg-white p-5 rounded-3xl border border-[#E8E2D5] shadow-sm flex items-center justify-between">
           <div>
             <div className="text-xs font-bold text-slate-500">মোট স্বতন্ত্র ক্রেতা</div>
-            <div className="text-2xl font-black text-[#0F3D2E]">
+            <div className="text-2xl font-black text-[#016831]">
               {summary?.totalUniqueCustomers || customers.length} জন
             </div>
             <div className="text-[11px] text-slate-400">অনন্য ফোন নম্বর ভিত্তিক ডাটাবেজ</div>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-[#0F3D2E] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-[#016831] flex items-center justify-center">
             <Users className="w-6 h-6" />
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function CustomerCRMView({ isManagerOrAdmin }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="গ্রাহকের নাম, মোবাইল নম্বর বা শহর দিয়ে খুঁজুন..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#E8E2D5] text-xs outline-none focus:border-[#0F3D2E]"
+            className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#E8E2D5] text-xs outline-none focus:border-[#016831]"
           />
         </div>
 
@@ -181,7 +181,7 @@ export default function CustomerCRMView({ isManagerOrAdmin }) {
                     <td className="py-3.5 px-4 font-bold text-slate-900">
                       {c.totalOrders} টি
                     </td>
-                    <td className="py-3.5 px-4 font-black text-[#0F3D2E] text-sm">
+                    <td className="py-3.5 px-4 font-black text-[#016831] text-sm">
                       ৳{c.totalSpent?.toLocaleString('bn-BD')}
                     </td>
                     <td className="py-3.5 px-4">
@@ -195,7 +195,7 @@ export default function CustomerCRMView({ isManagerOrAdmin }) {
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => setSelectedCustomer(c)}
-                        className="px-2.5 py-1 bg-[#0F3D2E] text-white rounded-lg text-[11px] font-bold flex items-center gap-1 ml-auto hover:bg-emerald-800 transition-colors"
+                        className="px-2.5 py-1 bg-[#016831] text-white rounded-lg text-[11px] font-bold flex items-center gap-1 ml-auto hover:bg-emerald-800 transition-colors"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>হিস্টোরি</span>
@@ -215,7 +215,7 @@ export default function CustomerCRMView({ isManagerOrAdmin }) {
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-[#E8E2D5] shadow-2xl space-y-4 my-6">
             <div className="flex justify-between items-center pb-3 border-b border-[#E8E2D5]">
               <div>
-                <h3 className="text-base font-bold text-[#0F3D2E]">
+                <h3 className="text-base font-bold text-[#016831]">
                   ক্রেতার প্রোফাইল: {selectedCustomer.name}
                 </h3>
                 <span className="text-xs text-amber-700 font-mono">
@@ -240,7 +240,7 @@ export default function CustomerCRMView({ isManagerOrAdmin }) {
               </div>
               <div className="bg-[#FDFBF7] p-2.5 rounded-xl border border-[#E8E2D5]">
                 <div className="text-[10px] text-slate-500">লাইফটাইম স্পেন্ড</div>
-                <div className="text-base font-black text-[#0F3D2E]">
+                <div className="text-base font-black text-[#016831]">
                   ৳{selectedCustomer.totalSpent}
                 </div>
               </div>
@@ -261,7 +261,7 @@ export default function CustomerCRMView({ isManagerOrAdmin }) {
 
             {/* Orders List */}
             <div className="space-y-2">
-              <h4 className="font-bold text-xs text-[#0F3D2E]">সাম্প্রতিক অর্ডার তালিকা:</h4>
+              <h4 className="font-bold text-xs text-[#016831]">সাম্প্রতিক অর্ডার তালিকা:</h4>
               <div className="divide-y divide-[#E8E2D5] max-h-48 overflow-y-auto">
                 {selectedCustomer.recentOrders?.map((ord, i) => (
                   <div key={i} className="py-2 flex justify-between items-center text-xs">
@@ -272,7 +272,7 @@ export default function CustomerCRMView({ isManagerOrAdmin }) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-[#0F3D2E]">৳{ord.totalAmount}</div>
+                      <div className="font-bold text-[#016831]">৳{ord.totalAmount}</div>
                       <span className="text-[10px] font-bold capitalize text-slate-500">{ord.orderStatus}</span>
                     </div>
                   </div>
