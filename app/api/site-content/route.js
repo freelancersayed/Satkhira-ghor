@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { connectToDatabase } from '@/lib/mongodb';
 import SiteContent from '@/models/SiteContent';
 import { requireAdmin } from '@/lib/auth';
+import { saveThemeToFile } from '@/lib/themeServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -162,6 +164,15 @@ export const defaultSiteContent = {
     tagline: 'Satkhira Ghor • Pure & Organic',
     logoChar: 'স',
   },
+  theme: {
+    primary: '#016831',
+    secondary: '#FAB116',
+    buttonBg: '#016831',
+    buttonText: '#FFFFFF',
+    textColor: '#14241E',
+    textHover: '#02833E',
+    buttonHoverBg: '#014D24',
+  },
 };
 
 export async function GET(request) {
@@ -218,6 +229,15 @@ export async function PUT(request) {
       { key, data, updatedBy: adminCheck.user.phone || 'admin' },
       { upsert: true, new: true }
     );
+
+    if (key === 'theme') {
+      saveThemeToFile(data);
+      try {
+        revalidatePath('/', 'layout');
+      } catch (e) {
+        // ignore
+      }
+    }
 
     return NextResponse.json({
       success: true,

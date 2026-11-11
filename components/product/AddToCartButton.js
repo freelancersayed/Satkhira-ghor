@@ -60,8 +60,8 @@ export default function AddToCartButton({ product }) {
                 type="button"
                 onClick={() => setSelectedVarIndex(idx)}
                 className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${selectedVarIndex === idx
-                    ? 'bg-[#016831] text-white border-[#016831] shadow-sm scale-105'
-                    : 'bg-white text-slate-800 border-[#E8E2D5] hover:border-[#016831]'
+                  ? 'bg-[#016831] text-white border-[#016831] shadow-sm scale-105'
+                  : 'bg-white text-slate-800 border-[#E8E2D5] hover:border-[#016831]'
                   }`}
               >
                 <span>{v.size || v.weight || `প্যাক ${idx + 1}`}</span>
@@ -108,8 +108,8 @@ export default function AddToCartButton({ product }) {
         <button
           onClick={handleAddToCart}
           className={`py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${isAdded
-              ? 'bg-emerald-800 text-white'
-              : 'bg-[#016831] hover:bg-[#014D24] text-white border border-[#016831]'
+            ? 'bg-emerald-800 text-white'
+            : 'bg-[#016831] hover:bg-[#014D24] text-white border border-[#016831]'
             }`}
         >
           {isAdded ? (

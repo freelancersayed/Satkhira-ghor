@@ -66,10 +66,10 @@ export default function MobileBottomNav() {
   const whatsappNumber = helplineDigits.startsWith('0')
     ? '88' + helplineDigits
     : helplineDigits.startsWith('+88')
-    ? helplineDigits.replace('+', '')
-    : helplineDigits.startsWith('88')
-    ? helplineDigits
-    : '8801712345678';
+      ? helplineDigits.replace('+', '')
+      : helplineDigits.startsWith('88')
+        ? helplineDigits
+        : '8801712345678';
 
   useEffect(() => {
     setMounted(true);
@@ -171,9 +171,8 @@ export default function MobileBottomNav() {
       <aside
         onClick={openCart}
         aria-label="Open Cart Drawer"
-        className={`fixed right-0 top-[52%] -translate-y-1/2 z-40 flex flex-col items-center justify-center bg-[#E08E00] hover:bg-[#D97706] active:scale-95 text-white px-2 sm:px-2.5 py-3 rounded-l-2xl shadow-2xl border-y border-l border-amber-300/40 cursor-pointer transition-all duration-300 group ${
-          cartBadgeAnimate ? 'scale-110 shadow-amber-500/60 ring-2 ring-white animate-pulse' : ''
-        }`}
+        className={`fixed right-0 top-[52%] -translate-y-1/2 z-40 flex flex-col items-center justify-center bg-[#00000052] hover:bg-black active:scale-95 text-white px-2 sm:px-2.5 py-3 rounded-l-2xl shadow-2xl border-y border-l border-amber-300/40 cursor-pointer transition-all duration-300 group ${cartBadgeAnimate ? 'scale-110 shadow-amber-500/60 ring-2 ring-white animate-pulse' : ''
+          }`}
       >
         <div className="relative mb-1">
           <ShoppingBag className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
@@ -219,14 +218,12 @@ export default function MobileBottomNav() {
           <Link
             href="/"
             onClick={handleHomeClick}
-            className={`flex flex-col items-center justify-center py-1 transition-all active:scale-90 ${
-              pathname === '/' ? 'text-[#FAB116]' : 'text-white/90 hover:text-white'
-            }`}
+            className={`flex flex-col items-center justify-center py-1 transition-all active:scale-90 ${pathname === '/' ? 'text-[#FAB116]' : 'text-white/90 hover:text-white'
+              }`}
           >
             <Home
-              className={`w-5 h-5 ${
-                pathname === '/' ? 'stroke-[2.5] scale-105' : 'stroke-[1.8]'
-              }`}
+              className={`w-5 h-5 ${pathname === '/' ? 'stroke-[2.5] scale-105' : 'stroke-[1.8]'
+                }`}
             />
             <span className="text-[10px] font-extrabold tracking-wider uppercase mt-1">
               HOME
@@ -255,17 +252,15 @@ export default function MobileBottomNav() {
           >
             <div className="relative">
               <ShoppingBag
-                className={`w-5 h-5 stroke-[1.8] transition-transform ${
-                  cartBadgeAnimate ? 'scale-115 text-[#FAB116]' : ''
-                }`}
+                className={`w-5 h-5 stroke-[1.8] transition-transform ${cartBadgeAnimate ? 'scale-115 text-[#FAB116]' : ''
+                  }`}
               />
               {/* স্ক্রিনশটের মতো ব্ল্যাক সার্কেল ব্যাজ (অ্যানিমেশন সহ) */}
               <span
-                className={`absolute -top-1.5 -right-2 text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-xs transition-all duration-300 ${
-                  cartBadgeAnimate
-                    ? 'scale-125 bg-[#FAB116] text-black ring-2 ring-white animate-bounce'
-                    : 'bg-slate-950 text-white'
-                }`}
+                className={`absolute -top-1.5 -right-2 text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-xs transition-all duration-300 ${cartBadgeAnimate
+                  ? 'scale-125 bg-[#FAB116] text-black ring-2 ring-white animate-bounce'
+                  : 'bg-slate-950 text-white'
+                  }`}
               >
                 {totalItems}
               </span>
@@ -292,19 +287,17 @@ export default function MobileBottomNav() {
           <button
             type="button"
             onClick={() => setAccountModalOpen(true)}
-            className={`flex flex-col items-center justify-center py-1 transition-all active:scale-90 ${
-              pathname.startsWith('/admin') || pathname === '/login' || pathname === '/track-order'
-                ? 'text-[#FAB116]'
-                : 'text-white/90 hover:text-white'
-            }`}
+            className={`flex flex-col items-center justify-center py-1 transition-all active:scale-90 ${pathname.startsWith('/admin') || pathname === '/login' || pathname === '/track-order'
+              ? 'text-[#FAB116]'
+              : 'text-white/90 hover:text-white'
+              }`}
             aria-label="একাউন্ট"
           >
             <User
-              className={`w-5 h-5 ${
-                pathname.startsWith('/admin') || pathname === '/login'
-                  ? 'stroke-[2.5] scale-105'
-                  : 'stroke-[1.8]'
-              }`}
+              className={`w-5 h-5 ${pathname.startsWith('/admin') || pathname === '/login'
+                ? 'stroke-[2.5] scale-105'
+                : 'stroke-[1.8]'
+                }`}
             />
             <span className="text-[10px] font-extrabold tracking-wider uppercase mt-1">
               ACCOUNT
@@ -523,11 +516,10 @@ export default function MobileBottomNav() {
                             setAddedSearchId(product.id);
                             setTimeout(() => setAddedSearchId(null), 1800);
                           }}
-                          className={`px-2.5 py-1.5 rounded-lg active:scale-95 transition-all text-[11px] font-bold shadow-xs flex items-center gap-1 flex-shrink-0 ${
-                            addedSearchId === product.id
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-[#016831] text-white hover:bg-[#02833E]'
-                          }`}
+                          className={`px-2.5 py-1.5 rounded-lg active:scale-95 transition-all text-[11px] font-bold shadow-xs flex items-center gap-1 flex-shrink-0 ${addedSearchId === product.id
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-[#016831] text-white hover:bg-[#02833E]'
+                            }`}
                         >
                           {addedSearchId === product.id ? (
                             <>

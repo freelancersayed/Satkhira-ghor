@@ -9,6 +9,8 @@ import Footer from '@/components/common/Footer';
 import CartDrawer from '@/components/common/CartDrawer';
 import MobileBottomNav from '@/components/common/MobileBottomNav';
 import AddToCartToast from '@/components/common/AddToCartToast';
+import DynamicThemeInjector from '@/components/common/DynamicThemeInjector';
+import { getSavedTheme, generateThemeCSS } from '@/lib/themeServer';
 
 const hindSiliguri = Hind_Siliguri({
   weight: ['300', '400', '500', '600', '700'],
@@ -50,7 +52,10 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const savedTheme = await getSavedTheme();
+  const themeCSS = generateThemeCSS(savedTheme);
+
   return (
     <html lang="bn" className={`scroll-smooth ${hindSiliguri.variable}`}>
       <head>
@@ -61,8 +66,13 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
+        <style
+          id="satkhira-ghor-dynamic-theme-ssr"
+          dangerouslySetInnerHTML={{ __html: themeCSS }}
+        />
       </head>
       <body className="min-h-screen flex flex-col bg-[#FCFBF7] text-[#14241E] antialiased font-sans pb-20 md:pb-0 overflow-x-hidden w-full">
+        <DynamicThemeInjector initialTheme={savedTheme} />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

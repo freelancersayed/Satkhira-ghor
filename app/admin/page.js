@@ -42,6 +42,7 @@ import {
   Layers,
   FolderPlus,
   Flame,
+  Palette,
 } from 'lucide-react';
 
 import { useAuthStore } from '@/store/authStore';
@@ -57,6 +58,7 @@ import BulkProductUploadModal from '@/components/admin/BulkProductUploadModal';
 import ProductVariationEditor from '@/components/admin/ProductVariationEditor';
 import AdminCategoriesView from '@/components/admin/AdminCategoriesView';
 import AdminFlashSaleView from '@/components/admin/AdminFlashSaleView';
+import AdminThemeView from '@/components/admin/AdminThemeView';
 import {
   initAudioOnUserGesture,
   playCashRegisterSound,
@@ -746,6 +748,21 @@ export default function AdminDashboardPage() {
               >
                 <Flame className="w-4 h-4 text-red-500 fill-current" />
                 <span>ধামাকা অফার</span>
+              </button>
+            )}
+
+            {/* RBAC: Dynamic Theme & Color Customizer */}
+            {isManagerOrAdmin && (
+              <button
+                onClick={() => setActiveTab('theme')}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  activeTab === 'theme'
+                    ? 'bg-[#016831] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
+                }`}
+              >
+                <Palette className="w-4 h-4 text-[#FAB116]" />
+                <span>কালার ও থিম</span>
               </button>
             )}
 
@@ -1442,6 +1459,11 @@ export default function AdminDashboardPage() {
         {/* ===================== TAB 9: FLASH SALE & DHAMAKA OFFERS ===================== */}
         {activeTab === 'flash-sale' && isManagerOrAdmin && (
           <AdminFlashSaleView allProducts={products} />
+        )}
+
+        {/* ===================== TAB 10: DYNAMIC THEME & COLOR PICKER ===================== */}
+        {activeTab === 'theme' && isManagerOrAdmin && (
+          <AdminThemeView showNotification={showNotification} />
         )}
 
         {/* ===================== PRODUCT CREATE / EDIT MODAL ===================== */}

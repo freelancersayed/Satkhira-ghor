@@ -156,10 +156,30 @@ const defaultContent = {
     tagline: 'Satkhira Ghor • Pure & Organic',
     logoChar: 'স',
   },
+  theme: {
+    primary: '#016831',
+    secondary: '#FAB116',
+    buttonBg: '#016831',
+    buttonText: '#FFFFFF',
+    textColor: '#14241E',
+    textHover: '#02833E',
+    buttonHoverBg: '#014D24',
+  },
 };
 
+// Preload cached theme from localStorage if in browser
+let initialContent = { ...defaultContent };
+if (typeof window !== 'undefined') {
+  try {
+    const cachedTheme = localStorage.getItem('satkhira_theme');
+    if (cachedTheme) {
+      initialContent.theme = { ...defaultContent.theme, ...JSON.parse(cachedTheme) };
+    }
+  } catch (e) {}
+}
+
 export const useSiteContentStore = create((set, get) => ({
-  content: defaultContent,
+  content: initialContent,
   loaded: false,
   loading: false,
 
@@ -172,6 +192,11 @@ export const useSiteContentStore = create((set, get) => ({
       if (res.ok) {
         const data = await res.json();
         if (data.content) {
+          if (data.content.theme && typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('satkhira_theme', JSON.stringify(data.content.theme));
+            } catch (e) {}
+          }
           set({ content: data.content, loaded: true, loading: false });
         }
       }
@@ -194,6 +219,12 @@ export const useSiteContentStore = create((set, get) => ({
           },
         },
       });
+
+      if (sectionKey === 'theme' && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('satkhira_theme', JSON.stringify(sectionData));
+        } catch (e) {}
+      }
 
       const res = await fetch('/api/site-content', {
         method: 'PUT',
