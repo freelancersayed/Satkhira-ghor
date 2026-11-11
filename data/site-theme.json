@@ -1,9 +1,9 @@
 {
-  "primary": "#0F3D2E",
-  "secondary": "#F59E0B",
-  "buttonBg": "#0F3D2E",
+  "primary": "#016831",
+  "secondary": "#FAB116",
+  "buttonBg": "#016831",
   "buttonText": "#FFFFFF",
-  "textColor": "#0D231B",
-  "textHover": "#1B5E43",
-  "buttonHoverBg": "#0A2B20"
+  "textColor": "#14241E",
+  "textHover": "#02833E",
+  "buttonHoverBg": "#014D24"
 }
