@@ -14,9 +14,10 @@ import {
   Phone,
   MessageCircle,
   Package,
-  Clock,
   Truck,
-  MapPin,
+  Search,
+  Calendar,
+  ShieldCheck,
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { products } from '@/data/products';
@@ -59,7 +60,7 @@ export default function HalumChatWindow({
           badge: '২০০৳ সাশ্রয়',
         },
       ],
-      quickReplies: ['🍯 খাঁটি খলসী মধু', '🧈 বিলোনা গাওয়া ঘি', '🎁 মেগা কম্বো প্যাক', '🚚 ফ্রি ডেলিভারি সীমা'],
+      quickReplies: ['🍯 খাঁটি খলসী মধু', '🧈 বিলোনা গাওয়া ঘি', '🎁 মেগা কম্বো প্যাক', '📦 অর্ডার ট্র্যাক'],
       timestamp: new Date(),
     },
   ]);
@@ -67,6 +68,8 @@ export default function HalumChatWindow({
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [addedItemSlug, setAddedItemSlug] = useState(null);
+  const [trackingCardInput, setTrackingCardInput] = useState('');
+  const [trackingLoading, setTrackingLoading] = useState(false);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -109,6 +112,60 @@ export default function HalumChatWindow({
     }
   }, [isOpen, messages]);
 
+  // Direct Live Order Tracker Functionality
+  const executeTrackQuery = async (query) => {
+    const cleanQuery = (query || '').trim();
+    if (!cleanQuery) return;
+
+    setTrackingLoading(true);
+    if (onStateChange) onStateChange('thinking');
+
+    try {
+      const res = await fetch(`/api/orders/track?q=${encodeURIComponent(cleanQuery)}`);
+      const data = await res.json();
+
+      if (res.ok && data.orders && data.orders.length > 0) {
+        const botMsg = {
+          id: `halum-track-${Date.now()}`,
+          sender: 'halum',
+          text: `হালুম! "${cleanQuery}"-এর লাইভ পার্সেল স্ট্যাটাস পেয়েছি 📦👇`,
+          orders: data.orders,
+          characterState: 'saluting',
+          quickReplies: ['📦 আরেকটি অর্ডার ট্র্যাক', '📞 কাস্টমার কেয়ার', '🍯 সেরা মধু দেখাও'],
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        if (onStateChange) onStateChange('saluting');
+      } else {
+        const notFoundMsg = {
+          id: `halum-track-nf-${Date.now()}`,
+          sender: 'halum',
+          text: `হালুম! "${cleanQuery}" তথ্যের সাথে কোনো অর্ডার পাওয়া যায়নি। অনুগ্রহ করে ১১ ডিজিটের মোবাইল নম্বর অথবা সঠিক অর্ডার আইডি দিন। যেকোনো সমস্যায় আমাদের সাথে সরাসরি কথা বলুন! 🐯`,
+          isFallback: true,
+          characterState: 'thinking',
+          quickReplies: ['📦 আবার ট্র্যাক করব', '📞 হেল্পলাইন কল', 'নতুন অর্ডার করব'],
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, notFoundMsg]);
+        if (onStateChange) onStateChange('thinking');
+      }
+    } catch (err) {
+      const errMsg = {
+        id: `halum-track-err-${Date.now()}`,
+        sender: 'halum',
+        text: `একটু নেটওয়ার্ক জ্যাম! সরাসরি কথা বলতে ${deliveryConfig.supportPhone} নম্বরে কল বা হোয়াটসঅ্যাপ করুন 🐯`,
+        isFallback: true,
+        characterState: 'thinking',
+        quickReplies: ['নতুন অর্ডার করব', 'মধুর দাম কত?'],
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errMsg]);
+    } finally {
+      setTrackingLoading(false);
+      setIsLoading(false);
+    }
+  };
+
   // Handle sending a message with Instant 0ms Local Intent Engine + In-Chat Tracking + AI fallback
   const handleSendMessage = async (textToSend) => {
     const text = (textToSend || inputMessage).trim();
@@ -128,55 +185,32 @@ export default function HalumChatWindow({
 
     if (onStateChange) onStateChange('thinking');
 
-    // 2. Check Local Intent Engine First (0ms Response Time!)
+    // 2. Check Local Intent Engine First (0ms Response Time)
     const localMatch = matchLocalHalumIntent(text, { pathname });
 
     if (localMatch) {
-      // Intent: Live In-Chat Order Tracking
-      if (localMatch.type === 'track_order') {
-        try {
-          const res = await fetch(`/api/orders/track?q=${encodeURIComponent(localMatch.query)}`);
-          const data = await res.json();
+      // Intent: Direct Phone/ID Tracking Query
+      if (localMatch.type === 'track_order_query') {
+        executeTrackQuery(localMatch.query);
+        return;
+      }
 
-          if (res.ok && data.orders && data.orders.length > 0) {
-            const botMsg = {
-              id: `halum-track-${Date.now()}`,
-              sender: 'halum',
-              text: `হালুম! আপনার অর্ডারের তথ্য পেয়েছি 📦👇`,
-              orders: data.orders,
-              characterState: 'saluting',
-              quickReplies: ['📦 নতুন অর্ডার করব', '📞 কাস্টমার কেয়ার', '🍯 সেরা মধু দেখাও'],
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, botMsg]);
-            if (onStateChange) onStateChange('saluting');
-          } else {
-            const notFoundMsg = {
-              id: `halum-track-nf-${Date.now()}`,
-              sender: 'halum',
-              text: `হালুম! "${localMatch.query}" তথ্যের সাথে কোনো অর্ডার পাওয়া যায়নি। মোবাইল নম্বর বা অর্ডার আইডি সঠিক কিনা চেক করুন অথবা কাস্টমার কেয়ারে যোগাযোগ করুন। 🐯`,
-              characterState: 'thinking',
-              isFallback: true,
-              quickReplies: ['📞 ০১৯০৮-৯৪৫১৪৫ কল করুন', 'নতুন অর্ডার করব'],
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, notFoundMsg]);
-            if (onStateChange) onStateChange('thinking');
-          }
-        } catch (err) {
-          const errMsg = {
-            id: `halum-track-err-${Date.now()}`,
+      // Intent: Show In-Chat Interactive Tracking Form (Requirement 3)
+      if (localMatch.type === 'show_track_form' || localMatch.showTrackForm) {
+        setTimeout(() => {
+          const botMsg = {
+            id: `halum-track-form-${Date.now()}`,
             sender: 'halum',
-            text: 'একটু নেটওয়ার্ক জ্যাম! সরাসরি কথা বলতে ০১৯০৮-৯৪৫১৪৫ নম্বরে কল বা হোয়াটসঅ্যাপ করুন 🐯',
-            isFallback: true,
+            text: localMatch.reply,
+            showTrackForm: true,
             characterState: 'thinking',
-            quickReplies: ['নতুন অর্ডার করব', 'মধুর দাম কত?'],
+            quickReplies: localMatch.quickReplies || ['📞 কাস্টমার কেয়ার', '🍯 সেরা মধু'],
             timestamp: new Date(),
           };
-          setMessages((prev) => [...prev, errMsg]);
-        } finally {
+          setMessages((prev) => [...prev, botMsg]);
           setIsLoading(false);
-        }
+          if (onStateChange) onStateChange('thinking');
+        }, 150);
         return;
       }
 
@@ -189,6 +223,7 @@ export default function HalumChatWindow({
           products: localMatch.products || [],
           quickReplies: localMatch.quickReplies || [],
           action: localMatch.action || null,
+          isFallback: localMatch.isFallback || false,
           timestamp: new Date(),
         };
 
@@ -277,12 +312,12 @@ export default function HalumChatWindow({
 
   return (
     <div
-      className={`fixed bottom-24 sm:bottom-6 ${
+      className={`fixed ${
         isLeftSide ? 'left-3 sm:left-6' : 'right-3 sm:right-6'
-      } z-50 w-[94vw] sm:w-[380px] max-h-[82vh] h-[550px] bg-white rounded-3xl shadow-2xl border-2 border-[#FAB116] flex flex-col overflow-hidden animate-slideUp transition-all duration-300`}
+      } bottom-[calc(80px+env(safe-area-inset-bottom,0px))] sm:bottom-6 z-50 w-[calc(100vw-24px)] sm:w-[380px] max-h-[75dvh] sm:max-h-[82vh] h-[520px] bg-white rounded-3xl shadow-2xl border-2 border-[#FAB116] flex flex-col overflow-hidden animate-slideUp transition-all duration-300`}
     >
-      {/* ── Chat Header ── */}
-      <div className="p-3.5 bg-gradient-to-r from-[#016831] via-[#015829] to-[#014D24] text-white flex items-center justify-between shadow-xs">
+      {/* ── Chat Header (Touch-Friendly 44px Controls) ── */}
+      <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#016831] via-[#015829] to-[#014D24] text-white flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-2.5">
           <div className="relative w-10 h-10 rounded-full bg-gradient-to-b from-[#FEF3C7] to-[#FDE68A] p-0.5 border-2 border-[#FAB116] flex items-center justify-center flex-shrink-0 shadow-xs">
             <span className="text-xl">🐯</span>
@@ -303,18 +338,19 @@ export default function HalumChatWindow({
           </div>
         </div>
 
+        {/* 44x44px Touch Target Close Button (Requirement 4) */}
         <button
           type="button"
           onClick={onClose}
-          className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white transition-all active:scale-95"
           aria-label="চ্যাট বন্ধ করুন"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* ── Scrollable Messages Area with pb-8 (Layout Fix) ── */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 pb-8 space-y-3.5 bg-[#FCFBF7]">
+      {/* ── Scrollable Messages Area with pb-8 and overflow-x-hidden (Requirement 1 & 4) ── */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 pb-8 space-y-3.5 bg-[#FCFBF7]">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -332,7 +368,7 @@ export default function HalumChatWindow({
 
             {/* Message Bubble */}
             <div
-              className={`max-w-[88%] p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
+              className={`max-w-[92%] sm:max-w-[88%] p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs break-words ${
                 msg.sender === 'user'
                   ? 'bg-[#016831] text-white rounded-br-xs font-medium'
                   : 'bg-white text-stone-800 rounded-bl-xs border border-amber-200/80 font-normal'
@@ -340,19 +376,65 @@ export default function HalumChatWindow({
             >
               <p>{msg.text}</p>
 
-              {/* Embedded In-Chat Order Tracking Cards */}
+              {/* ── In-Chat Interactive Order Tracking Input Card (Requirement 3) ── */}
+              {msg.showTrackForm && (
+                <div className="mt-3 p-3 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 shadow-xs space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#016831]">
+                    <Package className="w-4 h-4 text-[#FAB116]" />
+                    <span>লাইভ পার্সেল ট্র্যাকিং</span>
+                  </div>
+                  <p className="text-[11px] text-stone-600">
+                    আপনার ১১ ডিজিটের মোবাইল নম্বর বা অর্ডার আইডি দিন:
+                  </p>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (trackingCardInput.trim()) {
+                        executeTrackQuery(trackingCardInput);
+                      }
+                    }}
+                    className="flex flex-col sm:flex-row gap-1.5"
+                  >
+                    <input
+                      type="text"
+                      value={trackingCardInput}
+                      onChange={(e) => setTrackingCardInput(e.target.value)}
+                      placeholder="যেমন: 01712345678 বা ORD-12345"
+                      className="flex-1 px-3 py-2 text-xs rounded-xl border border-amber-200 bg-white focus:outline-none focus:border-[#016831] text-stone-800 placeholder-stone-400"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!trackingCardInput.trim() || trackingLoading}
+                      className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#016831] hover:bg-[#02833E] active:scale-95 text-white text-xs font-bold flex items-center justify-center gap-1 transition-all disabled:opacity-50"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      <span>{trackingLoading ? 'খোঁজা হচ্ছে...' : 'ট্র্যাক করুন'}</span>
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* ── Embedded In-Chat Order Status Card (Requirement 3) ── */}
               {msg.orders && msg.orders.length > 0 && (
                 <div className="mt-3 space-y-2.5 pt-2 border-t border-amber-100">
                   {msg.orders.map((ord, oIdx) => (
                     <div
                       key={ord._id || oIdx}
-                      className="p-3 rounded-2xl bg-[#FAF9F5] border-2 border-amber-300 shadow-xs space-y-2"
+                      className="p-3 rounded-2xl bg-[#FAF9F5] border-2 border-amber-300 shadow-xs space-y-2 overflow-hidden"
                     >
                       <div className="flex items-center justify-between pb-1.5 border-b border-amber-200/70">
                         <span className="font-black text-xs text-[#016831]">
                           #{ord.orderNumber}
                         </span>
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        <span
+                          className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+                            ord.status === 'delivered'
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                              : ord.status === 'shipped'
+                              ? 'bg-cyan-100 text-cyan-800 border-cyan-300'
+                              : 'bg-amber-100 text-amber-800 border-amber-300'
+                          }`}
+                        >
                           {ord.status === 'delivered'
                             ? 'ডেলিভারি সম্পন্ন ✓'
                             : ord.status === 'processing'
@@ -367,40 +449,45 @@ export default function HalumChatWindow({
                       <div className="space-y-1 text-[11px] text-stone-700">
                         {ord.items &&
                           ord.items.map((item, iIdx) => (
-                            <div key={iIdx} className="flex justify-between items-center">
+                            <div key={iIdx} className="flex justify-between items-center gap-2">
                               <span className="line-clamp-1 flex-1 font-semibold">
                                 • {item.name} × {item.quantity}
                               </span>
-                              <span className="font-bold text-[#016831]">
+                              <span className="font-bold text-[#016831] flex-shrink-0">
                                 ৳{item.price * item.quantity}
                               </span>
                             </div>
                           ))}
                       </div>
 
-                      {/* Pricing & Courier */}
+                      {/* Total Amount & Estimated Delivery */}
                       <div className="pt-1.5 border-t border-stone-200 flex justify-between items-center text-xs font-black">
-                        <span className="text-stone-600">মোট মূল্য:</span>
-                        <span className="text-amber-700">৳{ord.totalAmount}</span>
+                        <span className="text-stone-600">সর্বমোট প্রদেয়:</span>
+                        <span className="text-amber-700 text-sm">৳{ord.totalAmount}</span>
                       </div>
 
-                      {ord.courierBooking?.trackingCode && (
-                        <div className="text-[10px] bg-amber-50 p-1.5 rounded-lg text-stone-600 flex items-center gap-1">
-                          <Truck className="w-3 h-3 text-[#016831]" />
-                          <span>ট্র্যাকিং কোড: <strong>{ord.courierBooking.trackingCode}</strong></span>
+                      <div className="text-[10px] bg-amber-50 p-2 rounded-xl text-stone-600 space-y-1 border border-amber-100">
+                        <div className="flex items-center gap-1 text-[#016831] font-bold">
+                          <Truck className="w-3.5 h-3.5" />
+                          <span>ডেলিভারি সময়: ঢাকা সিটিতে ২৪–৪৮ ঘণ্টা, বাইরে ২–৩ দিন</span>
                         </div>
-                      )}
+                        {ord.courierBooking?.trackingCode && (
+                          <div className="font-semibold text-stone-700">
+                            কুরিয়ার ট্র্যাকিং কোড: <strong className="text-amber-800">{ord.courierBooking.trackingCode}</strong>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* Offline / Contact Fallback Card (Requirement 4) */}
+              {/* ── Offline / Contact Fallback Card (Requirement 4) ── */}
               {msg.isFallback && (
                 <div className="mt-3 pt-2 border-t border-amber-200 grid grid-cols-2 gap-2">
                   <a
                     href={`tel:${deliveryConfig.supportPhoneRaw}`}
-                    className="p-2 rounded-xl bg-[#016831] text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-xs hover:bg-[#02833E]"
+                    className="min-h-[44px] p-2 rounded-xl bg-[#016831] text-white text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-xs hover:bg-[#02833E] active:scale-95 transition-all"
                   >
                     <Phone className="w-3.5 h-3.5 text-amber-300" />
                     <span>কল করুন</span>
@@ -409,7 +496,7 @@ export default function HalumChatWindow({
                     href={deliveryConfig.supportWhatsApp}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 rounded-xl bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-xs hover:bg-emerald-700"
+                    className="min-h-[44px] p-2 rounded-xl bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-xs hover:bg-emerald-700 active:scale-95 transition-all"
                   >
                     <MessageCircle className="w-3.5 h-3.5 text-white" />
                     <span>হোয়াটসঅ্যাপ</span>
@@ -417,7 +504,7 @@ export default function HalumChatWindow({
                 </div>
               )}
 
-              {/* Embedded Product Cards with line-clamp-2 (Requirement 1 & 3) */}
+              {/* ── Embedded Product Cards with line-clamp-2 (Requirement 1 & 4) ── */}
               {msg.products && msg.products.length > 0 && (
                 <div className="mt-3 space-y-2 pt-2 border-t border-amber-100">
                   <div className="text-[10px] font-bold text-[#016831] flex items-center gap-1">
@@ -429,7 +516,7 @@ export default function HalumChatWindow({
                     {msg.products.map((prod) => (
                       <div
                         key={prod.id || prod.slug}
-                        className="p-2 rounded-xl bg-[#FAF9F5] border border-amber-200/90 hover:border-[#016831]/50 transition-all flex items-center gap-2.5"
+                        className="p-2 rounded-xl bg-[#FAF9F5] border border-amber-200/90 hover:border-[#016831]/50 transition-all flex items-center gap-2.5 overflow-hidden"
                       >
                         <Link
                           href={`/products/${prod.slug}`}
@@ -466,11 +553,11 @@ export default function HalumChatWindow({
                           </div>
                         </div>
 
-                        {/* Action: Direct Add to Cart Button */}
+                        {/* 44x44px Touch-Friendly Add to Cart Button */}
                         <button
                           type="button"
                           onClick={() => handleAddToCartFromAgent(prod)}
-                          className={`p-2 rounded-xl text-xs font-bold flex items-center gap-1 transition-all active:scale-90 flex-shrink-0 shadow-xs ${
+                          className={`min-w-[44px] min-h-[44px] p-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all active:scale-90 flex-shrink-0 shadow-xs ${
                             addedItemSlug === prod.slug
                               ? 'bg-emerald-600 text-white'
                               : 'bg-[#016831] hover:bg-[#02833E] text-white'
@@ -479,12 +566,12 @@ export default function HalumChatWindow({
                         >
                           {addedItemSlug === prod.slug ? (
                             <>
-                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                              <Check className="w-4 h-4 stroke-[3]" />
                               <span className="text-[10px]">যুক্ত ✓</span>
                             </>
                           ) : (
                             <>
-                              <ShoppingBag className="w-3.5 h-3.5 text-[#FAB116]" />
+                              <ShoppingBag className="w-4 h-4 text-[#FAB116]" />
                               <span className="text-[10px]">কার্ট</span>
                             </>
                           )}
@@ -504,7 +591,7 @@ export default function HalumChatWindow({
                       onClose();
                       openCart();
                     }}
-                    className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#016831] via-[#02833E] to-[#FAB116] text-white font-black text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all group"
+                    className="w-full min-h-[44px] py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#016831] via-[#02833E] to-[#FAB116] text-white font-black text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all group"
                   >
                     <span className="text-sm group-hover:scale-125 transition-transform">🐾</span>
                     <span>থাবা বসান (Order Now)</span>
@@ -513,7 +600,7 @@ export default function HalumChatWindow({
                 </div>
               )}
 
-              {/* Quick Reply Chips attached to the message */}
+              {/* 44px Min Touch-Target Quick Reply Chips (Requirement 4) */}
               {msg.quickReplies && msg.quickReplies.length > 0 && (
                 <div className="mt-2.5 pt-2 border-t border-amber-100 flex flex-wrap gap-1.5">
                   {msg.quickReplies.map((qr, idx) => (
@@ -521,7 +608,7 @@ export default function HalumChatWindow({
                       key={idx}
                       type="button"
                       onClick={() => handleSendMessage(qr)}
-                      className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-[#FEF9E7] text-[#016831] border border-amber-200 transition-colors active:scale-95"
+                      className="min-h-[44px] text-[11px] font-bold px-3 py-2 rounded-xl bg-amber-50 hover:bg-[#FEF9E7] text-[#016831] border border-amber-200 transition-colors active:scale-95 flex items-center justify-center"
                     >
                       {qr}
                     </button>
@@ -555,42 +642,49 @@ export default function HalumChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* ── Quick Categories Shortcut Strip ── */}
-      <div className="px-3 py-1.5 bg-[#FAF9F5] border-t border-amber-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[10px] font-bold">
+      {/* ── Quick Categories Shortcut Strip (Touch-pan-x, overflow-x-auto, 44px touch height) ── */}
+      <div className="px-3 py-2 bg-[#FAF9F5] border-t border-amber-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar touch-pan-x text-[11px] font-bold">
         <button
           onClick={() => handleSendMessage('মধু দেখতে চাই')}
-          className="whitespace-nowrap px-2 py-1 rounded-md bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831]"
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831] active:scale-95 flex items-center"
         >
           🍯 মধু
         </button>
         <button
           onClick={() => handleSendMessage('গাওয়া ঘি দেখতে চাই')}
-          className="whitespace-nowrap px-2 py-1 rounded-md bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831]"
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831] active:scale-95 flex items-center"
         >
           🧈 গাওয়া ঘি
         </button>
         <button
           onClick={() => handleSendMessage('সরিষার তেল কেমন?')}
-          className="whitespace-nowrap px-2 py-1 rounded-md bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831]"
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831] active:scale-95 flex items-center"
         >
-          🌿 ঘানি ভাঙা তেল
+          🌿 ঘানি তেল
+        </button>
+        <button
+          onClick={() => handleSendMessage('অর্ডার ট্র্যাক করব')}
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-amber-300 text-[#016831] active:scale-95 flex items-center gap-1"
+        >
+          <Package className="w-3.5 h-3.5 text-amber-500" />
+          <span>অর্ডার ট্র্যাক</span>
         </button>
         <button
           onClick={() => handleSendMessage('কম্বো অফার দেখাও')}
-          className="whitespace-nowrap px-2 py-1 rounded-md bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-0.5"
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 active:scale-95 flex items-center gap-1"
         >
-          <Flame className="w-2.5 h-2.5 text-amber-600" />
+          <Flame className="w-3.5 h-3.5 text-amber-600" />
           <span>মেগা কম্বো</span>
         </button>
       </div>
 
-      {/* ── Input Bar ── */}
+      {/* ── Sticky Bottom Input Bar (Ensures Keyboard Doesn't Cover It) ── */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleSendMessage();
         }}
-        className="p-2.5 bg-white border-t border-stone-200 flex items-center gap-2"
+        className="p-2 sm:p-2.5 bg-white border-t border-stone-200 flex items-center gap-2 sticky bottom-0 z-10"
       >
         <input
           ref={inputRef}
@@ -598,13 +692,14 @@ export default function HalumChatWindow({
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           placeholder="হালুম মামাকে যেকোনো প্রশ্ন করুন..."
-          className="flex-1 px-3 py-2 rounded-xl bg-[#FAF9F5] border border-stone-200 focus:border-[#016831] focus:ring-1 focus:ring-[#016831] outline-hidden text-xs text-stone-800 placeholder-stone-400"
+          className="flex-1 min-h-[44px] px-3.5 py-2 rounded-xl bg-[#FAF9F5] border border-stone-200 focus:border-[#016831] focus:ring-1 focus:ring-[#016831] outline-hidden text-xs sm:text-sm text-stone-800 placeholder-stone-400"
         />
 
+        {/* 44x44px Touch Target Send Button (Requirement 4) */}
         <button
           type="submit"
           disabled={!inputMessage.trim() || isLoading}
-          className="p-2.5 rounded-xl bg-[#016831] hover:bg-[#02833E] active:scale-95 text-white shadow-xs disabled:opacity-40 transition-all flex items-center justify-center flex-shrink-0"
+          className="min-w-[44px] min-h-[44px] rounded-xl bg-[#016831] hover:bg-[#02833E] active:scale-95 text-white shadow-xs disabled:opacity-40 transition-all flex items-center justify-center flex-shrink-0"
           aria-label="বার্তা পাঠান"
         >
           <Send className="w-4 h-4" />

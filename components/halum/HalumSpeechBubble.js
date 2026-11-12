@@ -70,15 +70,15 @@ export default function HalumSpeechBubble({
 
   const currentRouteInfo = ROUTE_INTELLIGENCE[pathname] || ROUTE_INTELLIGENCE['/'];
 
-  // ── Non-Intrusive Welcome Trigger (3–5 seconds delay, respects sessionStorage) ──
+  // ── Non-Intrusive Welcome Trigger (3.5s delay on initial visit, saved in sessionStorage) ──
   useEffect(() => {
-    // If on a specific product detail page or cart page, show after brief 1s delay
+    // If on a specific product detail page, cart page, or near free shipping, show promptly
     if (productKnowledge || pathname === '/cart' || isNearFreeDelivery) {
       const timer = setTimeout(() => setVisible(true), 1200);
       return () => clearTimeout(timer);
     }
 
-    // On home/general pages: check if user already dismissed welcome in this session
+    // On home/general pages: check if user already dismissed welcome toast in this session
     try {
       const isDismissed = sessionStorage.getItem('halum_welcome_dismissed');
       if (isDismissed === 'true') {
@@ -87,7 +87,7 @@ export default function HalumSpeechBubble({
       }
     } catch (e) {}
 
-    // Wait 3.5 seconds before showing non-intrusive welcome toast
+    // Wait 3.5 seconds before showing compact welcome toast (Requirement 2)
     const welcomeTimer = setTimeout(() => {
       setVisible(true);
     }, 3500);
@@ -100,7 +100,7 @@ export default function HalumSpeechBubble({
     if (isOpen || productKnowledge || isNearFreeDelivery) return;
     const timer = setInterval(() => {
       setQuipIndex((prev) => (prev + 1) % TIGER_WITTY_QUIPS.length);
-    }, 10000);
+    }, 12000);
     return () => clearInterval(timer);
   }, [isOpen, productKnowledge, isNearFreeDelivery]);
 
@@ -113,6 +113,13 @@ export default function HalumSpeechBubble({
     } catch (e) {}
   };
 
+  const handleOpenChatWithDismiss = () => {
+    try {
+      sessionStorage.setItem('halum_welcome_dismissed', 'true');
+    } catch (e) {}
+    if (onOpenChat) onOpenChat();
+  };
+
   // 1-Click Upsell Add to Cart
   const handleAddUpsell = (e) => {
     e.stopPropagation();
@@ -123,7 +130,7 @@ export default function HalumSpeechBubble({
   };
 
   // Determine active text & badge
-  let currentText = currentRouteInfo.greeting;
+  let currentText = 'হালুম! খাঁটি মধু বা ঘি খুঁজছো? 🐯';
   let badgeTitle = 'হালুম মামা';
   let badgeIcon = '🐯';
 
@@ -144,6 +151,8 @@ export default function HalumSpeechBubble({
     currentText = TIGER_WITTY_QUIPS[quipIndex % TIGER_WITTY_QUIPS.length];
     badgeTitle = 'বাঘের রসিকতা';
     badgeIcon = '✨';
+  } else if (currentRouteInfo && currentRouteInfo.greeting) {
+    currentText = currentRouteInfo.greeting;
   }
 
   // Voice synthesis
@@ -162,6 +171,10 @@ export default function HalumSpeechBubble({
 
   const handleActionClick = (e) => {
     e.stopPropagation();
+    try {
+      sessionStorage.setItem('halum_welcome_dismissed', 'true');
+    } catch (err) {}
+
     if (onTriggerTargetAction) {
       onTriggerTargetAction();
     } else {
@@ -174,16 +187,16 @@ export default function HalumSpeechBubble({
   }
 
   return (
-    <div className="relative mb-2 max-w-[240px] sm:max-w-[290px] animate-slideUp select-none">
+    <div className="relative mb-2 w-[270px] max-w-[calc(100vw-36px)] animate-slideUp select-none">
       <div
-        onClick={onOpenChat}
-        className="bg-white/95 backdrop-blur-md text-stone-900 p-2.5 sm:p-3 rounded-2xl shadow-2xl border-2 border-amber-300/90 hover:border-[#016831] cursor-pointer transition-all hover:scale-[1.01] relative group"
+        onClick={handleOpenChatWithDismiss}
+        className="bg-white/95 backdrop-blur-md text-stone-900 p-2.5 sm:p-3 rounded-2xl shadow-2xl border-2 border-amber-300/90 hover:border-[#016831] cursor-pointer transition-all hover:scale-[1.01] relative group overflow-hidden"
       >
-        {/* Top Control Bar: Title Badge, Voice, Swap Side, Minimize, Close */}
+        {/* Top Control Bar: Title Badge, Voice, Swap Side, Minimize, Touch-Friendly Close (Requirement 4: 44x44px touch area) */}
         <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-amber-100 text-[10px] text-stone-500 font-bold">
           <div className="flex items-center gap-1 text-[#016831] truncate">
             <span>{badgeIcon}</span>
-            <span className="truncate max-w-[130px] font-black">{badgeTitle}</span>
+            <span className="truncate max-w-[120px] font-black">{badgeTitle}</span>
           </div>
 
           <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
@@ -191,7 +204,7 @@ export default function HalumSpeechBubble({
             <button
               type="button"
               onClick={handleSpeak}
-              className="p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100/70 transition-colors"
+              className="min-w-[34px] min-h-[34px] flex items-center justify-center p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100/70 transition-colors"
               title="মুখে শুনুন 🔊"
               aria-label="শুনুন"
             >
@@ -203,7 +216,7 @@ export default function HalumSpeechBubble({
               <button
                 type="button"
                 onClick={onToggleSide}
-                className="p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100/70 transition-colors"
+                className="min-w-[34px] min-h-[34px] flex items-center justify-center p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100/70 transition-colors"
                 title={isLeftSide ? 'ডান পাশে নিন' : 'বাম পাশে নিন'}
                 aria-label="পজিশন পরিবর্তন"
               >
@@ -216,7 +229,7 @@ export default function HalumSpeechBubble({
               <button
                 type="button"
                 onClick={onMinimize}
-                className="p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100/70 transition-colors"
+                className="min-w-[34px] min-h-[34px] flex items-center justify-center p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100/70 transition-colors"
                 title="ছোট করুন"
                 aria-label="মিনিমাইজ"
               >
@@ -224,15 +237,15 @@ export default function HalumSpeechBubble({
               </button>
             )}
 
-            {/* Close button (Dismisses for session) */}
+            {/* Close button with 44x44px Touch Area (Requirement 2 & 4) */}
             <button
               type="button"
               onClick={handleDismiss}
-              className="p-1 rounded-md text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition-colors"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 -my-2 text-stone-400 hover:text-stone-800 hover:bg-stone-100 active:scale-95 transition-all rounded-full"
               title="বন্ধ করুন (এই সেশনে আর দেখাবে না)"
               aria-label="বন্ধ"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -248,7 +261,7 @@ export default function HalumSpeechBubble({
           ) : (
             <Sparkles className="w-3.5 h-3.5 text-[#FAB116] flex-shrink-0 mt-0.5" />
           )}
-          <p className="text-[11px] sm:text-xs font-bold leading-relaxed text-stone-800">
+          <p className="text-[11px] sm:text-xs font-bold leading-relaxed text-stone-800 break-words">
             {currentText}
           </p>
         </div>
@@ -259,9 +272,9 @@ export default function HalumSpeechBubble({
             <button
               type="button"
               onClick={handleAddUpsell}
-              className="w-full py-1.5 px-3 rounded-xl bg-[#016831] hover:bg-[#02833E] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
+              className="w-full min-h-[44px] py-2 px-3 rounded-xl bg-[#016831] hover:bg-[#02833E] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
             >
-              <Plus className="w-3.5 h-3.5 text-amber-300 stroke-[3]" />
+              <Plus className="w-4 h-4 text-amber-300 stroke-[3]" />
               <span>{upsellProduct.name} (+৳{upsellProduct.price})</span>
             </button>
           </div>
@@ -273,29 +286,15 @@ export default function HalumSpeechBubble({
             <button
               type="button"
               onClick={handleActionClick}
-              className="w-full py-1.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#FAB116] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg transition-all active:scale-95 animate-pulse"
+              className="w-full min-h-[44px] py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#FAB116] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg transition-all active:scale-95 animate-pulse"
             >
-              <Zap className="w-3.5 h-3.5 fill-current text-slate-950" />
+              <Zap className="w-4 h-4 fill-current text-slate-950" />
               <span>
                 {pathname === '/cart'
                   ? '👉 অর্ডার নিশ্চিত করুন (থাবা বসান 🐾)'
                   : '👉 এখনই অর্ডার করুন (এখানে থাবা দিন 🐾)'}
               </span>
             </button>
-          </div>
-        )}
-
-        {/* Quick Click Chips on Bubble */}
-        {!isNearFreeDelivery && productKnowledge && productKnowledge.chips && (
-          <div className="mt-1.5 pt-1.5 border-t border-amber-100/70 flex flex-wrap gap-1">
-            {productKnowledge.chips.slice(0, 2).map((chip, idx) => (
-              <span
-                key={idx}
-                className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-[#016831] border border-amber-200"
-              >
-                {chip}
-              </span>
-            ))}
           </div>
         )}
 

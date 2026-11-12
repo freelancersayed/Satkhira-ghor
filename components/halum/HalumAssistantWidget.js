@@ -40,7 +40,7 @@ export default function HalumAssistantWidget() {
     }
   }, []);
 
-  // Detect DOM Modals for Auto-Minimize
+  // Detect DOM Modals & Overlays for Auto-Minimize (Requirement 1 & 4)
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -48,22 +48,23 @@ export default function HalumAssistantWidget() {
       const modal =
         document.querySelector('[role="dialog"]') ||
         document.querySelector('.modal-backdrop') ||
-        document.querySelector('.admin-modal');
+        document.querySelector('.admin-modal') ||
+        document.body.classList.contains('overflow-hidden');
       setIsModalOpen(Boolean(modal));
     };
 
     const observer = new MutationObserver(checkModal);
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
     return () => observer.disconnect();
   }, []);
 
-  // Listen to user scroll to dim non-intrusively
+  // Listen to user scroll to dim & shrink non-intrusively (Requirement 5)
   useEffect(() => {
     let scrollTimer = null;
     const handleScroll = () => {
       setIsScrolling(true);
       clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => setIsScrolling(false), 800);
+      scrollTimer = setTimeout(() => setIsScrolling(false), 700);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -90,7 +91,7 @@ export default function HalumAssistantWidget() {
 
     if (pathname.startsWith('/products/')) {
       // On product detail page:
-      // Halum positions on the LEFT side to leave the right-hand Buy Box 100% unobstructed!
+      // Halum positions on the safe LEFT side to leave the right-hand Buy Box 100% unobstructed!
       setIsLeftSide(true);
       setTargetType('add-to-cart');
 
@@ -175,7 +176,7 @@ export default function HalumAssistantWidget() {
     return () => window.removeEventListener('halum:order-confirmed', handleOrderConfirmed);
   }, []);
 
-  // Side swap toggle (Left <-> Right)
+  // Side swap toggle (Left <-> Right) with safe persistence
   const handleToggleSide = () => {
     setIsLeftSide((prev) => {
       const next = !prev;
@@ -247,7 +248,6 @@ export default function HalumAssistantWidget() {
 
   const handleToggleChat = () => {
     if (effectiveMinimized && (isCartDrawerOpen || isModalOpen)) {
-      // If auto-minimized due to open drawer/modal, simply toggle mini
       setIsMinimized(false);
       return;
     }
@@ -265,9 +265,9 @@ export default function HalumAssistantWidget() {
     });
   };
 
-  // ── Auto-Minimize Condition (Requirement 1) ──
-  // When Cart Drawer is open or a Modal Dialog is active, auto-minimize Halum and drop z-index
-  const shouldAutoMinimize = isCartDrawerOpen || isModalOpen;
+  // ── Auto-Minimize Condition (Requirement 1 & 4) ──
+  // When Cart Drawer is open, modal is open, or on /cart checkout page, auto-minimize Halum and drop z-index
+  const shouldAutoMinimize = isCartDrawerOpen || isModalOpen || pathname === '/cart';
   const effectiveMinimized = isMinimized || shouldAutoMinimize;
 
   // Determine pointing arm direction
@@ -277,20 +277,25 @@ export default function HalumAssistantWidget() {
     <>
       {/* ── Floating Character Widget & Speech Bubble Container with Adaptive Positioning ── */}
       <div
-        className={`fixed flex flex-col pointer-events-none transition-all duration-500 ease-in-out ${
-          shouldAutoMinimize ? 'z-30 opacity-75' : 'z-50 opacity-100'
+        className={`fixed flex flex-col pointer-events-none transition-all duration-300 ease-in-out ${
+          shouldAutoMinimize ? 'z-20 opacity-60' : 'z-50 opacity-100'
         } ${
           isLeftSide
-            ? 'bottom-[76px] md:bottom-6 left-3 sm:left-6 items-start'
-            : 'bottom-[76px] md:bottom-6 right-3 sm:right-6 items-end'
-        } ${isScrolling ? 'opacity-70 hover:opacity-100' : ''}`}
+            ? 'bottom-[calc(76px+env(safe-area-inset-bottom,0px))] md:bottom-6 left-3 sm:left-6 items-start'
+            : 'bottom-[calc(76px+env(safe-area-inset-bottom,0px))] md:bottom-6 right-3 sm:right-6 items-end'
+        } ${isScrolling ? 'opacity-30 scale-90' : ''}`}
       >
         {/* Speech Bubble (hidden in minimized mode) */}
         {!effectiveMinimized && (
           <div className="pointer-events-auto">
             <HalumSpeechBubble
               isOpen={isChatOpen}
-              onOpenChat={() => setIsChatOpen(true)}
+              onOpenChat={() => {
+                setIsChatOpen(true);
+                try {
+                  sessionStorage.setItem('halum_welcome_dismissed', 'true');
+                } catch (e) {}
+              }}
               pathname={pathname}
               isLeftSide={isLeftSide}
               onToggleSide={handleToggleSide}
