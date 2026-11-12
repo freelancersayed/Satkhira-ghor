@@ -23,6 +23,8 @@ export default function HalumTigerAnimation({
   onClick,
   isMinimized = false,
   pointDirection = 'right', // 'left' | 'right'
+  isMoving = false,
+  facingLeft = false,
 }) {
   const [blink, setBlink] = useState(false);
 
@@ -67,7 +69,9 @@ export default function HalumTigerAnimation({
     <div
       onClick={onClick}
       className={`relative select-none cursor-pointer group transition-all duration-500 ${className} ${
-        isHappy
+        isMoving
+          ? 'animate-bounce scale-110 -rotate-3'
+          : isHappy
           ? 'animate-bounce'
           : isThinking
           ? '-rotate-3 scale-102'
@@ -126,7 +130,10 @@ export default function HalumTigerAnimation({
       )}
 
       {/* ── Full 2.5D Mascot Vector Canvas ── */}
-      <div className="w-28 sm:w-36 h-36 sm:h-44 relative flex items-center justify-center">
+      <div
+        className="w-28 sm:w-36 h-36 sm:h-44 relative flex items-center justify-center transition-transform duration-300"
+        style={{ transform: facingLeft ? 'scaleX(-1)' : 'none' }}
+      >
         <svg
           viewBox="0 0 140 170"
           className="w-full h-full overflow-visible drop-shadow-xl"

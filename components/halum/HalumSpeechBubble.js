@@ -187,7 +187,7 @@ export default function HalumSpeechBubble({
   }
 
   return (
-    <div className="relative mb-2 w-[270px] max-w-[calc(100vw-36px)] animate-slideUp select-none">
+    <div className="relative mb-2 w-full max-w-[270px] animate-slideUp select-none">
       <div
         onClick={handleOpenChatWithDismiss}
         className="bg-white/95 backdrop-blur-md text-stone-900 p-2.5 sm:p-3 rounded-2xl shadow-2xl border-2 border-amber-300/90 hover:border-[#016831] cursor-pointer transition-all hover:scale-[1.01] relative group overflow-hidden"
