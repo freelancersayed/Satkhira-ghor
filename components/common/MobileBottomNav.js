@@ -190,20 +190,7 @@ export default function MobileBottomNav() {
         </div>
       </aside>
 
-      {/* ═════════════════════════════════════════════════════════════════
-          ২. ফ্লোটিং চ্যাট / হেল্পলাইন বাটন (Floating Quick Contact at Bottom-Right)
-          ═════════════════════════════════════════════════════════════════ */}
-      <div className="md:hidden fixed bottom-[72px] right-3.5 z-40">
-        <button
-          type="button"
-          onClick={() => setChatModalOpen((prev) => !prev)}
-          aria-label="কাস্টমার সাপোর্ট ও চ্যাট"
-          className="w-12 h-12 rounded-full bg-[#E08E00] hover:bg-[#D97706] text-white flex items-center justify-center shadow-lg shadow-[#E08E00]/40 border-2 border-white active:scale-90 transition-transform group"
-        >
-          <MessageCircle className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
-          <span className="sr-only">চ্যাট করুন</span>
-        </button>
-      </div>
+      {/* ফ্লোটিং কাস্টমার সাপোর্ট বাটনটি এখন интерактив 'হালুম ভাই' AI অ্যাসিস্ট্যান্ট উইজেটে ইন্টিগ্রেটেড */}
 
       {/* ═════════════════════════════════════════════════════════════════
           ৩. মোবাইলের নিচের প্রিমিয়াম শর্টকাট আইকন বার (Bottom Navigation Bar)
