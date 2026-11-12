@@ -72,7 +72,7 @@ export default function HalumTigerAnimation({
       {/* ── Tiger Character Vector Canvas (Crisp 2D Cartoon / Lottie) ── */}
       <div className={`relative ${
         isMinimized ? 'w-14 h-14' : 'w-20 h-20 sm:w-24 sm:h-24'
-      } rounded-full bg-gradient-to-b from-[#FEF3C7] to-[#FDE68A] p-1.5 shadow-xl border-2 border-[#FAB116] flex items-center justify-center overflow-hidden transition-all duration-300`}>
+      } rounded-full bg-gradient-to-b from-[#FEF3C7] to-[#FDE68A] p-1.5 shadow-xl border-2 border-[#FAB116] flex items-center justify-center overflow-visible transition-all duration-300`}>
         {animationType === 'lottie' ? (
           <div className="w-full h-full flex items-center justify-center">
             <Lottie

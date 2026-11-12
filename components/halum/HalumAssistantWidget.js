@@ -54,26 +54,42 @@ export default function HalumAssistantWidget() {
   useEffect(() => {
     if (!mounted) return;
 
+    // Side preference handler
+    const restoreSidePreference = () => {
+      try {
+        const savedSide = localStorage.getItem('halum_side');
+        setIsLeftSide(savedSide === 'left');
+      } catch (e) {
+        setIsLeftSide(false);
+      }
+    };
+
     if (pathname.startsWith('/products/')) {
-      // On product detail page: Halum passionately praises the specific pure food!
+      // On product detail page: Automatically moves to the LEFT side so the right-side Buy Box is 100% clear!
+      setIsLeftSide(true);
       setCharacterState('praising');
       const timer = setTimeout(() => setCharacterState('idle'), 5000);
       return () => clearTimeout(timer);
     } else if (pathname === '/cart') {
+      restoreSidePreference();
       // On cart page: Halum dances to guide checkout
       setCharacterState('dancing');
       const timer = setTimeout(() => setCharacterState('idle'), 4000);
       return () => clearTimeout(timer);
     } else if (pathname === '/track-order') {
+      restoreSidePreference();
       // On track order page: Salutes and assures fast delivery
       setCharacterState('saluting');
       const timer = setTimeout(() => setCharacterState('idle'), 4000);
       return () => clearTimeout(timer);
     } else if (pathname === '/') {
+      restoreSidePreference();
       // On homepage landing: Warm welcome
       setCharacterState('greeting');
       const timer = setTimeout(() => setCharacterState('idle'), 3500);
       return () => clearTimeout(timer);
+    } else {
+      restoreSidePreference();
     }
   }, [pathname, mounted]);
 
@@ -152,7 +168,7 @@ export default function HalumAssistantWidget() {
     <>
       {/* ── Floating Character Widget & Speech Bubble Container with Adaptive Positioning ── */}
       <div
-        className={`fixed z-40 flex flex-col pointer-events-none transition-all duration-500 ease-in-out ${
+        className={`fixed z-50 flex flex-col pointer-events-none transition-all duration-500 ease-in-out ${
           isLeftSide
             ? 'bottom-[74px] md:bottom-6 left-3 sm:left-6 items-start'
             : 'bottom-[74px] md:bottom-6 right-3 sm:right-6 items-end'

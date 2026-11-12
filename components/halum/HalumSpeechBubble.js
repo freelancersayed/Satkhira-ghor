@@ -41,6 +41,11 @@ export default function HalumSpeechBubble({
   const currentProductPraise = productSlug ? PRODUCT_PRAISES[productSlug] : null;
   const currentRouteInfo = ROUTE_INTELLIGENCE[pathname] || ROUTE_INTELLIGENCE['/'];
 
+  // Whenever user navigates to a new page or product, reopen bubble with the new context!
+  useEffect(() => {
+    setVisible(true);
+  }, [pathname, hasCartItem]);
+
   // Rotate fun quips periodically when idle on general routes
   useEffect(() => {
     if (isOpen || currentProductPraise) return;
@@ -161,6 +166,20 @@ export default function HalumSpeechBubble({
             {currentText}
           </p>
         </div>
+
+        {/* Quick Click Chips on Bubble */}
+        {currentProductPraise && currentProductPraise.chips && (
+          <div className="mt-2 pt-1.5 border-t border-amber-100 flex flex-wrap gap-1">
+            {currentProductPraise.chips.slice(0, 2).map((chip, idx) => (
+              <span
+                key={idx}
+                className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-[#016831] border border-amber-200"
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Action callout */}
         <div className="mt-1.5 pt-1.5 border-t border-amber-100 flex items-center justify-between text-[9px] font-black text-[#016831]">
