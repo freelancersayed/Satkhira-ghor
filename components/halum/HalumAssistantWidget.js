@@ -18,17 +18,20 @@ export default function HalumAssistantWidget() {
   const [characterState, setCharacterState] = useState('idle');
 
   // Smart Autonomous Horizontal Positioning & 2.5D Movement States
-  const [positionX, setPositionX] = useState(20);
-  const [dockSide, setDockSide] = useState('right'); // 'left' | 'right'
+  const [positionX, setPositionX] = useState(14);
+  const [dockSide, setDockSide] = useState('left'); // 'left' | 'right' (Default: LEFT side!)
   const [isMoving, setIsMoving] = useState(false);
-  const [facingLeft, setFacingLeft] = useState(false);
+  const [facingLeft, setFacingLeft] = useState(false); // looking into webpage content
   const [isDragging, setIsDragging] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false); // ALWAYS false by default on mobile!
   const [isScrolling, setIsScrolling] = useState(false);
   const [isScrollAsking, setIsScrollAsking] = useState(false);
   const [hasTargetOnScreen, setHasTargetOnScreen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [welcomeStep, setWelcomeStep] = useState(0); // 0: none, 1: grand welcome, 2: help ask
+  const [itemJustAdded, setItemJustAdded] = useState(false);
 
+  const prevLastAddedRef = useRef(null);
   const widgetRef = useRef(null);
   const scrollAskTimeoutRef = useRef(null);
   const dragRef = useRef({
@@ -46,10 +49,10 @@ export default function HalumAssistantWidget() {
   // Helper: Calculate strictly bounded horizontal safe coordinates
   // Mathematical guarantee: Halum and his speech bubble NEVER cross screen left or right edges!
   const getSafeX = useCallback((side) => {
-    if (typeof window === 'undefined') return 20;
+    if (typeof window === 'undefined') return 14;
     const isMobile = window.innerWidth < 640;
     const widgetWidth = isMobile ? 80 : 112;
-    const safeMargin = isMobile ? 42 : 52;
+    const safeMargin = isMobile ? 12 : 20;
 
     if (side === 'left') {
       return safeMargin;
@@ -79,25 +82,49 @@ export default function HalumAssistantWidget() {
     return () => clearTimeout(moveTimer);
   }, []);
 
-  // Initialize position on mount (Active by default on mobile!)
+  // Initialize position on mount - DEFAULT LEFT at vertical middle
   useEffect(() => {
     setMounted(true);
-    let initialSide = 'right';
+    let initialSide = 'left';
     try {
       const savedSide = localStorage.getItem('halum_side');
-      if (savedSide === 'left') initialSide = 'left';
+      if (savedSide === 'right' && !pathname.startsWith('/products/') && pathname !== '/') {
+        initialSide = 'right';
+      }
     } catch (e) {}
 
-    // On product detail page, walk to LEFT side to leave right-side buy-box 100% unobstructed!
-    if (pathname && pathname.startsWith('/products/')) {
-      initialSide = 'left';
-    }
-
     setDockSide(initialSide);
-    setFacingLeft(initialSide === 'left');
+    setFacingLeft(initialSide === 'right');
     const x = getSafeX(initialSide);
     setPositionX(x);
   }, [pathname, getSafeX]);
+
+  // Welcome sequence on homepage entry / refresh
+  // Phase 1 (2.6s): Happy smile + enlarged scale ("সাতক্ষীরা ঘরে স্বাগতম")
+  // Phase 2 (7s): Normal size + help offer ("কীভাবে সহযোগিতা করতে পারি বলো? - পণ্য খুঁজে পাচ্ছ না? আমাকে বলো আমি খুঁজে দিচ্ছি!")
+  useEffect(() => {
+    if (!mounted) return;
+
+    if (pathname === '/') {
+      setWelcomeStep(1);
+      setCharacterState('happy');
+
+      const step1Timer = setTimeout(() => {
+        setWelcomeStep(2);
+        setCharacterState('idle');
+
+        const step2Timer = setTimeout(() => {
+          setWelcomeStep(0);
+        }, 7000);
+
+        return () => clearTimeout(step2Timer);
+      }, 2600);
+
+      return () => clearTimeout(step1Timer);
+    } else {
+      setWelcomeStep(0);
+    }
+  }, [pathname, mounted]);
 
   // Handle window resize dynamically without overflowing
   useEffect(() => {
@@ -175,19 +202,10 @@ export default function HalumAssistantWidget() {
   const checkObstruction = useCallback(() => {
     if (isDragging || isChatOpen || isCartDrawerOpen || isModalOpen) return;
     if (pathname.startsWith('/products/')) return; // Product page stays left
+    if (!widgetRef.current) return;
 
-    const isMobile = window.innerWidth < 640;
-    const w = isMobile ? 80 : 112;
-    const h = isMobile ? 112 : 144;
-    const bottomPos = isMobile ? 80 : 24;
-    const topPos = window.innerHeight - bottomPos - h;
-
-    const box = {
-      left: positionX,
-      top: topPos,
-      right: positionX + w,
-      bottom: window.innerHeight - bottomPos,
-    };
+    const box = widgetRef.current.getBoundingClientRect();
+    if (!box || box.width === 0) return;
 
     const candidates = document.querySelectorAll(
       'button:not([data-halum-ignore]), a.product-card, .product-card, [data-product-card], input, form'
@@ -217,14 +235,14 @@ export default function HalumAssistantWidget() {
       setDockSide((currentSide) => {
         const nextSide = currentSide === 'left' ? 'right' : 'left';
         const newX = getSafeX(nextSide);
-        walkTo(newX, nextSide === 'left');
+        walkTo(newX, nextSide === 'right');
         try {
           localStorage.setItem('halum_side', nextSide);
         } catch (e) {}
         return nextSide;
       });
     }
-  }, [isDragging, isChatOpen, isCartDrawerOpen, isModalOpen, pathname, positionX, getSafeX, walkTo]);
+  }, [isDragging, isChatOpen, isCartDrawerOpen, isModalOpen, pathname, getSafeX, walkTo]);
 
   // ── 3. Scroll Listener with Proactive Dialogue ──
   // Requirement: "ইউজার ওয়েব সাইটে স্ক্রল করলে হালুম মামা বার বার জিজ্ঞেস করবে ”কি লাগবে আমাকে বলুন খুজে দিচ্ছি”"
@@ -296,18 +314,19 @@ export default function HalumAssistantWidget() {
       setCharacterState('saluting');
       const timer = setTimeout(() => setCharacterState('idle'), 4000);
       return () => clearTimeout(timer);
-    } else if (pathname === '/') {
-      setCharacterState('greeting');
-      const timer = setTimeout(() => setCharacterState('idle'), 3500);
-      return () => clearTimeout(timer);
     }
   }, [pathname, mounted, getSafeX, walkTo, checkTargetButtons]);
 
   // Celebration on cart add
   useEffect(() => {
-    if (lastAddedItem) {
+    if (lastAddedItem && lastAddedItem !== prevLastAddedRef.current) {
+      prevLastAddedRef.current = lastAddedItem;
+      setItemJustAdded(true);
       setCharacterState('happy');
-      const timer = setTimeout(() => setCharacterState('idle'), 4500);
+      const timer = setTimeout(() => {
+        setItemJustAdded(false);
+        setCharacterState('idle');
+      }, 6000);
       return () => clearTimeout(timer);
     }
   }, [lastAddedItem]);
@@ -381,6 +400,9 @@ export default function HalumAssistantWidget() {
     } else if (wasMoved) {
       const newSide = positionX < window.innerWidth / 2 ? 'left' : 'right';
       setDockSide(newSide);
+      setFacingLeft(newSide === 'right');
+      const targetX = getSafeX(newSide);
+      walkTo(targetX, newSide === 'right');
       try {
         localStorage.setItem('halum_side', newSide);
       } catch (err) {}
@@ -443,8 +465,8 @@ export default function HalumAssistantWidget() {
   return (
     <>
       {/* ── 2.5D Animated Flying / Roaming Character Container ── */}
-      {/* Vertically anchored with bottom (never goes below screen!) */}
-      {/* Horizontally clamped with positionX (never goes outside left/right screen!) */}
+      {/* Vertically centered at screen eye-level (between top and bottom) */}
+      {/* Horizontally clamped with positionX (default LEFT side, safe bounded) */}
       <div
         ref={widgetRef}
         onPointerDown={handlePointerDown}
@@ -453,19 +475,24 @@ export default function HalumAssistantWidget() {
         onPointerCancel={handlePointerUp}
         style={{
           position: 'fixed',
-          bottom: 'calc(76px + env(safe-area-inset-bottom, 0px))',
+          top: '48%',
+          transform: `translateY(-50%) scale(${
+            welcomeStep === 1 ? 1.22 : shouldAutoMinimize ? 0.9 : 1
+          })`,
           left: `${positionX}px`,
           transition: isDragging
             ? 'none'
             : isMoving
-            ? 'left 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease'
-            : 'left 0.35s ease-out, opacity 0.25s ease',
+            ? 'left 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease'
+            : 'left 0.35s ease-out, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
           zIndex: shouldAutoMinimize ? 20 : 50,
           touchAction: 'none',
         }}
-        className={`flex flex-col items-center select-none pointer-events-none md:bottom-6 ${
-          shouldAutoMinimize ? 'opacity-65 scale-90' : 'opacity-100'
-        } ${isScrolling ? 'opacity-75' : ''}`}
+        className={`flex flex-col select-none pointer-events-none ${
+          dockSide === 'left' ? 'items-start' : 'items-end'
+        } ${shouldAutoMinimize ? 'opacity-65' : 'opacity-100'} ${
+          isScrolling ? 'opacity-75' : ''
+        }`}
       >
         {/* Compact Smart Speech Bubble perched directly over Halum's head */}
         {!effectiveMinimized && (
@@ -479,12 +506,18 @@ export default function HalumAssistantWidget() {
               onTriggerTargetAction={handleTriggerTargetAction}
               hasTargetOnScreen={hasTargetOnScreen}
               isScrollAsking={isScrollAsking}
+              welcomeStep={welcomeStep}
+              lastAddedItem={itemJustAdded ? lastAddedItem : null}
             />
           </div>
         )}
 
         {/* 2.5D Animated Mascot Character */}
-        <div className="pointer-events-auto cursor-grab active:cursor-grabbing">
+        <div
+          className={`pointer-events-auto cursor-grab active:cursor-grabbing ${
+            dockSide === 'left' ? 'ml-1' : 'mr-1'
+          }`}
+        >
           <HalumTigerAnimation
             state={characterState}
             onClick={() => handleToggleChat()}
