@@ -48,7 +48,7 @@ export async function POST(request) {
 
     // ─────────────────────────────────────────────────────────────
     // Internal Intelligent NLP Brain for Halum Bhai
-    // 4-Step Customer Journey Engine
+    // 4-Step Customer Journey Engine with Route-Aware Context
     // ─────────────────────────────────────────────────────────────
     let reply = '';
     let recommendedProducts = [];
@@ -56,8 +56,35 @@ export async function POST(request) {
     let characterState = 'talking';
     let action = null; // { type: 'order_now' }
 
-    // ── ধাপ ১: ওয়েবসাইটে প্রবেশ করা মাত্র (Welcome & Greeting) ──
+    const currentPath = context.pathname || '/';
+    const currentProductSlug = currentPath.startsWith('/products/')
+      ? currentPath.replace('/products/', '').split('?')[0].split('/')[0]
+      : null;
+    const activeBrowsingProduct = currentProductSlug ? PRODUCT_MAP[currentProductSlug] : null;
+
+    // ── স্পেশাল কনটেক্সট: কাস্টমার যে পণ্যটি দেখছেন, সেটির লাইভ প্রশংসা ও গুণগান ──
     if (
+      activeBrowsingProduct &&
+      (cleanMsg.includes('দাম') ||
+        cleanMsg.includes('price') ||
+        cleanMsg.includes('এইটা') ||
+        cleanMsg.includes('এই পণ্য') ||
+        cleanMsg.includes('উপকারিতা') ||
+        cleanMsg.includes('খাওয়ার নিয়ম') ||
+        cleanMsg.includes('গুণ') ||
+        cleanMsg.includes('কেমন'))
+    ) {
+      reply = `হালুম! আপনি এখন দেখছেন আমাদের '${activeBrowsingProduct.name}'। ${
+        activeBrowsingProduct.shortDescription || activeBrowsingProduct.description
+      } এর অফার মূল্য মাত্র ৳${activeBrowsingProduct.price} (${activeBrowsingProduct.unit})! কোনো ভেজালের লেশমাত্র নেই! 😋`;
+      recommendedProducts = [formatProductCard(activeBrowsingProduct)];
+      quickReplies = ['🛒 কার্টে যোগ করুন', 'Order Now / থাবা বসান 🐾', '🚚 ডেলিভারি কত দিনে পাব?'];
+      characterState = 'praising';
+      action = { type: 'order_now', label: 'থাবা বসান (Order Now)' };
+    }
+
+    // ── ধাপ ১: ওয়েবসাইটে প্রবেশ করা মাত্র (Welcome & Greeting) ──
+    else if (
       !cleanMsg ||
       cleanMsg.includes('হ্যালো') ||
       cleanMsg.includes('হাই') ||

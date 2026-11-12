@@ -24,6 +24,7 @@ export default function HalumTigerAnimation({
   className = '',
   onClick,
   animationType = 'vector', // 'vector' | 'lottie'
+  isMinimized = false,
 }) {
   const [blink, setBlink] = useState(false);
 
@@ -40,6 +41,7 @@ export default function HalumTigerAnimation({
   const isListening = state === 'listening';
   const isSaluting = state === 'saluting';
   const isGreeting = state === 'greeting';
+  const isPraising = state === 'praising';
 
   return (
     <div
@@ -47,26 +49,30 @@ export default function HalumTigerAnimation({
       className={`relative select-none cursor-pointer group transition-transform duration-300 ${className} ${
         isDancing
           ? 'animate-bounce'
+          : isPraising
+          ? 'scale-105'
           : isListening
           ? '-rotate-3 scale-105'
           : isSaluting
           ? 'hover:scale-105'
           : 'hover:scale-105'
       }`}
-      title="হালুম ভাই (Halum Bhai) - কথা বলতে ক্লিক করুন"
+      title={isMinimized ? "হালুম ভাই - বড় করতে ক্লিক করুন 🐯" : "হালুম ভাই (Halum Bhai) - কথা বলতে ক্লিক করুন"}
       aria-label="হালুম ভাই AI শপিং সহকারী"
     >
       {/* ── Glow / Backdrop Aura ── */}
       <div className={`absolute inset-0 rounded-full blur-md group-hover:blur-lg transition-all scale-105 ${
         isSaluting
           ? 'bg-gradient-to-tr from-emerald-400/50 via-teal-400/40 to-amber-300/40'
-          : isDancing
+          : isDancing || isPraising
           ? 'bg-gradient-to-tr from-amber-400/60 via-yellow-400/50 to-orange-400/40'
           : 'bg-gradient-to-tr from-amber-400/40 via-emerald-400/30 to-amber-300/40'
       }`} />
 
       {/* ── Tiger Character Vector Canvas (Crisp 2D Cartoon / Lottie) ── */}
-      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-b from-[#FEF3C7] to-[#FDE68A] p-1.5 shadow-xl border-2 border-[#FAB116] flex items-center justify-center overflow-hidden">
+      <div className={`relative ${
+        isMinimized ? 'w-14 h-14' : 'w-20 h-20 sm:w-24 sm:h-24'
+      } rounded-full bg-gradient-to-b from-[#FEF3C7] to-[#FDE68A] p-1.5 shadow-xl border-2 border-[#FAB116] flex items-center justify-center overflow-hidden transition-all duration-300`}>
         {animationType === 'lottie' ? (
           <div className="w-full h-full flex items-center justify-center">
             <Lottie
@@ -93,6 +99,8 @@ export default function HalumTigerAnimation({
           <g className={`transition-transform duration-300 origin-[35px_30px] ${
             isListening
               ? '-rotate-12 translate-y-[-2px]'
+              : isPraising
+              ? 'animate-pulse'
               : state === 'talking'
               ? 'animate-pulse'
               : ''
@@ -104,6 +112,8 @@ export default function HalumTigerAnimation({
           <g className={`transition-transform duration-300 origin-[85px_30px] ${
             isListening
               ? 'rotate-12 translate-y-[-2px]'
+              : isPraising
+              ? 'animate-pulse'
               : state === 'talking'
               ? 'animate-pulse'
               : ''
@@ -141,8 +151,8 @@ export default function HalumTigerAnimation({
               <path d="M42 56 Q48 62 54 56" stroke="#1F2937" strokeWidth="3" strokeLinecap="round" fill="none" />
               <path d="M66 56 Q72 62 78 56" stroke="#1F2937" strokeWidth="3" strokeLinecap="round" fill="none" />
             </>
-          ) : isDancing || isSaluting ? (
-            /* Starry Happy Cheerful Eyes (Step 3 & 4) */
+          ) : isDancing || isSaluting || isPraising ? (
+            /* Starry Happy Cheerful Eyes (Step 3 & 4 & Praising) */
             <>
               <path d="M42 58 Q48 50 54 58" stroke="#1F2937" strokeWidth="3.5" strokeLinecap="round" fill="none" />
               <path d="M66 58 Q72 50 78 58" stroke="#1F2937" strokeWidth="3.5" strokeLinecap="round" fill="none" />
@@ -204,6 +214,12 @@ export default function HalumTigerAnimation({
               <path d="M54 71 C54 78, 66 78, 66 71 Z" fill="#BE123C" stroke="#1F2937" strokeWidth="2" />
               <path d="M57 74 Q60 77 63 74" fill="#F43F5E" />
             </g>
+          ) : isPraising ? (
+            /* Tasty Smiling Mouth with Tongue Licking Lip (জিভে জল চলে এলো!) */
+            <g>
+              <path d="M51 71 Q60 82 69 71" stroke="#1F2937" strokeWidth="2.5" strokeLinecap="round" fill="#BE123C" />
+              <path d="M57 76 C57 80, 63 80, 63 76" fill="#F43F5E" stroke="#1F2937" strokeWidth="1" />
+            </g>
           ) : isDancing || isSaluting ? (
             /* Big Joyful Smile (Step 3 & 4) */
             <path d="M51 71 Q60 82 69 71" stroke="#1F2937" strokeWidth="2.5" strokeLinecap="round" fill="#BE123C" />
@@ -240,6 +256,20 @@ export default function HalumTigerAnimation({
               <circle cx="95" cy="79" r="2" fill="#FFFFFF" />
               <circle cx="100" cy="81" r="2" fill="#FFFFFF" />
             </g>
+          )}
+
+          {/* Praising State: Holding Pure Product with Sparkles */}
+          {isPraising && (
+            <>
+              <g transform="translate(12, 72)" className="animate-pulse">
+                <rect x="0" y="4" width="16" height="18" rx="4" fill="#FAB116" stroke="#1F2937" strokeWidth="1.5" />
+                <rect x="3" y="0" width="10" height="4" rx="2" fill="#E86A1E" stroke="#1F2937" strokeWidth="1.2" />
+                <text x="3" y="16" fontSize="9" fill="#1F2937" fontWeight="bold">🍯</text>
+              </g>
+              <g className="animate-bounce origin-[95px_75px]">
+                <text x="92" y="74" fontSize="12">✨</text>
+              </g>
+            </>
           )}
 
           {/* Step 3: Dancing & Pointing Paw towards Honey Jar / Order Button */}
@@ -284,11 +314,13 @@ export default function HalumTigerAnimation({
         </span>
       </div>
 
-      {/* Halum Bhai Badge Name Pill */}
-      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#016831] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md border border-[#FAB116] whitespace-nowrap flex items-center gap-1 group-hover:scale-105 transition-transform">
-        <span>হালুম ভাই</span>
-        <span className="text-[#FAB116]">🐯</span>
-      </div>
+      {/* Halum Bhai Badge Name Pill (hidden in minimized mode) */}
+      {!isMinimized && (
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#016831] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md border border-[#FAB116] whitespace-nowrap flex items-center gap-1 group-hover:scale-105 transition-transform">
+          <span>হালুম ভাই</span>
+          <span className="text-[#FAB116]">🐯</span>
+        </div>
+      )}
     </div>
   );
 }

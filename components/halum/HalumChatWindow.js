@@ -21,6 +21,8 @@ export default function HalumChatWindow({
   onClose,
   onStateChange,
   currentState = 'idle',
+  pathname = '/',
+  isLeftSide = false,
 }) {
   const [messages, setMessages] = useState([
     {
@@ -99,7 +101,7 @@ export default function HalumChatWindow({
       const res = await fetch('/api/halum-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, context: { pathname } }),
       });
 
       const data = await res.json();
@@ -166,7 +168,11 @@ export default function HalumChatWindow({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-24 sm:bottom-6 right-3 sm:right-6 z-50 w-[94vw] sm:w-[380px] max-h-[82vh] h-[540px] bg-white rounded-3xl shadow-2xl border-2 border-[#FAB116] flex flex-col overflow-hidden animate-slideUp">
+    <div
+      className={`fixed bottom-24 sm:bottom-6 ${
+        isLeftSide ? 'left-3 sm:left-6' : 'right-3 sm:right-6'
+      } z-50 w-[94vw] sm:w-[380px] max-h-[82vh] h-[540px] bg-white rounded-3xl shadow-2xl border-2 border-[#FAB116] flex flex-col overflow-hidden animate-slideUp transition-all duration-300`}
+    >
       {/* ── Chat Header ── */}
       <div className="p-3.5 bg-gradient-to-r from-[#016831] via-[#015829] to-[#014D24] text-white flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-2.5">
