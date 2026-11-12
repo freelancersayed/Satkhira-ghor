@@ -10,6 +10,7 @@ import {
   Minus,
   Zap,
   Plus,
+  Search,
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import {
@@ -22,6 +23,7 @@ import { products } from '@/data/products';
 
 export default function HalumSpeechBubble({
   onOpenChat,
+  onSendMessage,
   isOpen = false,
   pathname = '/',
   isLeftSide = false,
@@ -30,8 +32,9 @@ export default function HalumSpeechBubble({
   onTriggerTargetAction,
   hasTargetOnScreen = false,
   targetType = 'add-to-cart',
+  isScrollAsking = false,
 }) {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [quipIndex, setQuipIndex] = useState(0);
 
   const items = useCartStore((state) => state.items);
@@ -70,54 +73,35 @@ export default function HalumSpeechBubble({
 
   const currentRouteInfo = ROUTE_INTELLIGENCE[pathname] || ROUTE_INTELLIGENCE['/'];
 
-  // ── Non-Intrusive Welcome Trigger (3.5s delay on initial visit, saved in sessionStorage) ──
+  // Proactive visibility: Always keep visible on mobile & desktop
+  // When scrolling triggers isScrollAsking, ensure bubble is visible!
   useEffect(() => {
-    // If on a specific product detail page, cart page, or near free shipping, show promptly
-    if (productKnowledge || pathname === '/cart' || isNearFreeDelivery) {
-      const timer = setTimeout(() => setVisible(true), 1200);
-      return () => clearTimeout(timer);
-    }
-
-    // On home/general pages: check if user already dismissed welcome toast in this session
-    try {
-      const isDismissed = sessionStorage.getItem('halum_welcome_dismissed');
-      if (isDismissed === 'true') {
-        setVisible(false);
-        return;
-      }
-    } catch (e) {}
-
-    // Wait 3.5 seconds before showing compact welcome toast (Requirement 2)
-    const welcomeTimer = setTimeout(() => {
+    if (isScrollAsking) {
       setVisible(true);
-    }, 3500);
-
-    return () => clearTimeout(welcomeTimer);
-  }, [pathname, productKnowledge, isNearFreeDelivery]);
+    }
+  }, [isScrollAsking]);
 
   // Periodic quip rotation when idle
   useEffect(() => {
-    if (isOpen || productKnowledge || isNearFreeDelivery) return;
+    if (isOpen || productKnowledge || isNearFreeDelivery || isScrollAsking) return;
     const timer = setInterval(() => {
       setQuipIndex((prev) => (prev + 1) % TIGER_WITTY_QUIPS.length);
     }, 12000);
     return () => clearInterval(timer);
-  }, [isOpen, productKnowledge, isNearFreeDelivery]);
+  }, [isOpen, productKnowledge, isNearFreeDelivery, isScrollAsking]);
 
-  // Dismiss handler saving to sessionStorage
+  // Dismiss handler (soft dismiss: hides briefly, reappears when scrolling resumes)
   const handleDismiss = (e) => {
     e.stopPropagation();
     setVisible(false);
-    try {
-      sessionStorage.setItem('halum_welcome_dismissed', 'true');
-    } catch (e) {}
   };
 
-  const handleOpenChatWithDismiss = () => {
-    try {
-      sessionStorage.setItem('halum_welcome_dismissed', 'true');
-    } catch (e) {}
-    if (onOpenChat) onOpenChat();
+  const handleOpenChat = (query = null) => {
+    if (query && onSendMessage) {
+      onSendMessage(query);
+    } else if (onOpenChat) {
+      onOpenChat();
+    }
   };
 
   // 1-Click Upsell Add to Cart
@@ -130,21 +114,25 @@ export default function HalumSpeechBubble({
   };
 
   // Determine active text & badge
-  let currentText = 'হালুম! খাঁটি মধু বা ঘি খুঁজছো? 🐯';
+  let currentText = 'হালুম! কি লাগবে আমাকে বলুন, এখনই খুঁজে দিচ্ছি! 🐯🔍';
   let badgeTitle = 'হালুম মামা';
   let badgeIcon = '🐯';
 
-  if (isNearFreeDelivery) {
+  if (isScrollAsking) {
+    currentText = 'কি লাগবে আমাকে বলুন, খুঁজে দিচ্ছি! 🐯🔍';
+    badgeTitle = 'হালুম মামা সাহায্যকারী';
+    badgeIcon = '🔍';
+  } else if (isNearFreeDelivery) {
     badgeTitle = 'ফ্রি ডেলিভারি টিপ 🚚';
     badgeIcon = '🎁';
-    currentText = `আর মাত্র ৳${remainingForFree} টাকার আচার বা চুইঝাল নিলেই ডেলিভারি চার্জ একদম ফ্রি! 🚚✨`;
+    currentText = `আর মাত্র ৳${remainingForFree} টাকার পণ্য নিলেই ডেলিভারি চার্জ একদম ফ্রি! 🚚✨`;
   } else if (productKnowledge) {
     currentText = productKnowledge.dialogue;
     badgeTitle = productKnowledge.title;
     badgeIcon = '🍯';
   } else if (hasCartItem && pathname !== '/cart') {
     currentText =
-      'বাহ! খাঁটি খাবার তো কার্টে যুক্ত হয়েছে। বাঘের মতো শক্তি পেতে নিচে বাটনটায় একটা থাবা বসান আর অর্ডার কনফার্ম করুন! 🐾';
+      'বাহ! খাঁটি খাবার কার্টে যোগ হয়েছে। বাঘের মতো শক্তি পেতে নিচে থাবা বসান আর অর্ডার কনফার্ম করুন! 🐾';
     badgeTitle = 'অর্ডার গাইড';
     badgeIcon = '🐾';
   } else if (quipIndex > 0 && pathname === '/') {
@@ -161,7 +149,7 @@ export default function HalumSpeechBubble({
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(
-        currentText.replace(/[🐯🍯🧈🌿🥛🎁🌱🌶️✨🐾👉👇👈]/g, '')
+        currentText.replace(/[🐯🍯🧈🌿🥛🎁🌱🌶️✨🐾👉👇👈🔍]/g, '')
       );
       utterance.lang = 'bn-BD';
       utterance.rate = 0.95;
@@ -171,14 +159,10 @@ export default function HalumSpeechBubble({
 
   const handleActionClick = (e) => {
     e.stopPropagation();
-    try {
-      sessionStorage.setItem('halum_welcome_dismissed', 'true');
-    } catch (err) {}
-
     if (onTriggerTargetAction) {
       onTriggerTargetAction();
     } else {
-      onOpenChat();
+      handleOpenChat();
     }
   };
 
@@ -187,24 +171,25 @@ export default function HalumSpeechBubble({
   }
 
   return (
-    <div className="relative mb-2 w-full max-w-[270px] animate-slideUp select-none">
+    <div className="relative mb-2 w-full max-w-[270px] select-none animate-slideUp">
+      {/* ── Premium Glassmorphic Card Container ── */}
       <div
-        onClick={handleOpenChatWithDismiss}
-        className="bg-white/95 backdrop-blur-md text-stone-900 p-2.5 sm:p-3 rounded-2xl shadow-2xl border-2 border-amber-300/90 hover:border-[#016831] cursor-pointer transition-all hover:scale-[1.01] relative group overflow-hidden"
+        onClick={() => handleOpenChat()}
+        className="bg-gradient-to-b from-white/98 via-[#FEFBF2]/95 to-white/98 backdrop-blur-md text-stone-900 p-3 sm:p-3.5 rounded-3xl shadow-[0_12px_36px_-6px_rgba(250,177,22,0.35),0_4px_16px_rgba(1,104,49,0.12)] border-2 border-[#FAB116] cursor-pointer transition-all hover:scale-[1.01] relative group"
       >
-        {/* Top Control Bar: Title Badge, Voice, Swap Side, Minimize, Touch-Friendly Close (Requirement 4: 44x44px touch area) */}
-        <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-amber-100 text-[10px] text-stone-500 font-bold">
-          <div className="flex items-center gap-1 text-[#016831] truncate">
-            <span>{badgeIcon}</span>
-            <span className="truncate max-w-[120px] font-black">{badgeTitle}</span>
+        {/* Top Header Bar: Title Badge, Voice, Swap Side, Minimize, Touch-Friendly Close */}
+        <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-amber-200/70 text-[10px] text-stone-600 font-bold">
+          <div className="flex items-center gap-1.5 text-[#016831] truncate">
+            <span className="text-sm">{badgeIcon}</span>
+            <span className="truncate max-w-[130px] font-black tracking-tight">{badgeTitle}</span>
           </div>
 
-          <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
             {/* Audio Voice button */}
             <button
               type="button"
               onClick={handleSpeak}
-              className="min-w-[34px] min-h-[34px] flex items-center justify-center p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100/70 transition-colors"
+              className="min-w-[34px] min-h-[34px] flex items-center justify-center p-1 rounded-xl text-stone-600 hover:text-[#016831] hover:bg-amber-100/70 active:scale-95 transition-all"
               title="মুখে শুনুন 🔊"
               aria-label="শুনুন"
             >
@@ -216,7 +201,7 @@ export default function HalumSpeechBubble({
               <button
                 type="button"
                 onClick={onToggleSide}
-                className="min-w-[34px] min-h-[34px] flex items-center justify-center p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100/70 transition-colors"
+                className="min-w-[34px] min-h-[34px] flex items-center justify-center p-1 rounded-xl text-stone-600 hover:text-[#016831] hover:bg-amber-100/70 active:scale-95 transition-all"
                 title={isLeftSide ? 'ডান পাশে নিন' : 'বাম পাশে নিন'}
                 aria-label="পজিশন পরিবর্তন"
               >
@@ -229,7 +214,7 @@ export default function HalumSpeechBubble({
               <button
                 type="button"
                 onClick={onMinimize}
-                className="min-w-[34px] min-h-[34px] flex items-center justify-center p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100/70 transition-colors"
+                className="min-w-[34px] min-h-[34px] flex items-center justify-center p-1 rounded-xl text-stone-600 hover:text-[#016831] hover:bg-amber-100/70 active:scale-95 transition-all"
                 title="ছোট করুন"
                 aria-label="মিনিমাইজ"
               >
@@ -237,12 +222,12 @@ export default function HalumSpeechBubble({
               </button>
             )}
 
-            {/* Close button with 44x44px Touch Area (Requirement 2 & 4) */}
+            {/* Close button with 44px Touch Area */}
             <button
               type="button"
               onClick={handleDismiss}
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 -my-2 text-stone-400 hover:text-stone-800 hover:bg-stone-100 active:scale-95 transition-all rounded-full"
-              title="বন্ধ করুন (এই সেশনে আর দেখাবে না)"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 -my-2 text-stone-400 hover:text-stone-800 hover:bg-amber-100 active:scale-95 transition-all rounded-full"
+              title="বন্ধ করুন"
               aria-label="বন্ধ"
             >
               <X className="w-4 h-4" />
@@ -250,21 +235,46 @@ export default function HalumSpeechBubble({
           </div>
         </div>
 
-        {/* Bubble Message */}
-        <div className="flex items-start gap-1.5">
+        {/* Bubble Message Text */}
+        <div className="flex items-start gap-1.5 my-1">
           {isNearFreeDelivery ? (
-            <ShoppingBag className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5 animate-bounce" />
+            <ShoppingBag className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5 animate-bounce" />
           ) : productKnowledge ? (
-            <Sparkles className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-[#FAB116] flex-shrink-0 mt-0.5 animate-pulse" />
           ) : hasCartItem ? (
-            <ShoppingBag className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5 animate-bounce" />
+            <ShoppingBag className="w-4 h-4 text-[#FAB116] flex-shrink-0 mt-0.5 animate-bounce" />
           ) : (
-            <Sparkles className="w-3.5 h-3.5 text-[#FAB116] flex-shrink-0 mt-0.5" />
+            <Sparkles className="w-4 h-4 text-[#FAB116] flex-shrink-0 mt-0.5 animate-pulse" />
           )}
-          <p className="text-[11px] sm:text-xs font-bold leading-relaxed text-stone-800 break-words">
+          <p className="text-xs sm:text-[13px] font-black leading-snug text-stone-900 break-words">
             {currentText}
           </p>
         </div>
+
+        {/* ── Quick Action Search Chips (When asking "কি লাগবে আমাকে বলুন") ── */}
+        {isScrollAsking && (
+          <div
+            className="mt-2 pt-2 border-t border-amber-200/80 flex flex-wrap gap-1.5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {[
+              { label: '🍯 মধু', query: 'খাঁটি মধু দেখতে চাই' },
+              { label: '🧈 গাওয়া ঘি', query: 'বিলোনা গাওয়া ঘি' },
+              { label: '🌿 ঘানি তেল', query: 'সরিষার তেল' },
+              { label: '🥛 সন্দেশ', query: 'ক্ষীর সন্দেশ' },
+              { label: '🎁 অফার', query: 'আজকের অফার কি আছে' },
+            ].map((chip, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleOpenChat(chip.query)}
+                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-100 text-[#016831] border border-amber-300 text-[10px] font-bold shadow-2xs active:scale-95 transition-all flex items-center gap-1"
+              >
+                <span>{chip.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* 1-Click Free Delivery Upsell Add-Button */}
         {isNearFreeDelivery && upsellProduct && (
@@ -281,7 +291,7 @@ export default function HalumSpeechBubble({
         )}
 
         {/* Direct Action 1-Tap Trigger Button */}
-        {!isNearFreeDelivery && (hasTargetOnScreen || productKnowledge || pathname === '/cart') && (
+        {!isNearFreeDelivery && !isScrollAsking && (hasTargetOnScreen || productKnowledge || pathname === '/cart') && (
           <div className="mt-2 pt-1.5 border-t border-amber-100">
             <button
               type="button"
@@ -298,18 +308,23 @@ export default function HalumSpeechBubble({
           </div>
         )}
 
-        {/* Action callout bottom */}
-        <div className="mt-1.5 pt-1 flex items-center justify-between text-[9px] font-black text-[#016831]">
-          <span>হালুম মামার সাথে চ্যাট করতে ক্লিক করুন</span>
-          <span>খুলুন &rarr;</span>
+        {/* Callout Bottom Clickable Hint */}
+        <div className="mt-1.5 pt-1 flex items-center justify-between text-[10px] font-black text-[#016831]">
+          <span className="flex items-center gap-1">
+            <Search className="w-3 h-3 text-[#FAB116]" />
+            <span>খুঁজতে এখানে চাপ দিন</span>
+          </span>
+          <span className="text-amber-700 font-bold">চ্যাট খুলুন &rarr;</span>
         </div>
 
-        {/* Speech Bubble Arrow Tail pointing down (adaptive left/right) */}
+        {/* ── Speech Bubble Tail pointing down towards Halum (Left or Right) ── */}
         <div
-          className={`absolute -bottom-2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white drop-shadow-xs ${
-            isLeftSide ? 'left-10' : 'right-10'
+          className={`absolute -bottom-2.5 w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[9px] border-t-[#FAB116] drop-shadow-xs transition-all ${
+            isLeftSide ? 'left-8' : 'right-8'
           }`}
-        />
+        >
+          <div className="absolute -top-[9px] -left-[8px] w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white" />
+        </div>
       </div>
     </div>
   );

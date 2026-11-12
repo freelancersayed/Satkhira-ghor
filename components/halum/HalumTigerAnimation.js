@@ -68,9 +68,9 @@ export default function HalumTigerAnimation({
   return (
     <div
       onClick={onClick}
-      className={`relative select-none cursor-pointer group transition-all duration-500 ${className} ${
+      className={`relative select-none cursor-pointer group transition-all duration-300 ${className} ${
         isMoving
-          ? 'animate-bounce scale-110 -rotate-3'
+          ? 'halum-walking scale-105'
           : isHappy
           ? 'animate-bounce'
           : isThinking
@@ -184,6 +184,15 @@ export default function HalumTigerAnimation({
             {/* Dynamic CSS Keyframes inside SVG */}
             <style>
               {`
+                @keyframes halumWalkStep {
+                  0%, 100% { transform: translateY(0px) rotate(0deg); }
+                  25% { transform: translateY(-4px) rotate(-2.5deg); }
+                  50% { transform: translateY(0px) rotate(0deg); }
+                  75% { transform: translateY(-4px) rotate(2.5deg); }
+                }
+                .halum-walking {
+                  animation: halumWalkStep 0.32s ease-in-out infinite;
+                }
                 @keyframes halumTail {
                   0%, 100% { transform: rotate(0deg); }
                   50% { transform: rotate(-18deg); }

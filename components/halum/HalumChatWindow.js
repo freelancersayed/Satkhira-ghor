@@ -32,6 +32,7 @@ export default function HalumChatWindow({
   currentState = 'idle',
   pathname = '/',
   isLeftSide = false,
+  initialQuery = null,
 }) {
   const [messages, setMessages] = useState([
     {
@@ -111,6 +112,17 @@ export default function HalumChatWindow({
       inputRef.current?.focus();
     }
   }, [isOpen, messages]);
+
+  // Trigger initial query if passed from speech bubble chip
+  const lastInitialQueryRef = useRef(null);
+  useEffect(() => {
+    if (isOpen && initialQuery && lastInitialQueryRef.current !== initialQuery) {
+      lastInitialQueryRef.current = initialQuery;
+      setTimeout(() => {
+        handleSendMessage(initialQuery);
+      }, 200);
+    }
+  }, [isOpen, initialQuery]);
 
   // Direct Live Order Tracker Functionality
   const executeTrackQuery = async (query) => {
@@ -504,44 +516,56 @@ export default function HalumChatWindow({
                 </div>
               )}
 
-              {/* ── Embedded Product Cards with line-clamp-2 (Requirement 1 & 4) ── */}
+              {/* ── Embedded Product Cards (Compact 2-Cards per row Grid) ── */}
               {msg.products && msg.products.length > 0 && (
-                <div className="mt-3 space-y-2 pt-2 border-t border-amber-100">
-                  <div className="text-[10px] font-bold text-[#016831] flex items-center gap-1">
+                <div className="mt-3 pt-2 border-t border-amber-100">
+                  <div className="text-[10px] font-bold text-[#016831] flex items-center gap-1 mb-2">
                     <Sparkles className="w-3 h-3 text-[#FAB116]" />
                     <span>প্রস্তাবিত খাঁটি খাবার:</span>
                   </div>
 
-                  <div className="space-y-2">
+                  {/* 2-Columns Grid Layout */}
+                  <div className="grid grid-cols-2 gap-2">
                     {msg.products.map((prod) => (
                       <div
                         key={prod.id || prod.slug}
-                        className="p-2 rounded-xl bg-[#FAF9F5] border border-amber-200/90 hover:border-[#016831]/50 transition-all flex items-center gap-2.5 overflow-hidden"
+                        className="p-2 rounded-2xl bg-[#FAF9F5] border border-amber-200/90 hover:border-[#016831]/60 transition-all flex flex-col justify-between overflow-hidden shadow-xs group"
                       >
+                        {/* Compact Top Image + Badge */}
                         <Link
                           href={`/products/${prod.slug}`}
-                          className="w-12 h-12 relative rounded-lg overflow-hidden bg-stone-100 flex-shrink-0"
+                          className="w-full h-20 sm:h-24 relative rounded-xl overflow-hidden bg-stone-100 flex-shrink-0 block mb-1.5 group-hover:scale-[1.02] transition-transform"
                         >
                           <Image
                             src={prod.image}
                             alt={prod.name}
                             fill
+                            sizes="(max-width: 640px) 130px, 160px"
                             className="object-cover"
                           />
+                          {prod.badge && (
+                            <span className="absolute top-1 left-1 bg-amber-500/95 text-slate-950 font-black text-[8px] px-1.5 py-0.2 rounded-md shadow-xs">
+                              {prod.badge}
+                            </span>
+                          )}
                         </Link>
 
+                        {/* Title (line-clamp-2) & Unit */}
                         <div className="flex-1 min-w-0">
-                          {/* Title with line-clamp-2 */}
                           <Link
                             href={`/products/${prod.slug}`}
-                            className="text-xs font-bold text-stone-900 hover:text-[#016831] line-clamp-2 leading-snug block"
+                            className="text-[11px] font-bold text-stone-900 hover:text-[#016831] line-clamp-2 leading-tight block mb-0.5"
                           >
                             {prod.name}
                           </Link>
-                          <div className="text-[10px] text-stone-500 truncate mt-0.5">
+                          <div className="text-[9px] text-stone-500 truncate mb-1">
                             {prod.unit}
                           </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
+                        </div>
+
+                        {/* Price & Add to Cart button */}
+                        <div className="pt-1.5 border-t border-amber-100 flex items-center justify-between gap-1 mt-auto">
+                          <div className="flex flex-col">
                             <span className="text-xs font-black text-[#016831]">
                               ৳{prod.price}
                             </span>
@@ -551,31 +575,27 @@ export default function HalumChatWindow({
                               </span>
                             )}
                           </div>
-                        </div>
 
-                        {/* 44x44px Touch-Friendly Add to Cart Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleAddToCartFromAgent(prod)}
-                          className={`min-w-[44px] min-h-[44px] p-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all active:scale-90 flex-shrink-0 shadow-xs ${
-                            addedItemSlug === prod.slug
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-[#016831] hover:bg-[#02833E] text-white'
-                          }`}
-                          title="কার্টে যোগ করুন"
-                        >
-                          {addedItemSlug === prod.slug ? (
-                            <>
-                              <Check className="w-4 h-4 stroke-[3]" />
-                              <span className="text-[10px]">যুক্ত ✓</span>
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingBag className="w-4 h-4 text-[#FAB116]" />
-                              <span className="text-[10px]">কার্ট</span>
-                            </>
-                          )}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => handleAddToCartFromAgent(prod)}
+                            className={`min-h-[34px] px-2 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 transition-all active:scale-90 shadow-xs ${
+                              addedItemSlug === prod.slug
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-[#016831] hover:bg-[#02833E] text-white'
+                            }`}
+                            title="কার্টে যোগ করুন"
+                          >
+                            {addedItemSlug === prod.slug ? (
+                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            ) : (
+                              <>
+                                <ShoppingBag className="w-3 h-3 text-[#FAB116]" />
+                                <span>+কার্ট</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
