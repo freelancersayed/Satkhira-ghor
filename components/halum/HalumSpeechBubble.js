@@ -1,24 +1,11 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import {
-  X,
-  Sparkles,
-  ShoppingBag,
-  Volume2,
-  Zap,
-} from 'lucide-react';
+import { X, Volume2 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
-import {
-  getHalumProductKnowledge,
-  ROUTE_INTELLIGENCE,
-  TIGER_WITTY_QUIPS,
-} from './halumKnowledge';
-import { deliveryConfig } from '@/lib/deliveryConfig';
 
 export default function HalumSpeechBubble({
   onOpenChat,
-  onSendMessage,
   isOpen = false,
   pathname = '/',
   isLeftSide = false,
@@ -27,7 +14,6 @@ export default function HalumSpeechBubble({
   isScrollAsking = false,
 }) {
   const [visible, setVisible] = useState(true);
-  const [quipIndex, setQuipIndex] = useState(0);
 
   const items = useCartStore((state) => state.items);
   const getTotalPrice = useCartStore((state) => state.getTotalPrice);
@@ -35,63 +21,50 @@ export default function HalumSpeechBubble({
   const subtotal = getTotalPrice();
   const hasCartItem = items && items.length > 0;
 
-  // Free delivery proximity
-  const isNearFreeDelivery =
-    subtotal >= deliveryConfig.upsellNearThresholdMin &&
-    subtotal < deliveryConfig.freeDeliveryThreshold;
-  const remainingForFree = deliveryConfig.freeDeliveryThreshold - subtotal;
-
-  // Extract product slug if on product detail page
-  const productSlug = useMemo(() => {
-    if (pathname && pathname.startsWith('/products/')) {
-      return pathname.replace('/products/', '').split('?')[0].split('/')[0];
-    }
-    return null;
-  }, [pathname]);
-
-  const productKnowledge = useMemo(() => {
-    return productSlug ? getHalumProductKnowledge(productSlug) : null;
-  }, [productSlug]);
-
-  // When scrolling triggers isScrollAsking, ensure bubble shows up gently
+  // Whenever route changes or scroll trigger fires, ensure bubble gently shows up
   useEffect(() => {
+    setVisible(true);
+  }, [pathname, isScrollAsking]);
+
+  // ── Dynamic Route-Aware Next-Step Guide Text (চিকন ও স্মার্ট গাইড) ──
+  const dynamicGuideText = useMemo(() => {
+    if (pathname.startsWith('/products/')) {
+      if (hasTargetOnScreen) {
+        return "অর্ডার করতে 'এখনই অর্ডার করুন' বাটনে চাপ দিন! 👉";
+      }
+      return 'খাঁটি গুনাগুণ দেখে নিচে অর্ডার করুন! 👇';
+    }
+
+    if (pathname === '/cart') {
+      if (hasCartItem) {
+        return 'অর্ডার নিশ্চিত করতে নিচে ঠিকানা লিখে ক্লিক করুন! 👇';
+      }
+      return 'আপনার কার্ট খালি! খাঁটি খাবার বেছে নিন 🍯';
+    }
+
+    if (pathname === '/track-order') {
+      return '১১ ডিজিটের মোবাইল নম্বর লিখে পার্সেল ট্র্যাক করুন! 📦';
+    }
+
+    if (pathname === '/shop') {
+      return 'পছন্দের খাবারে ক্লিক করে খাঁটি বিবরণ দেখুন! 🌿';
+    }
+
+    if (pathname.startsWith('/about')) {
+      return 'আমাদের সরাসরি মৌয়াল ও কৃষক সংগ্রহের গল্প পড়ুন! 🌿';
+    }
+
+    // Default Home route ('/')
+    if (hasCartItem) {
+      return 'অর্ডার সম্পন্ন করতে উপরের কার্ট ব্যাগে ক্লিক করুন! 🛒';
+    }
+
     if (isScrollAsking) {
-      setVisible(true);
+      return 'খাবার বেছে নিতে ক্লিক করুন বা চ্যাটে বলুন! 🐯';
     }
-  }, [isScrollAsking]);
 
-  // Periodic quip rotation when idle
-  useEffect(() => {
-    if (isOpen || productKnowledge || isNearFreeDelivery || isScrollAsking) return;
-    const timer = setInterval(() => {
-      setQuipIndex((prev) => (prev + 1) % TIGER_WITTY_QUIPS.length);
-    }, 14000);
-    return () => clearInterval(timer);
-  }, [isOpen, productKnowledge, isNearFreeDelivery, isScrollAsking]);
-
-  // Concise, smart, non-intrusive short dialogues (1-2 lines max)
-  let shortText = 'কি লাগবে বলুন, খুঁজে দিচ্ছি! 🐯';
-  let badgeIcon = '🐯';
-
-  if (isScrollAsking) {
-    shortText = 'কি লাগবে বলুন, খুঁজে দিচ্ছি! 🔍';
-    badgeIcon = '🔍';
-  } else if (isNearFreeDelivery) {
-    shortText = `আর মাত্র ৳${remainingForFree} নিলেই ফ্রি ডেলিভারি! 🚚`;
-    badgeIcon = '🎁';
-  } else if (productKnowledge) {
-    shortText = '১০০% খাঁটি ও তাজা! অর্ডার করতে থাবা দিন 🐾';
-    badgeIcon = '🍯';
-  } else if (hasCartItem && pathname !== '/cart') {
-    shortText = 'খাবার কার্টে যুক্ত হয়েছে! অর্ডার করবেন? 🐾';
-    badgeIcon = '🛒';
-  } else if (quipIndex > 0 && pathname === '/') {
-    shortText = TIGER_WITTY_QUIPS[quipIndex % TIGER_WITTY_QUIPS.length];
-    badgeIcon = '✨';
-  } else if (pathname === '/cart') {
-    shortText = 'নিচের ফর্ম পূরণ করে অর্ডার কনফার্ম করুন! 🐾';
-    badgeIcon = '📦';
-  }
+    return 'খাঁটি খাবার দেখতে নিচে স্ক্রল করুন! 👇';
+  }, [pathname, hasTargetOnScreen, hasCartItem, isScrollAsking]);
 
   // Voice synthesis
   const handleSpeak = (e) => {
@@ -99,7 +72,7 @@ export default function HalumSpeechBubble({
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(
-        shortText.replace(/[🐯🍯🧈🌿🥛🎁🌱🌶️✨🐾👉👇👈🔍]/g, '')
+        dynamicGuideText.replace(/[🐯🍯🧈🌿🥛🎁🌱🌶️✨🐾👉👇👈🔍📦🛒]/g, '')
       );
       utterance.lang = 'bn-BD';
       utterance.rate = 1.0;
@@ -107,19 +80,10 @@ export default function HalumSpeechBubble({
     }
   };
 
-  const handleActionClick = (e) => {
+  const handleClickBubble = (e) => {
     e.stopPropagation();
-    if (onTriggerTargetAction) {
+    if (pathname.startsWith('/products/') && onTriggerTargetAction) {
       onTriggerTargetAction();
-    } else {
-      if (onOpenChat) onOpenChat();
-    }
-  };
-
-  const handleChipClick = (query, e) => {
-    e.stopPropagation();
-    if (onSendMessage) {
-      onSendMessage(query);
     } else if (onOpenChat) {
       onOpenChat();
     }
@@ -130,91 +94,48 @@ export default function HalumSpeechBubble({
   }
 
   return (
-    <div className="relative mb-1 w-max max-w-[170px] sm:max-w-[220px] select-none animate-slideUp">
-      {/* ── Smart Ultra-Compact Comic Speech Bubble ── */}
+    <div className="relative mb-1 w-max max-w-[210px] sm:max-w-[260px] select-none animate-slideUp">
+      {/* ── Ultra-Slim Smart Floating Pill (চিকন ও স্মার্ট বাবল) ── */}
       <div
-        onClick={() => {
-          if (onOpenChat) onOpenChat();
-        }}
-        className="bg-white/95 backdrop-blur-md text-stone-900 p-2 sm:p-2.5 rounded-2xl shadow-md shadow-amber-500/10 border-2 border-[#FAB116] cursor-pointer transition-all hover:scale-[1.02] relative"
+        onClick={handleClickBubble}
+        className="bg-white/95 backdrop-blur-md text-stone-900 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-md shadow-amber-500/15 border border-amber-400 cursor-pointer transition-all hover:scale-[1.03] active:scale-95 flex items-center gap-1.5 relative group"
+        title="ক্লিক করে চ্যাট করুন বা নির্দেশ দেখুন"
       >
-        {/* Top Mini Header: Badge & Quick Controls */}
-        <div className="flex items-center justify-between gap-1 pb-1 mb-1 border-b border-amber-100 text-[8.5px] font-black">
-          <div className="flex items-center gap-1 text-[#016831] truncate">
-            <span>{badgeIcon}</span>
-            <span className="truncate">হালুম মামা</span>
-          </div>
+        {/* Leading Tiger Emoji */}
+        <span className="text-xs flex-shrink-0">🐯</span>
 
-          <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={handleSpeak}
-              className="p-0.5 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100 transition-colors"
-              title="শুনুন"
-              aria-label="শুনুন"
-            >
-              <Volume2 className="w-2.5 h-2.5" />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setVisible(false);
-              }}
-              className="p-0.5 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
-              title="বন্ধ করুন"
-              aria-label="বন্ধ"
-            >
-              <X className="w-2.5 h-2.5" />
-            </button>
-          </div>
-        </div>
+        {/* Dynamic Route-Step Text (Pure, Clean & Slim) */}
+        <p className="text-[10px] sm:text-[11px] font-bold text-stone-900 leading-tight truncate">
+          {dynamicGuideText}
+        </p>
 
-        {/* Short & Sweet Message */}
-        <div className="text-[10px] sm:text-[11.5px] font-bold leading-tight text-stone-800 break-words my-0.5">
-          {shortText}
-        </div>
-
-        {/* 1-Tap Action Button when on Product Page */}
-        {(hasTargetOnScreen || productKnowledge) && (
-          <div className="mt-1 pt-1 border-t border-amber-100">
-            <button
-              type="button"
-              onClick={handleActionClick}
-              className="w-full py-1 px-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-[#FAB116] text-slate-950 font-black text-[9px] flex items-center justify-center gap-1 shadow-xs active:scale-95 transition-all animate-pulse"
-            >
-              <Zap className="w-2.5 h-2.5 fill-current" />
-              <span>এখানে থাবা বসান 🐾</span>
-            </button>
-          </div>
-        )}
-
-        {/* ── Smart Micro-Chips: 1-Tap Quick Helps ── */}
-        {!productKnowledge && (
-          <div
-            className="mt-1 pt-1 border-t border-amber-100 flex flex-wrap gap-1"
-            onClick={(e) => e.stopPropagation()}
+        {/* Action icons: Speaker & Close */}
+        <div className="flex items-center gap-0.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={handleSpeak}
+            className="p-0.5 rounded-full text-stone-400 hover:text-[#016831] transition-colors"
+            title="শুনুন"
+            aria-label="শুনুন"
           >
-            {[
-              { label: '🍯 মধু', q: 'খাঁটি মধু দেখতে চাই' },
-              { label: '🧈 ঘি', q: 'গাওয়া ঘি এর দাম' },
-              { label: '🌿 তেল', q: 'সরিষার তেল কেমন?' },
-              { label: '🎁 অফার', q: 'আজকের অফার কি আছে' },
-            ].map((chip, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={(e) => handleChipClick(chip.q, e)}
-                className="px-1.5 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 text-[#016831] border border-amber-200 text-[8.5px] font-bold active:scale-95 transition-all"
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-        )}
+            <Volume2 className="w-2.5 h-2.5" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setVisible(false);
+            }}
+            className="p-0.5 rounded-full text-stone-400 hover:text-stone-700 transition-colors"
+            title="লুকান"
+            aria-label="লুকান"
+          >
+            <X className="w-2.5 h-2.5" />
+          </button>
+        </div>
 
         {/* ── Cute Comic Tail Pointing Down to Halum's Head ── */}
-        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-[#FAB116]">
+        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-amber-400">
           <div className="absolute -top-[5px] -left-[4px] w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white" />
         </div>
       </div>

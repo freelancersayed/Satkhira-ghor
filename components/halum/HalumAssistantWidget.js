@@ -129,8 +129,8 @@ export default function HalumAssistantWidget() {
     return () => observer.disconnect();
   }, []);
 
-  // ── 1. Target Button Locator on Product Page ──
-  // On product page, points directly towards Buy Now / Add to Cart button
+  // ── 1. Target Button Locator on Product & Checkout Pages ──
+  // Points elongated finger directly towards Buy Now / Add to Cart / Checkout button
   const checkTargetButtons = useCallback(() => {
     if (isDragging || isChatOpen || isCartDrawerOpen || isModalOpen) return;
 
@@ -147,7 +147,7 @@ export default function HalumAssistantWidget() {
         if (inViewport) {
           setHasTargetOnScreen(true);
           setCharacterState('pointing');
-          // Safe on LEFT side pointing right towards buy-box
+          // Safe on LEFT side pointing elongated finger right towards buy-box
           if (dockSide !== 'left') {
             setDockSide('left');
             const x = getSafeX('left');
@@ -155,6 +155,16 @@ export default function HalumAssistantWidget() {
           }
           return;
         }
+      }
+    } else if (pathname === '/cart') {
+      const checkoutBtn =
+        document.getElementById('halum-checkout-btn') ||
+        document.querySelector('[data-halum-target="checkout"]');
+
+      if (checkoutBtn) {
+        setHasTargetOnScreen(true);
+        setCharacterState('pointing');
+        return;
       }
     }
 

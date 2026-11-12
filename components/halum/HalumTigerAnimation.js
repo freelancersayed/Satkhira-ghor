@@ -211,11 +211,18 @@ export default function HalumTigerAnimation({
                 }
                 @keyframes halumPointArm {
                   0%, 100% { transform: scale(1); }
-                  50% { transform: scale(1.08) translateX(${pointDirection === 'left' ? '-3px' : '3px'}); }
+                  50% { transform: scaleX(1.15) scaleY(1.04) translateX(${pointDirection === 'left' ? '-6px' : '6px'}); }
                 }
                 .halum-point-arm {
-                  transform-origin: ${pointDirection === 'left' ? '30px 85px' : '110px 85px'};
-                  animation: halumPointArm 0.9s ease-in-out infinite;
+                  transform-origin: ${pointDirection === 'left' ? '45px 85px' : '95px 85px'};
+                  animation: halumPointArm 0.85s ease-in-out infinite;
+                }
+                @keyframes halumSparkle {
+                  0%, 100% { transform: scale(0.85); opacity: 0.7; }
+                  50% { transform: scale(1.35); opacity: 1; filter: drop-shadow(0 0 5px #FAB116); }
+                }
+                .halum-finger-sparkle {
+                  animation: halumSparkle 0.75s ease-in-out infinite;
                 }
                 @keyframes halumHoneyGlow {
                   0%, 100% { filter: drop-shadow(0 0 2px #FAB116); }
@@ -313,19 +320,32 @@ export default function HalumTigerAnimation({
 
           {/* ── 6. Dynamic Left & Right Arms (Gestures & Pointing) ── */}
 
-          {/* GESTURE 1: POINTING POSE */}
+          {/* GESTURE 1: ELONGATED POINTING POSE (লম্বা আঙুল দিয়ে নির্দেশ) */}
           {isPointing && (
             <g className="halum-point-arm">
               {pointDirection === 'left' ? (
                 <g>
+                  {/* Elongated Stretched Left Arm */}
                   <path
-                    d="M50 90 C34 90 18 84 6 78 C2 76 2 70 8 70 C18 70 34 76 50 82"
+                    d="M50 90 C28 88 6 82 -12 76 C-20 73 -20 67 -12 67 C4 67 26 74 50 82"
                     fill="url(#halumFur)"
                     stroke="#1E293B"
                     strokeWidth="2.5"
                   />
-                  <circle cx="4" cy="74" r="6" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="2" />
-                  <path d="M6 72 L-4 72" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" />
+                  {/* Long Extended Pointing Finger */}
+                  <path
+                    d="M-10 68 L-30 68 C-34 68 -34 74 -30 74 L-10 74 Z"
+                    fill="url(#halumFur)"
+                    stroke="#1E293B"
+                    strokeWidth="2"
+                  />
+                  <circle cx="-10" cy="74" r="5" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="1.5" />
+                  <circle cx="-30" cy="71" r="2.5" fill="#FAB116" />
+                  {/* Glowing Sparkle at Tip of Long Finger */}
+                  <g className="halum-finger-sparkle" transform="translate(-34, 71)">
+                    <path d="M0 -5 L1.5 -1.5 L5 0 L1.5 1.5 L0 5 L-1.5 1.5 L-5 0 L-1.5 -1.5 Z" fill="#FAB116" />
+                  </g>
+                  {/* Polite Right Paw on Hip/Heart */}
                   <path
                     d="M93 88 C102 94 106 104 100 112 C96 116 90 114 88 108"
                     fill="url(#halumFur)"
@@ -335,14 +355,27 @@ export default function HalumTigerAnimation({
                 </g>
               ) : (
                 <g>
+                  {/* Elongated Stretched Right Arm */}
                   <path
-                    d="M90 90 C106 90 122 84 134 78 C138 76 138 70 132 70 C122 70 106 76 90 82"
+                    d="M90 90 C112 88 134 82 152 76 C160 73 160 67 152 67 C136 67 114 74 90 82"
                     fill="url(#halumFur)"
                     stroke="#1E293B"
                     strokeWidth="2.5"
                   />
-                  <circle cx="136" cy="74" r="6" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="2" />
-                  <path d="M134 72 L144 72" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" />
+                  {/* Long Extended Pointing Finger */}
+                  <path
+                    d="M150 68 L170 68 C174 68 174 74 170 74 L150 74 Z"
+                    fill="url(#halumFur)"
+                    stroke="#1E293B"
+                    strokeWidth="2"
+                  />
+                  <circle cx="150" cy="74" r="5" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="1.5" />
+                  <circle cx="170" cy="71" r="2.5" fill="#FAB116" />
+                  {/* Glowing Sparkle at Tip of Long Finger */}
+                  <g className="halum-finger-sparkle" transform="translate(174, 71)">
+                    <path d="M0 -5 L1.5 -1.5 L5 0 L1.5 1.5 L0 5 L-1.5 1.5 L-5 0 L-1.5 -1.5 Z" fill="#FAB116" />
+                  </g>
+                  {/* Polite Left Paw on Hip/Heart */}
                   <path
                     d="M47 88 C38 94 34 104 40 112 C44 116 50 114 52 108"
                     fill="url(#halumFur)"
