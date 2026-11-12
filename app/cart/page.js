@@ -139,6 +139,9 @@ export default function CartPage() {
       setConfirmedOrder(data.order);
       setOrderPlaced(true);
       clearCart();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('halum:order-confirmed'));
+      }
     } catch (err) {
       setOrderError(err.message);
     } finally {
@@ -156,6 +159,23 @@ export default function CartPage() {
           <h1 className="text-2xl sm:text-3xl font-black text-[#016831]">
             অর্ডার সফলভাবে গৃহীত হয়েছে!
           </h1>
+
+          {/* ── হালুম ভাই ধাপ ৪: স্যালুট ও থ্যাংক ইউ মেসেজ (Salute & Thank You Banner) ── */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FEF3C7] to-[#FDE68A] border-2 border-[#FAB116] flex items-center gap-3.5 text-left shadow-xs">
+            <div className="w-14 h-14 rounded-full bg-white p-1 border-2 border-[#016831] flex-shrink-0 flex items-center justify-center shadow-xs">
+              <span className="text-2xl animate-bounce">🐯</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-black text-[#016831]">
+                <span>হালুম ভাইয়ের স্যালুট</span>
+                <span className="text-xs">🫡</span>
+              </div>
+              <p className="text-xs sm:text-sm font-bold text-stone-800 leading-snug mt-0.5">
+                "শাবাশ! অর্ডার কনফার্ম হয়ে গেছে। এবার সুন্দরবনের খাঁটি মধু আপনার ঠিকানায় উড়ে চলে আসছে। ততদিন ভালো থাকবেন, সুস্থ থাকবেন!"
+              </p>
+            </div>
+          </div>
+
           <div className="inline-block bg-[#FEF3C7] px-4 py-1.5 rounded-full text-xs font-bold text-[#016831] border border-[#FCD34D]/60">
             অর্ডার ট্র্যাকিং আইডি: #{confirmedOrder.orderNumber}
           </div>

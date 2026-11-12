@@ -80,6 +80,10 @@ function createBaseLottie(name, durationFrames = 60) {
 export const TIGER_LOTTIE_STATES = {
   idle: createBaseLottie('tiger_idle', 60),
   greeting: createBaseLottie('tiger_greeting', 45),
-  talking: createBaseLottie('tiger_talking', 30),
+  listening: createBaseLottie('tiger_listening', 45),
+  dancing: createBaseLottie('tiger_dancing', 50),
   happy: createBaseLottie('tiger_happy', 50),
+  saluting: createBaseLottie('tiger_saluting', 40),
+  talking: createBaseLottie('tiger_talking', 30),
 };
+

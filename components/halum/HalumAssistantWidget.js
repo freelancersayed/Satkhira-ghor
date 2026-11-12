@@ -5,17 +5,21 @@ import { usePathname } from 'next/navigation';
 import HalumTigerAnimation from './HalumTigerAnimation';
 import HalumSpeechBubble from './HalumSpeechBubble';
 import HalumChatWindow from './HalumChatWindow';
+import { useCartStore } from '@/store/cartStore';
 
 export default function HalumAssistantWidget() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [characterState, setCharacterState] = useState('idle'); // 'idle' | 'greeting' | 'talking' | 'happy'
+  // 'idle' | 'greeting' | 'listening' | 'dancing' | 'saluting' | 'talking'
+  const [characterState, setCharacterState] = useState('idle');
+
+  const lastAddedItem = useCartStore((state) => state.lastAddedItem);
 
   useEffect(() => {
     setMounted(true);
 
-    // Initial delightful welcome on landing
+    // Initial delightful welcome on landing (Step 1)
     const greetTimer = setTimeout(() => {
       setCharacterState('greeting');
       const resetTimer = setTimeout(() => {
@@ -25,6 +29,31 @@ export default function HalumAssistantWidget() {
     }, 1800);
 
     return () => clearTimeout(greetTimer);
+  }, []);
+
+  // When item is added to cart, Halum rejoices with dancing animation (Step 3)
+  useEffect(() => {
+    if (lastAddedItem) {
+      setCharacterState('dancing');
+      const timer = setTimeout(() => {
+        setCharacterState('idle');
+      }, 4500);
+      return () => clearTimeout(timer);
+    }
+  }, [lastAddedItem]);
+
+  // Listen to order confirmed custom event (Step 4: Saluting)
+  useEffect(() => {
+    const handleOrderConfirmed = () => {
+      setCharacterState('saluting');
+      const timer = setTimeout(() => {
+        setCharacterState('idle');
+      }, 8000);
+      return () => clearTimeout(timer);
+    };
+
+    window.addEventListener('halum:order-confirmed', handleOrderConfirmed);
+    return () => window.removeEventListener('halum:order-confirmed', handleOrderConfirmed);
   }, []);
 
   // Do not render on admin dashboard
@@ -78,3 +107,4 @@ export default function HalumAssistantWidget() {
     </>
   );
 }
+

@@ -24,9 +24,9 @@ export default function HalumChatWindow({
 }) {
   const [messages, setMessages] = useState([
     {
-      id: 'welcome-1',
+      id: 'step-1-welcome',
       sender: 'halum',
-      text: 'হালুম! আমি সুন্দরবনের খাঁটি বন্ধু হালুম ভাই 🐯 সাতক্ষীরা ঘরের খাঁটি মধুতে আমার জিভে জল চলে আসে! আপনাকে কী খাঁটি খাবার খুঁজে দিতে পারি বলুন তো?',
+      text: 'হালুম! সুন্দরবনের গভীর থেকে সরাসরি খাঁটি মধুর দুনিয়ায় আপনাকে স্বাগতম! আমি বনের রাজা, তবে আজ আপনার শপিং গাইড! বলুন, আজ কোন মধুটা চেখে দেখতে চান? 🐯',
       products: [
         {
           id: 'prod-001',
@@ -40,16 +40,16 @@ export default function HalumChatWindow({
         },
         {
           id: 'prod-003',
-          name: 'সাতক্ষীরা মেগা ফ্যামিলি কম্বোপ্যাক',
+          name: 'সাতক্ষীরা সুন্দরবন মেগা ফ্যামিলি কম্বো',
           slug: 'satkhira-sundarbans-mega-family-combo',
-          price: 3450,
-          originalPrice: 3650,
+          price: 2450,
+          originalPrice: 2880,
           image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=800',
-          unit: 'মেগা সাশ্রয়ী প্যাক',
+          unit: '৩টি সেরা পণ্য বান্ডেল',
           badge: '২০০৳ সাশ্রয়',
         },
       ],
-      quickReplies: ['🍯 মধু দেখতে চাই', '🧈 গাওয়া ঘি এর দাম কত?', '🎁 কম্বো অফার আছে?', '🚚 ডেলিভারি চার্জ কত?'],
+      quickReplies: ['🍯 খাঁটি খলসী মধু', '🌿 কেওড়া মধু', '🎁 স্পেশাল কম্বো প্যাক', '🚚 ডেলিভারি চার্জ কত?'],
       timestamp: new Date(),
     },
   ]);
@@ -110,6 +110,7 @@ export default function HalumChatWindow({
         text: data.reply || 'হালুম! আমি আপনার কথাটি বুঝতে পেরেছি।',
         products: data.products || [],
         quickReplies: data.quickReplies || [],
+        action: data.action || null,
         timestamp: new Date(),
       };
 
@@ -117,7 +118,7 @@ export default function HalumChatWindow({
 
       if (onStateChange && data.characterState) {
         onStateChange(data.characterState);
-        setTimeout(() => onStateChange('idle'), 3500);
+        setTimeout(() => onStateChange('idle'), 4000);
       }
     } catch (err) {
       console.error('Halum response error:', err);
@@ -136,14 +137,29 @@ export default function HalumChatWindow({
     }
   };
 
+  // Step 3: Cart & Checkout Guidance action triggered when item added
   const handleAddToCartFromAgent = (product) => {
     addItem(product, 1, false);
     setAddedItemSlug(product.slug);
-    if (onStateChange) onStateChange('happy');
+    if (onStateChange) onStateChange('dancing');
+
+    // Halum provides joyful Step 3 guidance
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `step-3-${Date.now()}`,
+          sender: 'halum',
+          text: "বাহ! দারুণ একটা চয়েস করেছেন। এই মধু পেটে গেলে শরীরে বাঘের মতো শক্তি পাবেন গ্যারান্টি! এখন ঝটপট নিচের 'Order Now' বাটনটায় একটা থাবা বসান (ক্লিক করুন) আর আপনার ঠিকানাটা দিন! 🐾",
+          action: { type: 'order_now', label: 'থাবা বসান (Order Now)' },
+          quickReplies: ['🚚 ফ্রি ডেলিভারি কীভাবে পাব?', 'ক্যাশ অন ডেলিভারি আছে?'],
+          timestamp: new Date(),
+        },
+      ]);
+    }, 450);
 
     setTimeout(() => {
       setAddedItemSlug(null);
-      if (onStateChange) onStateChange('idle');
     }, 2000);
   };
 
@@ -287,6 +303,24 @@ export default function HalumChatWindow({
                 </div>
               )}
 
+              {/* Prominent Action Button: Order Now / থাবা বসান 🐾 */}
+              {msg.action && msg.action.type === 'order_now' && (
+                <div className="mt-3 pt-2.5 border-t border-amber-200">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      openCart();
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#016831] via-[#02833E] to-[#FAB116] text-white font-black text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all group"
+                  >
+                    <span className="text-sm group-hover:scale-125 transition-transform">🐾</span>
+                    <span>থাবা বসান (Order Now)</span>
+                    <ArrowRight className="w-4 h-4 ml-0.5 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              )}
+
               {/* Quick Reply Chips attached to the message */}
               {msg.quickReplies && msg.quickReplies.length > 0 && (
                 <div className="mt-2.5 pt-2 border-t border-amber-100 flex flex-wrap gap-1.5">
@@ -387,3 +421,4 @@ export default function HalumChatWindow({
     </div>
   );
 }
+

@@ -48,13 +48,15 @@ export async function POST(request) {
 
     // ─────────────────────────────────────────────────────────────
     // Internal Intelligent NLP Brain for Halum Bhai
+    // 4-Step Customer Journey Engine
     // ─────────────────────────────────────────────────────────────
     let reply = '';
     let recommendedProducts = [];
     let quickReplies = [];
     let characterState = 'talking';
+    let action = null; // { type: 'order_now' }
 
-    // 1. Greetings & Welcome
+    // ── ধাপ ১: ওয়েবসাইটে প্রবেশ করা মাত্র (Welcome & Greeting) ──
     if (
       !cleanMsg ||
       cleanMsg.includes('হ্যালো') ||
@@ -66,30 +68,70 @@ export async function POST(request) {
       cleanMsg.includes('hi')
     ) {
       reply =
-        'হালুম! আমি সুন্দরবনের বাঘ হালুম ভাই 🐯 সাতক্ষীরা ঘরে আপনাকে স্বাগতম! এখানে ভেজালের কোনো কারবার নেই। সুন্দরবনের খাঁটি মধু, প্রাচীন বিলোনা গাওয়া ঘি নাকি ঘানি ভাঙা সরিষার তেল—কোন খাঁটি খাবারটি আপনি খুঁজছেন বলুন তো?';
-      recommendedProducts = [
-        formatProductCard(PRODUCT_MAP['sundarbans-pure-khalsi-honey']),
-        formatProductCard(PRODUCT_MAP['traditional-bilona-pure-cow-ghee']),
-      ].filter(Boolean);
-      quickReplies = ['🍯 খাঁটি মধু দেখতে চাই', '🧈 গাওয়া ঘি এর দাম কত?', '🎁 কম্বো অফার আছে?'];
-      characterState = 'greeting';
-    }
-
-    // 2. Honey / মধু
-    else if (
-      cleanMsg.includes('মধু') ||
-      cleanMsg.includes('honey') ||
-      cleanMsg.includes('খলসী') ||
-      cleanMsg.includes('সুন্দরবন')
-    ) {
-      reply =
-        'হালুম! মধুর কথা বলতেই আমার জিভে জল চলে এলো! 🍯 আমাদের মধু সরাসরি সুন্দরবনের শ্যামনগর থেকে মৌয়ালদের মাধ্যমে সংগৃহীত। কোনো হিটিং বা প্রিজারভেটিভ নেই—কাঁচা এবং প্রাকৃতিক এনজাইমে ভরপুর। ঠান্ডা ও কাশিতে এটা একদম জাদুকরী!';
+        'হালুম! সুন্দরবনের গভীর থেকে সরাসরি খাঁটি মধুর দুনিয়ায় আপনাকে স্বাগতম! আমি বনের রাজা, তবে আজ আপনার শপিং গাইড! বলুন, আজ কোন মধুটা চেখে দেখতে চান? 🐯';
       recommendedProducts = [
         formatProductCard(PRODUCT_MAP['sundarbans-pure-khalsi-honey']),
         formatProductCard(PRODUCT_MAP['satkhira-sundarbans-mega-family-combo']),
       ].filter(Boolean);
-      quickReplies = ['মধু কার্টে যোগ করব', 'গাওয়া ঘি দেখতে চাই', 'ফ্রি ডেলিভারি কীভাবে পাব?'];
-      characterState = 'happy';
+      quickReplies = ['🍯 খাঁটি খলসী মধু', '🌿 কেওড়া মধু', '🎁 স্পেশাল কম্বো প্যাক', '🚚 ডেলিভারি চার্জ কত?'];
+      characterState = 'greeting';
+    }
+
+    // ── ধাপ ২: কাস্টমারের চাহিদা জানা (Product Exploration) ──
+    else if (
+      cleanMsg.includes('মধু') ||
+      cleanMsg.includes('খলসী') ||
+      cleanMsg.includes('কেওড়া') ||
+      cleanMsg.includes('খুঁজ') ||
+      cleanMsg.includes('দেখতে চাই') ||
+      cleanMsg.includes('পণ্য') ||
+      cleanMsg.includes('honey')
+    ) {
+      reply =
+        'সুন্দরবনের মৌয়ালদের কাছ থেকে আনা খাঁটি খলসি বা কেওড়া মধু খুঁজছেন নাকি? নাকি রোগ প্রতিরোধ ক্ষমতা বাড়াতে স্পেশাল কম্বো প্যাক চাই? একটু নিচে স্ক্রোল করুন বা আমাকে বলুন, আমি খুঁজে দিচ্ছি! 🌿';
+      recommendedProducts = [
+        formatProductCard(PRODUCT_MAP['sundarbans-pure-khalsi-honey']),
+        formatProductCard(PRODUCT_MAP['satkhira-sundarbans-mega-family-combo']),
+        formatProductCard(PRODUCT_MAP['traditional-bilona-pure-cow-ghee']),
+      ].filter(Boolean);
+      quickReplies = ['মধু কার্টে যোগ করব', 'গাওয়া ঘি দেখতে চাই', 'অর্ডার করতে চাই 🐾'];
+      characterState = 'listening';
+    }
+
+    // ── ধাপ ৪: অর্ডার কনফার্মেশনের পর (Thank You Message) ──
+    else if (
+      cleanMsg.includes('কনফার্ম') ||
+      cleanMsg.includes('ধন্যবাদ') ||
+      cleanMsg.includes('হয়েছে') ||
+      cleanMsg.includes('সফল') ||
+      cleanMsg.includes('থ্যাংক') ||
+      cleanMsg.includes('congrat') ||
+      cleanMsg.includes('status')
+    ) {
+      reply =
+        'শাবাশ! অর্ডার কনফার্ম হয়ে গেছে। এবার সুন্দরবনের খাঁটি মধু আপনার ঠিকানায় উড়ে চলে আসছে। ততদিন ভালো থাকবেন, সুস্থ থাকবেন! 🐯';
+      quickReplies = ['আরও কিছু কিনব', 'অর্ডার ট্র্যাক করব', 'হেল্পলাইন'];
+      characterState = 'saluting';
+    }
+
+    // ── ধাপ ৩: অর্ডার করার সময় গাইড করা (Cart & Checkout Guidance) ──
+    else if (
+      cleanMsg.includes('অর্ডার') ||
+      cleanMsg.includes('order') ||
+      cleanMsg.includes('থাবা') ||
+      cleanMsg.includes('কিনব') ||
+      cleanMsg.includes('কার্ট') ||
+      cleanMsg.includes('cart') ||
+      cleanMsg.includes('নিতে চাই')
+    ) {
+      reply =
+        'বাহ! দারুণ একটা চয়েস করেছেন। এই মধু পেটে গেলে শরীরে বাঘের মতো শক্তি পাবেন গ্যারান্টি! এখন ঝটপট নিচের \'Order Now\' বাটনটায় একটা থাবা বসান (ক্লিক করুন) আর আপনার ঠিকানাটা দিন! 🐾';
+      recommendedProducts = [
+        formatProductCard(PRODUCT_MAP['satkhira-sundarbans-mega-family-combo']),
+      ].filter(Boolean);
+      quickReplies = ['Order Now / থাবা বসান 🐾', 'ক্যাশ অন ডেলিভারি আছে?', 'ফ্রি ডেলিভারি কীভাবে পাব?'];
+      characterState = 'dancing';
+      action = { type: 'order_now', label: 'থাবা বসান (Order Now)' };
     }
 
     // 3. Ghee / গাওয়া ঘি
@@ -225,6 +267,7 @@ export async function POST(request) {
       products: recommendedProducts,
       quickReplies,
       characterState,
+      action,
     });
   } catch (error) {
     console.error('Halum Agent Error:', error);
@@ -282,3 +325,4 @@ Always respond in cheerful Bengali. Keep responses under 4 sentences.`;
     characterState: 'talking',
   };
 }
+
