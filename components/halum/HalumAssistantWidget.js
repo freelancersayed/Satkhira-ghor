@@ -48,8 +48,8 @@ export default function HalumAssistantWidget() {
   const getSafeX = useCallback((side) => {
     if (typeof window === 'undefined') return 20;
     const isMobile = window.innerWidth < 640;
-    const widgetWidth = isMobile ? 96 : 128;
-    const safeMargin = isMobile ? 48 : 56;
+    const widgetWidth = isMobile ? 80 : 112;
+    const safeMargin = isMobile ? 42 : 52;
 
     if (side === 'left') {
       return safeMargin;
@@ -167,8 +167,8 @@ export default function HalumAssistantWidget() {
     if (pathname.startsWith('/products/')) return; // Product page stays left
 
     const isMobile = window.innerWidth < 640;
-    const w = isMobile ? 96 : 128;
-    const h = isMobile ? 128 : 160;
+    const w = isMobile ? 80 : 112;
+    const h = isMobile ? 112 : 144;
     const bottomPos = isMobile ? 80 : 24;
     const topPos = window.innerHeight - bottomPos - h;
 
@@ -341,8 +341,8 @@ export default function HalumAssistantWidget() {
     }
 
     const isMobile = window.innerWidth < 640;
-    const widgetWidth = isMobile ? 96 : 128;
-    const safeMargin = isMobile ? 48 : 56;
+    const widgetWidth = isMobile ? 80 : 112;
+    const safeMargin = isMobile ? 42 : 52;
 
     // Strictly clamped inside the screen boundaries!
     const minX = safeMargin;

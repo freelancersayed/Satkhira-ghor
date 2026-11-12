@@ -130,16 +130,16 @@ export default function HalumSpeechBubble({
   }
 
   return (
-    <div className="relative mb-1.5 w-max max-w-[210px] sm:max-w-[240px] select-none animate-slideUp">
-      {/* ── Smart Compact Comic Speech Bubble ── */}
+    <div className="relative mb-1 w-max max-w-[170px] sm:max-w-[220px] select-none animate-slideUp">
+      {/* ── Smart Ultra-Compact Comic Speech Bubble ── */}
       <div
         onClick={() => {
           if (onOpenChat) onOpenChat();
         }}
-        className="bg-white/95 backdrop-blur-md text-stone-900 p-2 sm:p-2.5 rounded-2xl shadow-lg shadow-amber-500/15 border-2 border-[#FAB116] cursor-pointer transition-all hover:scale-[1.02] relative"
+        className="bg-white/95 backdrop-blur-md text-stone-900 p-2 sm:p-2.5 rounded-2xl shadow-md shadow-amber-500/10 border-2 border-[#FAB116] cursor-pointer transition-all hover:scale-[1.02] relative"
       >
         {/* Top Mini Header: Badge & Quick Controls */}
-        <div className="flex items-center justify-between gap-1 pb-1 mb-1 border-b border-amber-100 text-[9px] font-black">
+        <div className="flex items-center justify-between gap-1 pb-1 mb-1 border-b border-amber-100 text-[8.5px] font-black">
           <div className="flex items-center gap-1 text-[#016831] truncate">
             <span>{badgeIcon}</span>
             <span className="truncate">হালুম মামা</span>
@@ -149,11 +149,11 @@ export default function HalumSpeechBubble({
             <button
               type="button"
               onClick={handleSpeak}
-              className="p-1 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100 transition-colors"
+              className="p-0.5 rounded-md text-stone-500 hover:text-[#016831] hover:bg-amber-100 transition-colors"
               title="শুনুন"
               aria-label="শুনুন"
             >
-              <Volume2 className="w-3 h-3" />
+              <Volume2 className="w-2.5 h-2.5" />
             </button>
             <button
               type="button"
@@ -161,17 +161,17 @@ export default function HalumSpeechBubble({
                 e.stopPropagation();
                 setVisible(false);
               }}
-              className="p-1 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
+              className="p-0.5 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
               title="বন্ধ করুন"
               aria-label="বন্ধ"
             >
-              <X className="w-3 h-3" />
+              <X className="w-2.5 h-2.5" />
             </button>
           </div>
         </div>
 
-        {/* Short & Smart Message */}
-        <div className="text-[11px] sm:text-xs font-bold leading-snug text-stone-800 break-words my-0.5">
+        {/* Short & Sweet Message */}
+        <div className="text-[10px] sm:text-[11.5px] font-bold leading-tight text-stone-800 break-words my-0.5">
           {shortText}
         </div>
 
@@ -181,9 +181,9 @@ export default function HalumSpeechBubble({
             <button
               type="button"
               onClick={handleActionClick}
-              className="w-full py-1 px-2 rounded-lg bg-gradient-to-r from-amber-500 to-[#FAB116] text-slate-950 font-black text-[10px] flex items-center justify-center gap-1 shadow-xs active:scale-95 transition-all animate-pulse"
+              className="w-full py-1 px-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-[#FAB116] text-slate-950 font-black text-[9px] flex items-center justify-center gap-1 shadow-xs active:scale-95 transition-all animate-pulse"
             >
-              <Zap className="w-3 h-3 fill-current" />
+              <Zap className="w-2.5 h-2.5 fill-current" />
               <span>এখানে থাবা বসান 🐾</span>
             </button>
           </div>
@@ -192,7 +192,7 @@ export default function HalumSpeechBubble({
         {/* ── Smart Micro-Chips: 1-Tap Quick Helps ── */}
         {!productKnowledge && (
           <div
-            className="mt-1.5 pt-1 border-t border-amber-100 flex flex-wrap gap-1"
+            className="mt-1 pt-1 border-t border-amber-100 flex flex-wrap gap-1"
             onClick={(e) => e.stopPropagation()}
           >
             {[
@@ -205,7 +205,7 @@ export default function HalumSpeechBubble({
                 key={idx}
                 type="button"
                 onClick={(e) => handleChipClick(chip.q, e)}
-                className="px-1.5 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 text-[#016831] border border-amber-200 text-[9px] font-bold active:scale-95 transition-all"
+                className="px-1.5 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 text-[#016831] border border-amber-200 text-[8.5px] font-bold active:scale-95 transition-all"
               >
                 {chip.label}
               </button>
@@ -214,8 +214,8 @@ export default function HalumSpeechBubble({
         )}
 
         {/* ── Cute Comic Tail Pointing Down to Halum's Head ── */}
-        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#FAB116]">
-          <div className="absolute -top-[6px] -left-[5px] w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-white" />
+        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-[#FAB116]">
+          <div className="absolute -top-[5px] -left-[4px] w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white" />
         </div>
       </div>
     </div>

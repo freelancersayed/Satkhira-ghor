@@ -129,9 +129,9 @@ export default function HalumTigerAnimation({
         </div>
       )}
 
-      {/* ── Full 2.5D Mascot Vector Canvas ── */}
+      {/* ── Full 2.5D Mascot Vector Canvas (Mobile: 80x112px, Desktop: 112x152px) ── */}
       <div
-        className="w-24 sm:w-32 h-32 sm:h-40 relative flex items-center justify-center transition-transform duration-300"
+        className="w-20 sm:w-28 h-28 sm:h-38 relative flex items-center justify-center transition-transform duration-300"
         style={{ transform: facingLeft ? 'scaleX(-1)' : 'none' }}
       >
         <svg
