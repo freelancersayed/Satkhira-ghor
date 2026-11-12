@@ -15,6 +15,8 @@ import {
   Flame,
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { products } from '@/data/products';
+import { getHalumProductKnowledge } from './halumKnowledge';
 
 export default function HalumChatWindow({
   isOpen,
@@ -65,6 +67,29 @@ export default function HalumChatWindow({
 
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useCartStore((state) => state.openCart);
+
+  // Auto-adapt greeting based on the current product route
+  useEffect(() => {
+    if (pathname && pathname.startsWith('/products/')) {
+      const slug = pathname.replace('/products/', '').split('?')[0].split('/')[0];
+      const productInfo = getHalumProductKnowledge(slug);
+      const catalogItem = products.find((p) => p.slug === slug || p.id === slug);
+
+      if (productInfo) {
+        setMessages([
+          {
+            id: `prod-welcome-${slug}`,
+            sender: 'halum',
+            text: productInfo.dialogue,
+            products: catalogItem ? [catalogItem] : [],
+            quickReplies: productInfo.chips || ['👉 এখনই অর্ডার করুন', '🍯 গুনাগুন জানুন', '🚚 ফ্রি ডেলিভারি কীভাবে পাব?'],
+            action: { type: 'order_now', label: 'থাবা বসান (Order Now)' },
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    }
+  }, [pathname]);
 
   // Auto scroll to bottom
   const scrollToBottom = () => {

@@ -200,7 +200,12 @@ export default async function ProductDetailPage({ params }) {
             </div>
 
             {/* Interactive Add to Cart & Buy Now Button */}
-            <div className="pt-4 border-t border-[#E8E2D5]">
+            <div
+              id="halum-product-action-anchor"
+              data-halum-slug={product.slug}
+              data-halum-product-id={product.id || product._id}
+              className="pt-4 border-t border-[#E8E2D5]"
+            >
               <AddToCartButton product={product} />
             </div>
 

@@ -45,7 +45,13 @@ export default function AddToCartButton({ product }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div
+      id="halum-add-to-cart-container"
+      data-halum-product-id={product.id || product._id || product.slug}
+      data-halum-product-name={product.name}
+      data-halum-price={currentPrice}
+      className="space-y-4"
+    >
       {/* Variations Selection Matrix (Requirement 5) */}
       {hasVars && (
         <div className="space-y-2 pb-2">
@@ -106,6 +112,8 @@ export default function AddToCartButton({ product }) {
       {/* Action Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
         <button
+          id="halum-add-to-cart-btn"
+          data-halum-target="add-to-cart"
           onClick={handleAddToCart}
           className={`py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${isAdded
             ? 'bg-emerald-800 text-white'
@@ -126,6 +134,8 @@ export default function AddToCartButton({ product }) {
         </button>
 
         <button
+          id="halum-buy-now-btn"
+          data-halum-target="buy-now"
           onClick={handleBuyNow}
           className="py-3.5 px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
         >

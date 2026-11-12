@@ -498,6 +498,8 @@ export default function CartPage() {
                   )}
 
                   <button
+                    id="halum-checkout-btn"
+                    data-halum-target="checkout"
                     type="submit"
                     disabled={submitting}
                     className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-2xl text-sm transition-all duration-200 shadow-lg hover:shadow-amber-500/30 hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"

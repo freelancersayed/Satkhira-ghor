@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import HalumTigerAnimation from './HalumTigerAnimation';
 import HalumSpeechBubble from './HalumSpeechBubble';
@@ -11,13 +11,16 @@ export default function HalumAssistantWidget() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  // 'idle' | 'greeting' | 'listening' | 'praising' | 'dancing' | 'saluting' | 'talking'
+
+  // 'idle' | 'greeting' | 'listening' | 'praising' | 'dancing' | 'saluting' | 'pointing' | 'talking'
   const [characterState, setCharacterState] = useState('idle');
 
   // Smart Adaptive Positioning states
   const [isLeftSide, setIsLeftSide] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [hasTargetOnScreen, setHasTargetOnScreen] = useState(false);
+  const [targetType, setTargetType] = useState('general');
 
   const lastAddedItem = useCartStore((state) => state.lastAddedItem);
 
@@ -50,7 +53,7 @@ export default function HalumAssistantWidget() {
     };
   }, []);
 
-  // Route-Aware Dynamic Behavior: Halum speaks about the current page/product!
+  // Autonomous Target Button Locator & Route Intelligence
   useEffect(() => {
     if (!mounted) return;
 
@@ -64,36 +67,73 @@ export default function HalumAssistantWidget() {
       }
     };
 
+    let checkTargetTimer = null;
+
     if (pathname.startsWith('/products/')) {
-      // On product detail page: Automatically moves to the LEFT side so the right-side Buy Box is 100% clear!
+      // On product detail page:
+      // Halum positions on the LEFT side to leave the right-hand Buy Box 100% unobstructed!
       setIsLeftSide(true);
-      setCharacterState('praising');
-      const timer = setTimeout(() => setCharacterState('idle'), 5000);
-      return () => clearTimeout(timer);
+      setTargetType('add-to-cart');
+
+      // Check if Add-To-Cart / Buy-Now button exists on DOM
+      checkTargetTimer = setTimeout(() => {
+        const targetBtn =
+          document.getElementById('halum-buy-now-btn') ||
+          document.getElementById('halum-add-to-cart-btn') ||
+          document.querySelector('[data-halum-target="add-to-cart"]');
+
+        if (targetBtn) {
+          setHasTargetOnScreen(true);
+          // Halum points at the button and praises the authentic origin
+          setCharacterState('pointing');
+        } else {
+          setHasTargetOnScreen(false);
+          setCharacterState('praising');
+        }
+      }, 500);
+
+      return () => clearTimeout(checkTargetTimer);
     } else if (pathname === '/cart') {
       restoreSidePreference();
-      // On cart page: Halum dances to guide checkout
-      setCharacterState('dancing');
-      const timer = setTimeout(() => setCharacterState('idle'), 4000);
-      return () => clearTimeout(timer);
+      setTargetType('checkout');
+
+      checkTargetTimer = setTimeout(() => {
+        const checkoutBtn =
+          document.getElementById('halum-checkout-btn') ||
+          document.querySelector('[data-halum-target="checkout"]');
+
+        if (checkoutBtn) {
+          setHasTargetOnScreen(true);
+          setCharacterState('pointing');
+        } else {
+          setHasTargetOnScreen(false);
+          setCharacterState('dancing');
+        }
+      }, 500);
+
+      return () => clearTimeout(checkTargetTimer);
     } else if (pathname === '/track-order') {
       restoreSidePreference();
-      // On track order page: Salutes and assures fast delivery
+      setHasTargetOnScreen(false);
+      setTargetType('general');
       setCharacterState('saluting');
       const timer = setTimeout(() => setCharacterState('idle'), 4000);
       return () => clearTimeout(timer);
     } else if (pathname === '/') {
       restoreSidePreference();
-      // On homepage landing: Warm welcome
+      setHasTargetOnScreen(false);
+      setTargetType('general');
       setCharacterState('greeting');
       const timer = setTimeout(() => setCharacterState('idle'), 3500);
       return () => clearTimeout(timer);
     } else {
       restoreSidePreference();
+      setHasTargetOnScreen(false);
+      setTargetType('general');
     }
   }, [pathname, mounted]);
 
-  // When item is added to cart, Halum rejoices with dancing animation (Step 3)
+  // When item is added to cart, Halum rejoices with dancing animation
   useEffect(() => {
     if (lastAddedItem) {
       setCharacterState('dancing');
@@ -104,7 +144,7 @@ export default function HalumAssistantWidget() {
     }
   }, [lastAddedItem]);
 
-  // Listen to order confirmed custom event (Step 4: Saluting)
+  // Listen to order confirmed custom event
   useEffect(() => {
     const handleOrderConfirmed = () => {
       setCharacterState('saluting');
@@ -140,6 +180,49 @@ export default function HalumAssistantWidget() {
     });
   };
 
+  // Direct 1-Tap Execution: Triggers on-screen target button with visual highlight
+  const handleTriggerTargetAction = useCallback(() => {
+    if (pathname.startsWith('/products/')) {
+      const buyNowBtn =
+        document.getElementById('halum-buy-now-btn') ||
+        document.getElementById('halum-add-to-cart-btn') ||
+        document.querySelector('[data-halum-target="add-to-cart"]');
+
+      if (buyNowBtn) {
+        // Smoothly scroll to the button
+        buyNowBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Add temporary golden pulse highlight
+        buyNowBtn.classList.add('ring-4', 'ring-[#FAB116]', 'ring-offset-2');
+        setTimeout(() => {
+          buyNowBtn.classList.remove('ring-4', 'ring-[#FAB116]', 'ring-offset-2');
+        }, 2200);
+
+        // Click the button
+        buyNowBtn.click();
+        setCharacterState('dancing');
+        setTimeout(() => setCharacterState('idle'), 4000);
+      }
+    } else if (pathname === '/cart') {
+      const checkoutBtn =
+        document.getElementById('halum-checkout-btn') ||
+        document.querySelector('[data-halum-target="checkout"]');
+
+      if (checkoutBtn) {
+        checkoutBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        checkoutBtn.classList.add('ring-4', 'ring-[#FAB116]', 'ring-offset-2');
+        setTimeout(() => {
+          checkoutBtn.classList.remove('ring-4', 'ring-[#FAB116]', 'ring-offset-2');
+        }, 2200);
+
+        checkoutBtn.click();
+        setCharacterState('saluting');
+      }
+    } else {
+      setIsChatOpen(true);
+    }
+  }, [pathname]);
+
   // Do not render on admin dashboard
   if (pathname.startsWith('/admin')) {
     return null;
@@ -164,14 +247,19 @@ export default function HalumAssistantWidget() {
     });
   };
 
+  // Determine pointing arm direction
+  // If Halum is on the left side, he points to the right towards the content/button!
+  // If Halum is on the right side, he points to the left!
+  const pointDirection = isLeftSide ? 'right' : 'left';
+
   return (
     <>
       {/* ── Floating Character Widget & Speech Bubble Container with Adaptive Positioning ── */}
       <div
         className={`fixed z-50 flex flex-col pointer-events-none transition-all duration-500 ease-in-out ${
           isLeftSide
-            ? 'bottom-[74px] md:bottom-6 left-3 sm:left-6 items-start'
-            : 'bottom-[74px] md:bottom-6 right-3 sm:right-6 items-end'
+            ? 'bottom-[76px] md:bottom-6 left-3 sm:left-6 items-start'
+            : 'bottom-[76px] md:bottom-6 right-3 sm:right-6 items-end'
         } ${isScrolling ? 'opacity-70 hover:opacity-100' : 'opacity-100'}`}
       >
         {/* Speech Bubble (hidden in minimized mode) */}
@@ -184,6 +272,9 @@ export default function HalumAssistantWidget() {
               isLeftSide={isLeftSide}
               onToggleSide={handleToggleSide}
               onMinimize={handleToggleMinimize}
+              onTriggerTargetAction={handleTriggerTargetAction}
+              hasTargetOnScreen={hasTargetOnScreen}
+              targetType={targetType}
             />
           </div>
         )}
@@ -194,6 +285,7 @@ export default function HalumAssistantWidget() {
             state={characterState}
             onClick={handleToggleChat}
             isMinimized={isMinimized}
+            pointDirection={pointDirection}
           />
         </div>
       </div>
@@ -210,4 +302,3 @@ export default function HalumAssistantWidget() {
     </>
   );
 }
-
