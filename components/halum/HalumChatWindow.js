@@ -9,14 +9,20 @@ import {
   ShoppingBag,
   Sparkles,
   ArrowRight,
-  RotateCcw,
-  ExternalLink,
   Check,
   Flame,
+  Phone,
+  MessageCircle,
+  Package,
+  Clock,
+  Truck,
+  MapPin,
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { products } from '@/data/products';
 import { getHalumProductKnowledge } from './halumKnowledge';
+import { matchLocalHalumIntent } from './halumLocalMatcher';
+import { deliveryConfig } from '@/lib/deliveryConfig';
 
 export default function HalumChatWindow({
   isOpen,
@@ -30,7 +36,7 @@ export default function HalumChatWindow({
     {
       id: 'step-1-welcome',
       sender: 'halum',
-      text: 'হালুম! সুন্দরবনের গভীর থেকে সরাসরি খাঁটি মধুর দুনিয়ায় আপনাকে স্বাগতম! আমি বনের রাজা, তবে আজ আপনার শপিং গাইড! বলুন, আজ কোন মধুটা চেখে দেখতে চান? 🐯',
+      text: 'হালুম! সুন্দরবনের খাঁটি মধুর দুনিয়ায় আপনাকে স্বাগতম! আমি হালুম মামা—বনের রাজা ও আপনার শপিং গাইড! আজ কোন খাঁটি খাবারটা চেখে দেখবেন? 🐯',
       products: [
         {
           id: 'prod-001',
@@ -53,7 +59,7 @@ export default function HalumChatWindow({
           badge: '২০০৳ সাশ্রয়',
         },
       ],
-      quickReplies: ['🍯 খাঁটি খলসী মধু', '🌿 কেওড়া মধু', '🎁 স্পেশাল কম্বো প্যাক', '🚚 ডেলিভারি চার্জ কত?'],
+      quickReplies: ['🍯 খাঁটি খলসী মধু', '🧈 বিলোনা গাওয়া ঘি', '🎁 মেগা কম্বো প্যাক', '🚚 ফ্রি ডেলিভারি সীমা'],
       timestamp: new Date(),
     },
   ]);
@@ -82,7 +88,7 @@ export default function HalumChatWindow({
             sender: 'halum',
             text: productInfo.dialogue,
             products: catalogItem ? [catalogItem] : [],
-            quickReplies: productInfo.chips || ['👉 এখনই অর্ডার করুন', '🍯 গুনাগুন জানুন', '🚚 ফ্রি ডেলিভারি কীভাবে পাব?'],
+            quickReplies: productInfo.chips || ['👉 এখনই অর্ডার করুন', '🍯 গুনাগুন জানুন', '🚚 ফ্রি ডেলিভারি পাব?'],
             action: { type: 'order_now', label: 'থাবা বসান (Order Now)' },
             timestamp: new Date(),
           },
@@ -103,7 +109,7 @@ export default function HalumChatWindow({
     }
   }, [isOpen, messages]);
 
-  // Handle sending a message
+  // Handle sending a message with Instant 0ms Local Intent Engine + In-Chat Tracking + AI fallback
   const handleSendMessage = async (textToSend) => {
     const text = (textToSend || inputMessage).trim();
     if (!text || isLoading) return;
@@ -120,8 +126,84 @@ export default function HalumChatWindow({
     setInputMessage('');
     setIsLoading(true);
 
-    if (onStateChange) onStateChange('talking');
+    if (onStateChange) onStateChange('thinking');
 
+    // 2. Check Local Intent Engine First (0ms Response Time!)
+    const localMatch = matchLocalHalumIntent(text, { pathname });
+
+    if (localMatch) {
+      // Intent: Live In-Chat Order Tracking
+      if (localMatch.type === 'track_order') {
+        try {
+          const res = await fetch(`/api/orders/track?q=${encodeURIComponent(localMatch.query)}`);
+          const data = await res.json();
+
+          if (res.ok && data.orders && data.orders.length > 0) {
+            const botMsg = {
+              id: `halum-track-${Date.now()}`,
+              sender: 'halum',
+              text: `হালুম! আপনার অর্ডারের তথ্য পেয়েছি 📦👇`,
+              orders: data.orders,
+              characterState: 'saluting',
+              quickReplies: ['📦 নতুন অর্ডার করব', '📞 কাস্টমার কেয়ার', '🍯 সেরা মধু দেখাও'],
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, botMsg]);
+            if (onStateChange) onStateChange('saluting');
+          } else {
+            const notFoundMsg = {
+              id: `halum-track-nf-${Date.now()}`,
+              sender: 'halum',
+              text: `হালুম! "${localMatch.query}" তথ্যের সাথে কোনো অর্ডার পাওয়া যায়নি। মোবাইল নম্বর বা অর্ডার আইডি সঠিক কিনা চেক করুন অথবা কাস্টমার কেয়ারে যোগাযোগ করুন। 🐯`,
+              characterState: 'thinking',
+              isFallback: true,
+              quickReplies: ['📞 ০১৯০৮-৯৪৫১৪৫ কল করুন', 'নতুন অর্ডার করব'],
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, notFoundMsg]);
+            if (onStateChange) onStateChange('thinking');
+          }
+        } catch (err) {
+          const errMsg = {
+            id: `halum-track-err-${Date.now()}`,
+            sender: 'halum',
+            text: 'একটু নেটওয়ার্ক জ্যাম! সরাসরি কথা বলতে ০১৯০৮-৯৪৫১৪৫ নম্বরে কল বা হোয়াটসঅ্যাপ করুন 🐯',
+            isFallback: true,
+            characterState: 'thinking',
+            quickReplies: ['নতুন অর্ডার করব', 'মধুর দাম কত?'],
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, errMsg]);
+        } finally {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      // Standard Local Match: Instant human-like 180ms response
+      setTimeout(() => {
+        const botMsg = {
+          id: `halum-${Date.now()}`,
+          sender: 'halum',
+          text: localMatch.reply,
+          products: localMatch.products || [],
+          quickReplies: localMatch.quickReplies || [],
+          action: localMatch.action || null,
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, botMsg]);
+        setIsLoading(false);
+
+        if (onStateChange && localMatch.characterState) {
+          onStateChange(localMatch.characterState);
+          setTimeout(() => onStateChange('idle'), 4000);
+        }
+      }, 180);
+      return;
+    }
+
+    // 3. Fallback to Server Agent / LLM Brain
     try {
       const res = await fetch('/api/halum-agent', {
         method: 'POST',
@@ -136,7 +218,7 @@ export default function HalumChatWindow({
         sender: 'halum',
         text: data.reply || 'হালুম! আমি আপনার কথাটি বুঝতে পেরেছি।',
         products: data.products || [],
-        quickReplies: data.quickReplies || [],
+        quickReplies: data.quickReplies || ['🍯 সুন্দরবনের মধু', '🧈 বিলোনা ঘি', '🎁 মেগা কম্বো'],
         action: data.action || null,
         timestamp: new Date(),
       };
@@ -149,12 +231,14 @@ export default function HalumChatWindow({
       }
     } catch (err) {
       console.error('Halum response error:', err);
+      // Robust Offline Fallback Card (Requirement 4)
       setMessages((prev) => [
         ...prev,
         {
-          id: `halum-${Date.now()}`,
+          id: `halum-fallback-${Date.now()}`,
           sender: 'halum',
-          text: 'হালুম! একটু নেটওয়ার্কের সমস্যা হয়েছে বন্ধু। নিচে বাটন থেকে পণ্য দেখতে পারেন।',
+          text: `একটু নেটওয়ার্ক জ্যাম! সরাসরি কথা বলতে ${deliveryConfig.supportPhone} নম্বরে কল বা হোয়াটসঅ্যাপ করুন 🐯`,
+          isFallback: true,
           quickReplies: ['মধু দেখতে চাই', 'গাওয়া ঘি দেখতে চাই'],
           timestamp: new Date(),
         },
@@ -168,18 +252,17 @@ export default function HalumChatWindow({
   const handleAddToCartFromAgent = (product) => {
     addItem(product, 1, false);
     setAddedItemSlug(product.slug);
-    if (onStateChange) onStateChange('dancing');
+    if (onStateChange) onStateChange('happy');
 
-    // Halum provides joyful Step 3 guidance
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
           id: `step-3-${Date.now()}`,
           sender: 'halum',
-          text: "বাহ! দারুণ একটা চয়েস করেছেন। এই মধু পেটে গেলে শরীরে বাঘের মতো শক্তি পাবেন গ্যারান্টি! এখন ঝটপট নিচের 'Order Now' বাটনটায় একটা থাবা বসান (ক্লিক করুন) আর আপনার ঠিকানাটা দিন! 🐾",
+          text: "বাহ! দারুণ চয়েস 🐾 এই খাবার পেটে গেলে বাঘের মতো শক্তি পাবেন! এখন ঝটপট নিচের 'Order Now' বাটনটায় একটা থাবা বসান আর অর্ডার কনফার্ম করুন!",
           action: { type: 'order_now', label: 'থাবা বসান (Order Now)' },
-          quickReplies: ['🚚 ফ্রি ডেলিভারি কীভাবে পাব?', 'ক্যাশ অন ডেলিভারি আছে?'],
+          quickReplies: [`🚚 ফ্রি ডেলিভারি (৳${deliveryConfig.freeDeliveryThreshold}+)`, 'ক্যাশ অন ডেলিভারি আছে?'],
           timestamp: new Date(),
         },
       ]);
@@ -196,7 +279,7 @@ export default function HalumChatWindow({
     <div
       className={`fixed bottom-24 sm:bottom-6 ${
         isLeftSide ? 'left-3 sm:left-6' : 'right-3 sm:right-6'
-      } z-50 w-[94vw] sm:w-[380px] max-h-[82vh] h-[540px] bg-white rounded-3xl shadow-2xl border-2 border-[#FAB116] flex flex-col overflow-hidden animate-slideUp transition-all duration-300`}
+      } z-50 w-[94vw] sm:w-[380px] max-h-[82vh] h-[550px] bg-white rounded-3xl shadow-2xl border-2 border-[#FAB116] flex flex-col overflow-hidden animate-slideUp transition-all duration-300`}
     >
       {/* ── Chat Header ── */}
       <div className="p-3.5 bg-gradient-to-r from-[#016831] via-[#015829] to-[#014D24] text-white flex items-center justify-between shadow-xs">
@@ -208,14 +291,14 @@ export default function HalumChatWindow({
           <div>
             <div className="flex items-center gap-1.5">
               <h3 className="text-sm font-black text-white leading-tight">
-                হালুম ভাই
+                হালুম মামা
               </h3>
               <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-[#FAB116] text-black">
-                AI Agent
+                শপিং গাইড
               </span>
             </div>
             <p className="text-[10px] text-emerald-200 leading-tight">
-              সুন্দরবনের খাঁটি বন্ধু ও শপিং গাইড
+              চিফ টেস্ট অফিসার ও খাঁটি বন্ধু
             </p>
           </div>
         </div>
@@ -230,8 +313,8 @@ export default function HalumChatWindow({
         </button>
       </div>
 
-      {/* ── Scrollable Messages Area ── */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3.5 bg-[#FCFBF7]">
+      {/* ── Scrollable Messages Area with pb-8 (Layout Fix) ── */}
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 pb-8 space-y-3.5 bg-[#FCFBF7]">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -243,7 +326,7 @@ export default function HalumChatWindow({
             {msg.sender === 'halum' && (
               <div className="flex items-center gap-1 text-[10px] font-bold text-[#016831] mb-1">
                 <span>🐯</span>
-                <span>হালুম ভাই</span>
+                <span>হালুম মামা</span>
               </div>
             )}
 
@@ -257,7 +340,84 @@ export default function HalumChatWindow({
             >
               <p>{msg.text}</p>
 
-              {/* Embedded Product Cards recommended by Agent */}
+              {/* Embedded In-Chat Order Tracking Cards */}
+              {msg.orders && msg.orders.length > 0 && (
+                <div className="mt-3 space-y-2.5 pt-2 border-t border-amber-100">
+                  {msg.orders.map((ord, oIdx) => (
+                    <div
+                      key={ord._id || oIdx}
+                      className="p-3 rounded-2xl bg-[#FAF9F5] border-2 border-amber-300 shadow-xs space-y-2"
+                    >
+                      <div className="flex items-center justify-between pb-1.5 border-b border-amber-200/70">
+                        <span className="font-black text-xs text-[#016831]">
+                          #{ord.orderNumber}
+                        </span>
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          {ord.status === 'delivered'
+                            ? 'ডেলিভারি সম্পন্ন ✓'
+                            : ord.status === 'processing'
+                            ? 'প্যাকিং চলছে 📦'
+                            : ord.status === 'shipped'
+                            ? 'কুরিয়ারে হস্তান্তর 🚚'
+                            : 'অর্ডার গৃহীত'}
+                        </span>
+                      </div>
+
+                      {/* Items List */}
+                      <div className="space-y-1 text-[11px] text-stone-700">
+                        {ord.items &&
+                          ord.items.map((item, iIdx) => (
+                            <div key={iIdx} className="flex justify-between items-center">
+                              <span className="line-clamp-1 flex-1 font-semibold">
+                                • {item.name} × {item.quantity}
+                              </span>
+                              <span className="font-bold text-[#016831]">
+                                ৳{item.price * item.quantity}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+
+                      {/* Pricing & Courier */}
+                      <div className="pt-1.5 border-t border-stone-200 flex justify-between items-center text-xs font-black">
+                        <span className="text-stone-600">মোট মূল্য:</span>
+                        <span className="text-amber-700">৳{ord.totalAmount}</span>
+                      </div>
+
+                      {ord.courierBooking?.trackingCode && (
+                        <div className="text-[10px] bg-amber-50 p-1.5 rounded-lg text-stone-600 flex items-center gap-1">
+                          <Truck className="w-3 h-3 text-[#016831]" />
+                          <span>ট্র্যাকিং কোড: <strong>{ord.courierBooking.trackingCode}</strong></span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Offline / Contact Fallback Card (Requirement 4) */}
+              {msg.isFallback && (
+                <div className="mt-3 pt-2 border-t border-amber-200 grid grid-cols-2 gap-2">
+                  <a
+                    href={`tel:${deliveryConfig.supportPhoneRaw}`}
+                    className="p-2 rounded-xl bg-[#016831] text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-xs hover:bg-[#02833E]"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-amber-300" />
+                    <span>কল করুন</span>
+                  </a>
+                  <a
+                    href={deliveryConfig.supportWhatsApp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-xl bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-xs hover:bg-emerald-700"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 text-white" />
+                    <span>হোয়াটসঅ্যাপ</span>
+                  </a>
+                </div>
+              )}
+
+              {/* Embedded Product Cards with line-clamp-2 (Requirement 1 & 3) */}
               {msg.products && msg.products.length > 0 && (
                 <div className="mt-3 space-y-2 pt-2 border-t border-amber-100">
                   <div className="text-[10px] font-bold text-[#016831] flex items-center gap-1">
@@ -284,13 +444,14 @@ export default function HalumChatWindow({
                         </Link>
 
                         <div className="flex-1 min-w-0">
+                          {/* Title with line-clamp-2 */}
                           <Link
                             href={`/products/${prod.slug}`}
-                            className="text-xs font-bold text-stone-900 hover:text-[#016831] truncate block"
+                            className="text-xs font-bold text-stone-900 hover:text-[#016831] line-clamp-2 leading-snug block"
                           >
                             {prod.name}
                           </Link>
-                          <div className="text-[10px] text-stone-500 truncate">
+                          <div className="text-[10px] text-stone-500 truncate mt-0.5">
                             {prod.unit}
                           </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
@@ -382,7 +543,7 @@ export default function HalumChatWindow({
         {isLoading && (
           <div className="flex items-center gap-2 text-xs text-[#016831] font-bold bg-white p-2.5 rounded-2xl border border-amber-200 w-fit animate-pulse">
             <span>🐯</span>
-            <span>হালুম ভাই ভাবছেন...</span>
+            <span>হালুম মামা ভাবছেন...</span>
             <span className="flex gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[#016831] animate-bounce" />
               <span className="w-1.5 h-1.5 rounded-full bg-[#016831] animate-bounce delay-100" />
@@ -436,7 +597,7 @@ export default function HalumChatWindow({
           type="text"
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
-          placeholder="হালুম ভাইকে যেকোনো প্রশ্ন করুন..."
+          placeholder="হালুম মামাকে যেকোনো প্রশ্ন করুন..."
           className="flex-1 px-3 py-2 rounded-xl bg-[#FAF9F5] border border-stone-200 focus:border-[#016831] focus:ring-1 focus:ring-[#016831] outline-hidden text-xs text-stone-800 placeholder-stone-400"
         />
 
@@ -452,4 +613,3 @@ export default function HalumChatWindow({
     </div>
   );
 }
-

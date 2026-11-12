@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { deliveryConfig } from '@/lib/deliveryConfig';
 
 export default function CartDrawer() {
   const [mounted, setMounted] = useState(false);
@@ -35,7 +36,7 @@ export default function CartDrawer() {
   if (!mounted) return null;
 
   const totalPrice = getTotalPrice();
-  const freeShippingThreshold = 1500;
+  const freeShippingThreshold = deliveryConfig.freeDeliveryThreshold;
   const progressToFreeShipping = Math.min(
     100,
     (totalPrice / freeShippingThreshold) * 100

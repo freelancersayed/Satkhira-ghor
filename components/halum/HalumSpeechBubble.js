@@ -9,6 +9,7 @@ import {
   ArrowLeftRight,
   Minus,
   Zap,
+  Plus,
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import {
@@ -16,6 +17,8 @@ import {
   ROUTE_INTELLIGENCE,
   TIGER_WITTY_QUIPS,
 } from './halumKnowledge';
+import { deliveryConfig } from '@/lib/deliveryConfig';
+import { products } from '@/data/products';
 
 export default function HalumSpeechBubble({
   onOpenChat,
@@ -26,13 +29,32 @@ export default function HalumSpeechBubble({
   onMinimize,
   onTriggerTargetAction,
   hasTargetOnScreen = false,
-  targetType = 'add-to-cart', // 'add-to-cart' | 'checkout' | 'general'
+  targetType = 'add-to-cart',
 }) {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const [quipIndex, setQuipIndex] = useState(0);
 
   const items = useCartStore((state) => state.items);
+  const getTotalPrice = useCartStore((state) => state.getTotalPrice);
+  const addItem = useCartStore((state) => state.addItem);
+
+  const subtotal = getTotalPrice();
   const hasCartItem = items && items.length > 0;
+
+  // Smart Cart Watcher: Calculate if close to Free Delivery (e.g. 1100 to 1499 BDT)
+  const isNearFreeDelivery =
+    subtotal >= deliveryConfig.upsellNearThresholdMin &&
+    subtotal < deliveryConfig.freeDeliveryThreshold;
+  const remainingForFree = deliveryConfig.freeDeliveryThreshold - subtotal;
+
+  // Add-on product for 1-click upsell (Pickle / Chui Jhal)
+  const upsellProduct = useMemo(() => {
+    return (
+      products.find((p) => p.slug === 'sundarbans-plum-mango-pickle') ||
+      products.find((p) => p.category === 'pickles') ||
+      products[products.length - 1]
+    );
+  }, []);
 
   // Extract product slug if on product detail page
   const productSlug = useMemo(() => {
@@ -42,39 +64,80 @@ export default function HalumSpeechBubble({
     return null;
   }, [pathname]);
 
-  // Retrieve omniscient product knowledge
   const productKnowledge = useMemo(() => {
     return productSlug ? getHalumProductKnowledge(productSlug) : null;
   }, [productSlug]);
 
   const currentRouteInfo = ROUTE_INTELLIGENCE[pathname] || ROUTE_INTELLIGENCE['/'];
 
-  // Whenever user navigates to a new page or product, reopen bubble with the new context!
+  // ── Non-Intrusive Welcome Trigger (3–5 seconds delay, respects sessionStorage) ──
   useEffect(() => {
-    setVisible(true);
-  }, [pathname, hasCartItem]);
+    // If on a specific product detail page or cart page, show after brief 1s delay
+    if (productKnowledge || pathname === '/cart' || isNearFreeDelivery) {
+      const timer = setTimeout(() => setVisible(true), 1200);
+      return () => clearTimeout(timer);
+    }
 
-  // Rotate fun quips periodically when idle on general routes
+    // On home/general pages: check if user already dismissed welcome in this session
+    try {
+      const isDismissed = sessionStorage.getItem('halum_welcome_dismissed');
+      if (isDismissed === 'true') {
+        setVisible(false);
+        return;
+      }
+    } catch (e) {}
+
+    // Wait 3.5 seconds before showing non-intrusive welcome toast
+    const welcomeTimer = setTimeout(() => {
+      setVisible(true);
+    }, 3500);
+
+    return () => clearTimeout(welcomeTimer);
+  }, [pathname, productKnowledge, isNearFreeDelivery]);
+
+  // Periodic quip rotation when idle
   useEffect(() => {
-    if (isOpen || productKnowledge) return;
+    if (isOpen || productKnowledge || isNearFreeDelivery) return;
     const timer = setInterval(() => {
       setQuipIndex((prev) => (prev + 1) % TIGER_WITTY_QUIPS.length);
-    }, 9000);
+    }, 10000);
     return () => clearInterval(timer);
-  }, [isOpen, productKnowledge]);
+  }, [isOpen, productKnowledge, isNearFreeDelivery]);
 
-  // Determine current active dialogue & badges
+  // Dismiss handler saving to sessionStorage
+  const handleDismiss = (e) => {
+    e.stopPropagation();
+    setVisible(false);
+    try {
+      sessionStorage.setItem('halum_welcome_dismissed', 'true');
+    } catch (e) {}
+  };
+
+  // 1-Click Upsell Add to Cart
+  const handleAddUpsell = (e) => {
+    e.stopPropagation();
+    if (upsellProduct) {
+      addItem(upsellProduct, 1, false);
+      setVisible(false);
+    }
+  };
+
+  // Determine active text & badge
   let currentText = currentRouteInfo.greeting;
-  let badgeTitle = 'হালুম ভাই (বনের রাজা)';
+  let badgeTitle = 'হালুম মামা';
   let badgeIcon = '🐯';
 
-  if (productKnowledge) {
+  if (isNearFreeDelivery) {
+    badgeTitle = 'ফ্রি ডেলিভারি টিপ 🚚';
+    badgeIcon = '🎁';
+    currentText = `আর মাত্র ৳${remainingForFree} টাকার আচার বা চুইঝাল নিলেই ডেলিভারি চার্জ একদম ফ্রি! 🚚✨`;
+  } else if (productKnowledge) {
     currentText = productKnowledge.dialogue;
     badgeTitle = productKnowledge.title;
     badgeIcon = '🍯';
   } else if (hasCartItem && pathname !== '/cart') {
     currentText =
-      'বাহ! খাঁটি খাবারগুলো তো কার্টে যুক্ত হয়েছে। বাঘের মতো শক্তি পেতে এখন ঝটপট নিচের বাটনটায় একটা থাবা বসান আর অর্ডার কনফার্ম করুন! 🐾';
+      'বাহ! খাঁটি খাবার তো কার্টে যুক্ত হয়েছে। বাঘের মতো শক্তি পেতে নিচে বাটনটায় একটা থাবা বসান আর অর্ডার কনফার্ম করুন! 🐾';
     badgeTitle = 'অর্ডার গাইড';
     badgeIcon = '🐾';
   } else if (quipIndex > 0 && pathname === '/') {
@@ -83,7 +146,7 @@ export default function HalumSpeechBubble({
     badgeIcon = '✨';
   }
 
-  // Voice synthesis (Web Speech API)
+  // Voice synthesis
   const handleSpeak = (e) => {
     e.stopPropagation();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -161,12 +224,12 @@ export default function HalumSpeechBubble({
               </button>
             )}
 
-            {/* Close button */}
+            {/* Close button (Dismisses for session) */}
             <button
               type="button"
-              onClick={() => setVisible(false)}
+              onClick={handleDismiss}
               className="p-1 rounded-md text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition-colors"
-              title="বন্ধ করুন"
+              title="বন্ধ করুন (এই সেশনে আর দেখাবে না)"
               aria-label="বন্ধ"
             >
               <X className="w-3.5 h-3.5" />
@@ -176,7 +239,9 @@ export default function HalumSpeechBubble({
 
         {/* Bubble Message */}
         <div className="flex items-start gap-1.5">
-          {productKnowledge ? (
+          {isNearFreeDelivery ? (
+            <ShoppingBag className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5 animate-bounce" />
+          ) : productKnowledge ? (
             <Sparkles className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5 animate-pulse" />
           ) : hasCartItem ? (
             <ShoppingBag className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5 animate-bounce" />
@@ -188,8 +253,22 @@ export default function HalumSpeechBubble({
           </p>
         </div>
 
-        {/* Direct Action 1-Tap Trigger Button (Requirement: Pointing & Action Guidance) */}
-        {(hasTargetOnScreen || productKnowledge || pathname === '/cart') && (
+        {/* 1-Click Free Delivery Upsell Add-Button */}
+        {isNearFreeDelivery && upsellProduct && (
+          <div className="mt-2 pt-1.5 border-t border-emerald-100">
+            <button
+              type="button"
+              onClick={handleAddUpsell}
+              className="w-full py-1.5 px-3 rounded-xl bg-[#016831] hover:bg-[#02833E] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
+            >
+              <Plus className="w-3.5 h-3.5 text-amber-300 stroke-[3]" />
+              <span>{upsellProduct.name} (+৳{upsellProduct.price})</span>
+            </button>
+          </div>
+        )}
+
+        {/* Direct Action 1-Tap Trigger Button */}
+        {!isNearFreeDelivery && (hasTargetOnScreen || productKnowledge || pathname === '/cart') && (
           <div className="mt-2 pt-1.5 border-t border-amber-100">
             <button
               type="button"
@@ -207,7 +286,7 @@ export default function HalumSpeechBubble({
         )}
 
         {/* Quick Click Chips on Bubble */}
-        {productKnowledge && productKnowledge.chips && (
+        {!isNearFreeDelivery && productKnowledge && productKnowledge.chips && (
           <div className="mt-1.5 pt-1.5 border-t border-amber-100/70 flex flex-wrap gap-1">
             {productKnowledge.chips.slice(0, 2).map((chip, idx) => (
               <span
@@ -222,7 +301,7 @@ export default function HalumSpeechBubble({
 
         {/* Action callout bottom */}
         <div className="mt-1.5 pt-1 flex items-center justify-between text-[9px] font-black text-[#016831]">
-          <span>হালুম ভাইয়ের সাথে চ্যাট করতে ক্লিক করুন</span>
+          <span>হালুম মামার সাথে চ্যাট করতে ক্লিক করুন</span>
           <span>খুলুন &rarr;</span>
         </div>
 

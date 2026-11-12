@@ -3,21 +3,26 @@
 import { useState, useEffect } from 'react';
 
 /**
- * HalumTigerAnimation (হালুম ভাই - ২.৫ডি অন-স্ক্রিন শুভঙ্কর)
+ * HalumTigerAnimation (হালুম মামা - ২.৫ডি অন-স্ক্রিন শুভঙ্কর)
  *
  * True 2.5D Mascot Character for Satkhira Ghor.
- * Expressive full-body cartoon tiger companion with:
- * - Animated tail wagging
- * - Dynamic arm gestures (pointing paw, honey jar praising, cheering, waving, saluting)
- * - 3D volumetric gradients, ground contact shadow, and ambient depth
- * - Pointing finger indicator for on-screen DOM targets
+ * Context-aware character states:
+ * - 'idle': Natural breathing, eye blinking, slow tail wagging.
+ * - 'happy': Bouncing celebration, raised cheering paws on cart-add / order-confirm.
+ * - 'thinking': Paw on chin, reading glasses, thinking bubble when processing queries.
+ * - 'proud': Hand on heart/chest, puffed chest, proud of 100% pure Sundarban heritage.
+ * - 'pointing': Pointing paw and finger towards action button with bouncy directive tag.
+ * - 'praising': Proudly holding glowing jar of pure honey.
+ * - 'greeting': Friendly waving paw and wink.
+ * - 'saluting': Crisp salute at brow for delivery / order tracking.
+ * - 'talking': Animated mouth in sync with speech/typing.
  */
 export default function HalumTigerAnimation({
   state = 'idle',
   className = '',
   onClick,
   isMinimized = false,
-  pointDirection = 'right', // 'left' | 'right' | 'down'
+  pointDirection = 'right', // 'left' | 'right'
 }) {
   const [blink, setBlink] = useState(false);
 
@@ -32,7 +37,9 @@ export default function HalumTigerAnimation({
 
   const isPointing = state === 'pointing';
   const isPraising = state === 'praising';
-  const isDancing = state === 'happy' || state === 'dancing';
+  const isProud = state === 'proud';
+  const isThinking = state === 'thinking';
+  const isHappy = state === 'happy' || state === 'dancing';
   const isListening = state === 'listening';
   const isSaluting = state === 'saluting';
   const isGreeting = state === 'greeting';
@@ -43,14 +50,14 @@ export default function HalumTigerAnimation({
       <div
         onClick={onClick}
         className="relative group cursor-pointer select-none transition-transform duration-300 hover:scale-110"
-        title="হালুম ভাই - বড় করতে ক্লিক করুন 🐯"
-        aria-label="হালুম ভাই শপিং সহকারী"
+        title="হালুম মামা - বড় করতে ক্লিক করুন 🐯"
+        aria-label="হালুম মামা শপিং গাইড"
       >
         <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 via-[#FAB116] to-yellow-300 p-1 shadow-xl border-2 border-white flex items-center justify-center animate-pulse">
           <span className="text-2xl drop-shadow-md">🐯</span>
         </div>
         <div className="absolute -bottom-1 -right-1 bg-[#016831] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-white shadow">
-          হালুম
+          হালুম মামা
         </div>
       </div>
     );
@@ -60,8 +67,12 @@ export default function HalumTigerAnimation({
     <div
       onClick={onClick}
       className={`relative select-none cursor-pointer group transition-all duration-500 ${className} ${
-        isDancing
+        isHappy
           ? 'animate-bounce'
+          : isThinking
+          ? '-rotate-3 scale-102'
+          : isProud
+          ? 'scale-105'
           : isPointing
           ? 'hover:scale-105'
           : isPraising
@@ -70,16 +81,18 @@ export default function HalumTigerAnimation({
           ? '-rotate-2 scale-105'
           : 'hover:scale-105'
       }`}
-      title="হালুম ভাই (Halum Bhai) - কথা বলতে বা অর্ডার গাইড পেতে ক্লিক করুন 🐯"
-      aria-label="হালুম ভাই AI শপিং সহকারী"
+      title="হালুম মামা (Halum Mama) - কথা বলতে বা শপিং গাইড পেতে ক্লিক করুন 🐯"
+      aria-label="হালুম মামা AI শপিং সহকারী"
     >
       {/* ── 3D Ambient Aura / Glow Behind Character ── */}
       <div
         className={`absolute inset-0 rounded-full blur-xl transition-all duration-500 scale-90 -z-10 ${
           isPointing
             ? 'bg-amber-400/50 animate-pulse'
-            : isDancing || isPraising
+            : isHappy || isPraising || isProud
             ? 'bg-gradient-to-tr from-amber-400/60 via-yellow-300/50 to-emerald-400/40'
+            : isThinking
+            ? 'bg-emerald-400/30 animate-pulse'
             : isSaluting
             ? 'bg-gradient-to-tr from-emerald-400/50 via-teal-400/40 to-amber-300/40'
             : 'bg-amber-400/30'
@@ -88,15 +101,31 @@ export default function HalumTigerAnimation({
 
       {/* ── Pointing Finger Tooltip Tag (When pointing at an actionable button) ── */}
       {isPointing && (
-        <div className={`absolute -top-7 ${
-          pointDirection === 'left' ? '-left-6' : '-right-6'
-        } z-20 pointer-events-none flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full shadow-lg border border-amber-200 animate-bounce whitespace-nowrap`}>
+        <div
+          className={`absolute -top-7 ${
+            pointDirection === 'left' ? '-left-6' : '-right-6'
+          } z-20 pointer-events-none flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full shadow-lg border border-amber-200 animate-bounce whitespace-nowrap`}
+        >
           <span>{pointDirection === 'left' ? '👈' : '👉'}</span>
           <span>এখানে থাবা বসাও!</span>
         </div>
       )}
 
-      {/* ── Full 2.5D Mascot Vector Canvas (Not clipped in a circle!) ── */}
+      {/* ── Thinking Floating Bubble (When pondering an answer) ── */}
+      {isThinking && (
+        <div className="absolute -top-6 -right-2 z-20 pointer-events-none flex items-center gap-1 bg-white/95 text-[#016831] font-bold text-[10px] px-2 py-0.5 rounded-full shadow-md border border-emerald-300 animate-pulse whitespace-nowrap">
+          <span>💭 ভাবছি...</span>
+        </div>
+      )}
+
+      {/* ── Proud Laurel / Pure Quality Tag (When talking about authentic heritage) ── */}
+      {isProud && (
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1 bg-[#016831] text-amber-300 font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-md border border-amber-400 animate-pulse whitespace-nowrap">
+          <span>✨ বাঘের জবান (১০০% খাঁটি)</span>
+        </div>
+      )}
+
+      {/* ── Full 2.5D Mascot Vector Canvas ── */}
       <div className="w-28 sm:w-36 h-36 sm:h-44 relative flex items-center justify-center">
         <svg
           viewBox="0 0 140 170"
@@ -187,8 +216,8 @@ export default function HalumTigerAnimation({
           <ellipse
             cx="70"
             cy="158"
-            rx={isDancing ? '28' : '42'}
-            ry={isDancing ? '4.5' : '7.5'}
+            rx={isHappy ? '28' : '42'}
+            ry={isHappy ? '4.5' : '7.5'}
             fill="#000000"
             opacity="0.22"
             filter="url(#halumContactShadow)"
@@ -197,7 +226,6 @@ export default function HalumTigerAnimation({
 
           {/* ── 2. Striped Wagging Tiger Tail ── */}
           <g className="halum-tail-anim">
-            {/* Tail curve behind body */}
             <path
               d="M38 128 C20 120 10 95 22 75 C26 68 35 68 34 76 C31 89 36 106 48 118"
               fill="url(#halumFur)"
@@ -220,7 +248,6 @@ export default function HalumTigerAnimation({
           {/* Left Foot */}
           <g className="transition-transform duration-300">
             <ellipse cx="46" cy="154" rx="13" ry="8" fill="url(#halumFur)" stroke="#1E293B" strokeWidth="2.5" />
-            {/* Soft cream toes */}
             <circle cx="39" cy="155" r="3" fill="url(#halumCream)" />
             <circle cx="45" cy="157" r="3.2" fill="url(#halumCream)" />
             <circle cx="51" cy="156" r="3" fill="url(#halumCream)" />
@@ -228,7 +255,6 @@ export default function HalumTigerAnimation({
           {/* Right Foot */}
           <g className="transition-transform duration-300">
             <ellipse cx="94" cy="154" rx="13" ry="8" fill="url(#halumFur)" stroke="#1E293B" strokeWidth="2.5" />
-            {/* Soft cream toes */}
             <circle cx="89" cy="156" r="3" fill="url(#halumCream)" />
             <circle cx="95" cy="157" r="3.2" fill="url(#halumCream)" />
             <circle cx="101" cy="155" r="3" fill="url(#halumCream)" />
@@ -241,7 +267,6 @@ export default function HalumTigerAnimation({
             stroke="#1E293B"
             strokeWidth="2.5"
           />
-          {/* Torso Top Highlight */}
           <path
             d="M42 90 C36 108 38 140 50 148 C60 154 80 154 90 148 C102 140 104 108 98 90 Z"
             fill="url(#halumHighlight)"
@@ -272,23 +297,19 @@ export default function HalumTigerAnimation({
 
           {/* ── 6. Dynamic Left & Right Arms (Gestures & Pointing) ── */}
 
-          {/* GESTURE 1: POINTING POSE (Points paw & finger directly at target button) */}
+          {/* GESTURE 1: POINTING POSE */}
           {isPointing && (
             <g className="halum-point-arm">
               {pointDirection === 'left' ? (
-                /* Extended Left Arm pointing to the left */
                 <g>
-                  {/* Arm stretching left */}
                   <path
                     d="M50 90 C34 90 18 84 6 78 C2 76 2 70 8 70 C18 70 34 76 50 82"
                     fill="url(#halumFur)"
                     stroke="#1E293B"
                     strokeWidth="2.5"
                   />
-                  {/* Extended Pointing Finger / Paw */}
                   <circle cx="4" cy="74" r="6" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="2" />
                   <path d="M6 72 L-4 72" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" />
-                  {/* Other paw on hip */}
                   <path
                     d="M93 88 C102 94 106 104 100 112 C96 116 90 114 88 108"
                     fill="url(#halumFur)"
@@ -297,19 +318,15 @@ export default function HalumTigerAnimation({
                   />
                 </g>
               ) : (
-                /* Extended Right Arm pointing to the right */
                 <g>
-                  {/* Arm stretching right */}
                   <path
                     d="M90 90 C106 90 122 84 134 78 C138 76 138 70 132 70 C122 70 106 76 90 82"
                     fill="url(#halumFur)"
                     stroke="#1E293B"
                     strokeWidth="2.5"
                   />
-                  {/* Extended Pointing Finger / Paw */}
                   <circle cx="136" cy="74" r="6" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="2" />
                   <path d="M134 72 L144 72" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" />
-                  {/* Left paw on hip */}
                   <path
                     d="M47 88 C38 94 34 104 40 112 C44 116 50 114 52 108"
                     fill="url(#halumFur)"
@@ -321,27 +338,64 @@ export default function HalumTigerAnimation({
             </g>
           )}
 
-          {/* GESTURE 2: PRAISING POSE (Proudly holds up glowing Jar of Sundarbans Honey) */}
+          {/* GESTURE 2: THINKING POSE (Paw on Chin & Reading Glasses) */}
+          {isThinking && (
+            <g>
+              {/* Left hand supporting elbow or on hip */}
+              <path
+                d="M48 90 C38 94 36 106 42 112 C46 116 52 114 54 106"
+                fill="url(#halumFur)"
+                stroke="#1E293B"
+                strokeWidth="2.5"
+              />
+              {/* Right arm bent up with paw touching chin */}
+              <path
+                d="M92 90 C104 88 106 76 96 68 L84 66 C78 66 78 74 86 82"
+                fill="url(#halumFur)"
+                stroke="#1E293B"
+                strokeWidth="2.5"
+              />
+              <circle cx="84" cy="67" r="5" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="1.5" />
+            </g>
+          )}
+
+          {/* GESTURE 3: PROUD POSE (Hand on Heart / Chest Puffed Up) */}
+          {isProud && (
+            <g>
+              {/* Left hand on hip */}
+              <path
+                d="M47 88 C38 94 34 104 40 112 C44 116 50 114 52 108"
+                fill="url(#halumFur)"
+                stroke="#1E293B"
+                strokeWidth="2.5"
+              />
+              {/* Right hand proudly placed across chest/heart */}
+              <path
+                d="M92 90 C102 92 102 102 92 106 L74 104 C68 104 68 96 74 94"
+                fill="url(#halumFur)"
+                stroke="#1E293B"
+                strokeWidth="2.5"
+              />
+              <ellipse cx="73" cy="100" rx="6" ry="5" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="1.5" />
+            </g>
+          )}
+
+          {/* GESTURE 4: PRAISING POSE (Proudly holds up glowing Jar of Honey) */}
           {isPraising && (
             <g>
-              {/* Left hand holding honey jar */}
               <path
                 d="M48 92 C36 94 28 86 28 74 C28 66 38 66 44 76"
                 fill="url(#halumFur)"
                 stroke="#1E293B"
                 strokeWidth="2.5"
               />
-              {/* Glowing Honey Jar */}
               <g className="halum-honey-glow">
                 <rect x="18" y="52" width="18" height="22" rx="4" fill="url(#halumHoney)" stroke="#78350F" strokeWidth="2" />
                 <rect x="20" y="48" width="14" height="5" rx="2" fill="#E86A1E" stroke="#78350F" strokeWidth="1.5" />
-                {/* Honey Drop Badge on Jar */}
                 <circle cx="27" cy="63" r="3.5" fill="#FEF3C7" />
-                {/* Little sparkling stars */}
                 <path d="M12 48 L14 44 L16 48 L20 50 L16 52 L14 56 L12 52 L8 50 Z" fill="#FBBF24" />
                 <path d="M38 42 L39 39 L40 42 L43 43 L40 44 L39 47 L38 44 L35 43 Z" fill="#FBBF24" />
               </g>
-              {/* Right hand showing thumbs up */}
               <path
                 d="M92 90 C104 92 112 86 112 74 C112 68 104 68 98 76"
                 fill="url(#halumFur)"
@@ -352,10 +406,9 @@ export default function HalumTigerAnimation({
             </g>
           )}
 
-          {/* GESTURE 3: DANCING / HAPPY CELEBRATION (Both paws raised in air) */}
-          {isDancing && (
+          {/* GESTURE 5: HAPPY / DANCING (Both paws raised high celebrating) */}
+          {isHappy && (
             <g>
-              {/* Left arm up */}
               <path
                 d="M48 88 C32 78 24 58 28 46 C32 42 40 46 44 60"
                 fill="url(#halumFur)"
@@ -364,7 +417,6 @@ export default function HalumTigerAnimation({
               />
               <circle cx="28" cy="46" r="6" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="2" />
 
-              {/* Right arm up */}
               <path
                 d="M92 88 C108 78 116 58 112 46 C108 42 100 46 96 60"
                 fill="url(#halumFur)"
@@ -372,20 +424,22 @@ export default function HalumTigerAnimation({
                 strokeWidth="2.5"
               />
               <circle cx="112" cy="46" r="6" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="2" />
+
+              {/* Sparkles of joy */}
+              <path d="M18 36 L20 32 L22 36 L26 38 L22 40 L20 44 L18 40 L14 38 Z" fill="#FBBF24" />
+              <path d="M122 36 L124 32 L126 36 L130 38 L126 40 L124 44 L122 40 L118 38 Z" fill="#FBBF24" />
             </g>
           )}
 
-          {/* GESTURE 4: GREETING POSE (Waving paw) */}
+          {/* GESTURE 6: GREETING POSE (Waving paw) */}
           {isGreeting && (
             <g>
-              {/* Left hand relaxed */}
               <path
                 d="M46 92 C38 98 38 112 46 116 C52 118 56 110 52 100"
                 fill="url(#halumFur)"
                 stroke="#1E293B"
                 strokeWidth="2.5"
               />
-              {/* Right arm waving in air */}
               <g className="halum-paw-wave">
                 <path
                   d="M92 88 C106 78 114 62 110 50 C106 46 98 50 96 64"
@@ -399,17 +453,15 @@ export default function HalumTigerAnimation({
             </g>
           )}
 
-          {/* GESTURE 5: SALUTING POSE (Respectful salute at brow) */}
+          {/* GESTURE 7: SALUTING POSE (Respectful salute at brow) */}
           {isSaluting && (
             <g>
-              {/* Left arm standing straight */}
               <path
                 d="M46 92 C38 98 38 112 46 116 C52 118 56 110 52 100"
                 fill="url(#halumFur)"
                 stroke="#1E293B"
                 strokeWidth="2.5"
               />
-              {/* Right arm bent crisp salute */}
               <path
                 d="M92 88 C104 84 108 68 100 52 L90 52 C86 52 86 64 92 78"
                 fill="url(#halumFur)"
@@ -420,47 +472,51 @@ export default function HalumTigerAnimation({
             </g>
           )}
 
-          {/* GESTURE 6: IDLE / TALKING / LISTENING (Default resting cute paws) */}
-          {!isPointing && !isPraising && !isDancing && !isGreeting && !isSaluting && (
-            <g>
-              {/* Left Paw resting cutely on belly */}
-              <path
-                d="M46 90 C36 96 36 108 44 114 C50 118 56 112 54 102"
-                fill="url(#halumFur)"
-                stroke="#1E293B"
-                strokeWidth="2.5"
-              />
-              <circle cx="46" cy="112" r="5" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="1.5" />
+          {/* GESTURE 8: IDLE / DEFAULT (Resting paws) */}
+          {!isPointing &&
+            !isThinking &&
+            !isProud &&
+            !isPraising &&
+            !isHappy &&
+            !isGreeting &&
+            !isSaluting && (
+              <g>
+                <path
+                  d="M46 90 C36 96 36 108 44 114 C50 118 56 112 54 102"
+                  fill="url(#halumFur)"
+                  stroke="#1E293B"
+                  strokeWidth="2.5"
+                />
+                <circle cx="46" cy="112" r="5" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="1.5" />
 
-              {/* Right Paw resting cutely on belly */}
-              <path
-                d="M94 90 C104 96 104 108 96 114 C90 118 84 112 86 102"
-                fill="url(#halumFur)"
-                stroke="#1E293B"
-                strokeWidth="2.5"
-              />
-              <circle cx="94" cy="112" r="5" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="1.5" />
-            </g>
-          )}
+                <path
+                  d="M94 90 C104 96 104 108 96 114 C90 118 84 112 86 102"
+                  fill="url(#halumFur)"
+                  stroke="#1E293B"
+                  strokeWidth="2.5"
+                />
+                <circle cx="94" cy="112" r="5" fill="url(#halumCream)" stroke="#1E293B" strokeWidth="1.5" />
+              </g>
+            )}
 
           {/* ── 7. Tiger Ears (Perked up & Dimensional) ── */}
-          {/* Left Ear */}
-          <g className={`transition-transform duration-300 origin-[45px_30px] ${
-            isListening ? '-rotate-12 translate-y-[-3px]' : ''
-          }`}>
+          <g
+            className={`transition-transform duration-300 origin-[45px_30px] ${
+              isListening || isThinking ? '-rotate-12 translate-y-[-3px]' : ''
+            }`}
+          >
             <circle cx="42" cy="26" r="15" fill="url(#halumFur)" stroke="#1E293B" strokeWidth="2.5" />
             <circle cx="42" cy="26" r="8.5" fill="#FCA5A5" />
-            {/* Ear inner depth shadow */}
             <path d="M37 26 C37 22 47 22 47 26" stroke="#E11D48" strokeWidth="1.5" fill="none" opacity="0.6" />
           </g>
 
-          {/* Right Ear */}
-          <g className={`transition-transform duration-300 origin-[95px_30px] ${
-            isListening ? 'rotate-12 translate-y-[-3px]' : ''
-          }`}>
+          <g
+            className={`transition-transform duration-300 origin-[95px_30px] ${
+              isListening ? 'rotate-12 translate-y-[-3px]' : ''
+            }`}
+          >
             <circle cx="98" cy="26" r="15" fill="url(#halumFur)" stroke="#1E293B" strokeWidth="2.5" />
             <circle cx="98" cy="26" r="8.5" fill="#FCA5A5" />
-            {/* Ear inner depth shadow */}
             <path d="M93 26 C93 22 103 22 103 26" stroke="#E11D48" strokeWidth="1.5" fill="none" opacity="0.6" />
           </g>
 
@@ -468,7 +524,7 @@ export default function HalumTigerAnimation({
           <circle cx="70" cy="54" r="37" fill="url(#halumFur)" stroke="#1E293B" strokeWidth="2.5" />
           <circle cx="70" cy="54" r="37" fill="url(#halumHighlight)" />
 
-          {/* Royal Bengal Tiger Forehead Stripes */}
+          {/* Forehead Stripes */}
           <path d="M70 20 L70 32" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" />
           <path d="M62 25 L55 31" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
           <path d="M78 25 L85 31" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
@@ -485,26 +541,18 @@ export default function HalumTigerAnimation({
           <ellipse cx="82" cy="65" rx="14" ry="11" fill="url(#halumCream)" />
 
           {/* ── 9. Cute Tiger Face Features ── */}
-          {/* Cute Nose */}
+          {/* Nose */}
           <path d="M65 59 L75 59 C72 65 68 65 65 59 Z" fill="#881337" stroke="#1E293B" strokeWidth="1.5" />
 
-          {/* Mouth & Cute Little Tiger Fangs */}
+          {/* Mouth & Fangs */}
           {isTalking ? (
-            /* Open Talking Mouth */
             <g className="animate-pulse">
-              <path
-                d="M62 67 Q70 79 78 67 Z"
-                fill="#881337"
-                stroke="#1E293B"
-                strokeWidth="2"
-              />
+              <path d="M62 67 Q70 79 78 67 Z" fill="#881337" stroke="#1E293B" strokeWidth="2" />
               <path d="M66 73 Q70 76 74 73 Z" fill="#F43F5E" />
-              {/* Cute tiny white fangs */}
               <polygon points="63,67 65,71 67,67" fill="#FFFFFF" />
               <polygon points="73,67 75,71 77,67" fill="#FFFFFF" />
             </g>
           ) : (
-            /* Happy W-Shaped Tiger Smile */
             <g>
               <path
                 d="M60 67 C64 73 69 70 70 65 C71 70 76 73 80 67"
@@ -513,7 +561,6 @@ export default function HalumTigerAnimation({
                 strokeLinecap="round"
                 fill="none"
               />
-              {/* Tiny cute fangs peeking out */}
               <polygon points="61,66 63,69 64,66" fill="#FFFFFF" />
               <polygon points="76,66 77,69 79,66" fill="#FFFFFF" />
             </g>
@@ -526,8 +573,8 @@ export default function HalumTigerAnimation({
           <path d="M103 70 L92 69" stroke="#1E293B" strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
 
           {/* ── 10. Expressive Big 2.5D Cartoon Eyes ── */}
-          {blink ? (
-            /* Blinking Eyes (Happy Curves) */
+          {blink || isProud ? (
+            /* Proud or Blinking Happy Curves */
             <g>
               <path d="M50 48 Q56 53 62 48" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" fill="none" />
               <path d="M78 48 Q84 53 90 48" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" fill="none" />
@@ -535,31 +582,41 @@ export default function HalumTigerAnimation({
           ) : (
             /* Open Glossy Anime Eyes */
             <g>
-              {/* Left Eye */}
               <ellipse cx="56" cy="47" rx="7.5" ry="9" fill="#1E293B" />
               <circle cx="54" cy="44" r="3" fill="#FFFFFF" />
               <circle cx="58" cy="49" r="1.5" fill="#FFFFFF" />
 
-              {/* Right Eye */}
               <ellipse cx="84" cy="47" rx="7.5" ry="9" fill="#1E293B" />
               <circle cx="82" cy="44" r="3" fill="#FFFFFF" />
               <circle cx="86" cy="49" r="1.5" fill="#FFFFFF" />
 
               {/* Expressive Eyebrows */}
               <path
-                d={isListening ? "M48 36 L62 38" : isPointing ? "M48 37 Q55 33 62 37" : "M48 38 Q55 34 62 38"}
+                d={isThinking ? 'M48 35 L62 40' : isListening ? 'M48 36 L62 38' : 'M48 38 Q55 34 62 38'}
                 stroke="#1E293B"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 fill="none"
               />
               <path
-                d={isListening ? "M92 34 L78 38" : isPointing ? "M92 37 Q85 33 78 37" : "M92 38 Q85 34 78 38"}
+                d={isThinking ? 'M92 37 L78 35' : isListening ? 'M92 34 L78 38' : 'M92 38 Q85 34 78 38'}
                 stroke="#1E293B"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 fill="none"
               />
+            </g>
+          )}
+
+          {/* ── Special Thinking Glasses Overlay ── */}
+          {isThinking && (
+            <g className="animate-pulse">
+              <circle cx="56" cy="47" r="10" stroke="#016831" strokeWidth="2" fill="none" />
+              <circle cx="84" cy="47" r="10" stroke="#016831" strokeWidth="2" fill="none" />
+              <path d="M66 47 L74 47" stroke="#016831" strokeWidth="2" strokeLinecap="round" />
+              {/* Little glass glint reflection */}
+              <path d="M52 42 L56 42" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M80 42 L84 42" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
             </g>
           )}
 

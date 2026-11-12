@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { products } from '@/data/products';
+import { deliveryConfig } from '@/lib/deliveryConfig';
 
 export const dynamic = 'force-dynamic';
 
 // ─────────────────────────────────────────────────────────────
-// Halum Bhai Knowledge Base & Intent Matching
+// Halum Mama Knowledge Base & Intent Matching
 // ─────────────────────────────────────────────────────────────
 const PRODUCT_MAP = products.reduce((acc, p) => {
   acc[p.slug] = p;
@@ -315,7 +316,7 @@ export async function POST(request) {
 // Optional Gemini LLM Query Wrapper
 // ─────────────────────────────────────────────────────────────
 async function queryGeminiAgent(userPrompt, apiKey) {
-  const systemInstruction = `You are হালুম ভাই (Halum Bhai), the beloved Royal Bengal Tiger shopping guide and customer assistant of "সাতক্ষীরা ঘর" (satkhiraghor.com).
+  const systemInstruction = `You are হালুম মামা (Halum Mama), the beloved Royal Bengal Tiger chief taste officer and shopping guide of "সাতক্ষীরা ঘর" (satkhiraghor.com).
 You live in the Sundarbans forest of Satkhira, Bangladesh. You love pure honey, bilona ghee, wood-pressed mustard oil, and authentic food.
 Your tone is warm, witty, enthusiastic, and playful in Bengali. Start messages with friendly tiger sounds like "হালুম!".
 Catalog:
@@ -323,11 +324,12 @@ Catalog:
 - খাঁটি গাওয়া ঘি (প্রাচীন বিলোনা পদ্ধতিতে তৈরি) (৳1,890 / 1 kg)
 - ঘানি ভাঙা সরিষার তেল (৳320 / 1 litre)
 - সাতক্ষীরার ঐতিহ্যবাহী ক্ষীর সন্দেশ (৳850 / 1 kg)
-- মেগা ফ্যামিলি কম্বো (মধু + ঘি + তেল, ৳3,450, ৳200 ছাড়)
+- মেগা ফ্যামিলি কম্বো (মধু + ঘি + তেল, ৳2,450, ৳200 ছাড়)
 Policy:
-- Free delivery on orders over 1500 BDT.
+- Free delivery on orders over ${deliveryConfig.freeDeliveryThreshold} BDT (৳1,500).
 - Cash on delivery all over Bangladesh.
-Always respond in cheerful Bengali. Keep responses under 4 sentences.`;
+- Customer support: ${deliveryConfig.supportPhone}
+Always respond in cheerful Bengali. Keep responses under 3 sentences.`;
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 

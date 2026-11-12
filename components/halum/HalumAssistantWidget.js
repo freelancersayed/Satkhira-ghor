@@ -12,7 +12,7 @@ export default function HalumAssistantWidget() {
   const [mounted, setMounted] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  // 'idle' | 'greeting' | 'listening' | 'praising' | 'dancing' | 'saluting' | 'pointing' | 'talking'
+  // 'idle' | 'greeting' | 'listening' | 'praising' | 'dancing' | 'saluting' | 'pointing' | 'talking' | 'thinking' | 'proud' | 'happy'
   const [characterState, setCharacterState] = useState('idle');
 
   // Smart Adaptive Positioning states
@@ -21,7 +21,10 @@ export default function HalumAssistantWidget() {
   const [isScrolling, setIsScrolling] = useState(false);
   const [hasTargetOnScreen, setHasTargetOnScreen] = useState(false);
   const [targetType, setTargetType] = useState('general');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Cart drawer state for Auto-Minimize
+  const isCartDrawerOpen = useCartStore((state) => state.isOpen);
   const lastAddedItem = useCartStore((state) => state.lastAddedItem);
 
   // Restore saved position preferences
@@ -35,6 +38,23 @@ export default function HalumAssistantWidget() {
     } catch (e) {
       // ignore
     }
+  }, []);
+
+  // Detect DOM Modals for Auto-Minimize
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const checkModal = () => {
+      const modal =
+        document.querySelector('[role="dialog"]') ||
+        document.querySelector('.modal-backdrop') ||
+        document.querySelector('.admin-modal');
+      setIsModalOpen(Boolean(modal));
+    };
+
+    const observer = new MutationObserver(checkModal);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, []);
 
   // Listen to user scroll to dim non-intrusively
@@ -57,7 +77,6 @@ export default function HalumAssistantWidget() {
   useEffect(() => {
     if (!mounted) return;
 
-    // Side preference handler
     const restoreSidePreference = () => {
       try {
         const savedSide = localStorage.getItem('halum_side');
@@ -75,7 +94,6 @@ export default function HalumAssistantWidget() {
       setIsLeftSide(true);
       setTargetType('add-to-cart');
 
-      // Check if Add-To-Cart / Buy-Now button exists on DOM
       checkTargetTimer = setTimeout(() => {
         const targetBtn =
           document.getElementById('halum-buy-now-btn') ||
@@ -84,11 +102,10 @@ export default function HalumAssistantWidget() {
 
         if (targetBtn) {
           setHasTargetOnScreen(true);
-          // Halum points at the button and praises the authentic origin
           setCharacterState('pointing');
         } else {
           setHasTargetOnScreen(false);
-          setCharacterState('praising');
+          setCharacterState('proud');
         }
       }, 500);
 
@@ -107,7 +124,7 @@ export default function HalumAssistantWidget() {
           setCharacterState('pointing');
         } else {
           setHasTargetOnScreen(false);
-          setCharacterState('dancing');
+          setCharacterState('happy');
         }
       }, 500);
 
@@ -133,10 +150,10 @@ export default function HalumAssistantWidget() {
     }
   }, [pathname, mounted]);
 
-  // When item is added to cart, Halum rejoices with dancing animation
+  // When item is added to cart, Halum rejoices with celebration animation
   useEffect(() => {
     if (lastAddedItem) {
-      setCharacterState('dancing');
+      setCharacterState('happy');
       const timer = setTimeout(() => {
         setCharacterState('idle');
       }, 4500);
@@ -189,18 +206,14 @@ export default function HalumAssistantWidget() {
         document.querySelector('[data-halum-target="add-to-cart"]');
 
       if (buyNowBtn) {
-        // Smoothly scroll to the button
         buyNowBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // Add temporary golden pulse highlight
         buyNowBtn.classList.add('ring-4', 'ring-[#FAB116]', 'ring-offset-2');
         setTimeout(() => {
           buyNowBtn.classList.remove('ring-4', 'ring-[#FAB116]', 'ring-offset-2');
         }, 2200);
 
-        // Click the button
         buyNowBtn.click();
-        setCharacterState('dancing');
+        setCharacterState('happy');
         setTimeout(() => setCharacterState('idle'), 4000);
       }
     } else if (pathname === '/cart') {
@@ -233,6 +246,11 @@ export default function HalumAssistantWidget() {
   }
 
   const handleToggleChat = () => {
+    if (effectiveMinimized && (isCartDrawerOpen || isModalOpen)) {
+      // If auto-minimized due to open drawer/modal, simply toggle mini
+      setIsMinimized(false);
+      return;
+    }
     if (isMinimized) {
       setIsMinimized(false);
       return;
@@ -247,23 +265,28 @@ export default function HalumAssistantWidget() {
     });
   };
 
+  // ── Auto-Minimize Condition (Requirement 1) ──
+  // When Cart Drawer is open or a Modal Dialog is active, auto-minimize Halum and drop z-index
+  const shouldAutoMinimize = isCartDrawerOpen || isModalOpen;
+  const effectiveMinimized = isMinimized || shouldAutoMinimize;
+
   // Determine pointing arm direction
-  // If Halum is on the left side, he points to the right towards the content/button!
-  // If Halum is on the right side, he points to the left!
   const pointDirection = isLeftSide ? 'right' : 'left';
 
   return (
     <>
       {/* ── Floating Character Widget & Speech Bubble Container with Adaptive Positioning ── */}
       <div
-        className={`fixed z-50 flex flex-col pointer-events-none transition-all duration-500 ease-in-out ${
+        className={`fixed flex flex-col pointer-events-none transition-all duration-500 ease-in-out ${
+          shouldAutoMinimize ? 'z-30 opacity-75' : 'z-50 opacity-100'
+        } ${
           isLeftSide
             ? 'bottom-[76px] md:bottom-6 left-3 sm:left-6 items-start'
             : 'bottom-[76px] md:bottom-6 right-3 sm:right-6 items-end'
-        } ${isScrolling ? 'opacity-70 hover:opacity-100' : 'opacity-100'}`}
+        } ${isScrolling ? 'opacity-70 hover:opacity-100' : ''}`}
       >
         {/* Speech Bubble (hidden in minimized mode) */}
-        {!isMinimized && (
+        {!effectiveMinimized && (
           <div className="pointer-events-auto">
             <HalumSpeechBubble
               isOpen={isChatOpen}
@@ -279,12 +302,12 @@ export default function HalumAssistantWidget() {
           </div>
         )}
 
-        {/* Halum Tiger Character (Pointer events auto on tiger) */}
+        {/* Halum Tiger Character */}
         <div className="pointer-events-auto">
           <HalumTigerAnimation
             state={characterState}
             onClick={handleToggleChat}
-            isMinimized={isMinimized}
+            isMinimized={effectiveMinimized}
             pointDirection={pointDirection}
           />
         </div>

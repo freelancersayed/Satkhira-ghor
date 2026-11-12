@@ -17,6 +17,7 @@ import {
 import { useCartStore } from '@/store/cartStore';
 
 import { useAuthStore } from '@/store/authStore';
+import { deliveryConfig } from '@/lib/deliveryConfig';
 
 export default function CartPage() {
   const [mounted, setMounted] = useState(false);
@@ -73,7 +74,10 @@ export default function CartPage() {
   }
 
   const subtotal = getTotalPrice();
-  const deliveryCharge = subtotal >= 1500 || subtotal === 0 ? 0 : 70;
+  const deliveryCharge =
+    subtotal >= deliveryConfig.freeDeliveryThreshold || subtotal === 0
+      ? 0
+      : deliveryConfig.insideDhaka;
   const total = Math.max(0, subtotal - discount + deliveryCharge);
 
   const handleApplyCoupon = async (e) => {
