@@ -17,18 +17,16 @@ export default function HalumAssistantWidget() {
   // 'idle' | 'greeting' | 'listening' | 'praising' | 'dancing' | 'saluting' | 'pointing' | 'talking' | 'thinking' | 'proud' | 'happy'
   const [characterState, setCharacterState] = useState('idle');
 
-  // Smart Autonomous Positioning & 2.5D Movement States
-  const [position, setPosition] = useState({ x: 20, y: 400 });
+  // Smart Autonomous Horizontal Positioning & 2.5D Movement States
+  const [positionX, setPositionX] = useState(20);
   const [dockSide, setDockSide] = useState('right'); // 'left' | 'right'
   const [isMoving, setIsMoving] = useState(false);
   const [facingLeft, setFacingLeft] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [isNearButton, setIsNearButton] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false); // ALWAYS false by default on mobile!
   const [isScrolling, setIsScrolling] = useState(false);
   const [isScrollAsking, setIsScrollAsking] = useState(false);
   const [hasTargetOnScreen, setHasTargetOnScreen] = useState(false);
-  const [targetType, setTargetType] = useState('general');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const widgetRef = useRef(null);
@@ -36,9 +34,7 @@ export default function HalumAssistantWidget() {
   const dragRef = useRef({
     isDown: false,
     startX: 0,
-    startY: 0,
     initX: 0,
-    initY: 0,
     hasMoved: false,
     startTime: 0,
   });
@@ -47,36 +43,32 @@ export default function HalumAssistantWidget() {
   const isCartDrawerOpen = useCartStore((state) => state.isOpen);
   const lastAddedItem = useCartStore((state) => state.lastAddedItem);
 
-  // Helper: Calculate screen-safe docking coordinates based on viewport & side
-  // GUARANTEE: Never overflows right edge or left edge!
-  const getSafeCoords = useCallback((side, customY = null) => {
-    if (typeof window === 'undefined') return { x: 12, y: 500 };
-    const containerWidth = Math.min(270, window.innerWidth - 24);
-    const widgetHeight = window.innerWidth < 640 ? 210 : 240;
-    const bottomSafeMargin = window.innerWidth < 640 ? 84 : 28;
+  // Helper: Calculate strictly bounded horizontal safe coordinates
+  // Mathematical guarantee: Halum and his speech bubble NEVER cross screen left or right edges!
+  const getSafeX = useCallback((side) => {
+    if (typeof window === 'undefined') return 20;
+    const isMobile = window.innerWidth < 640;
+    const widgetWidth = isMobile ? 96 : 128;
+    const safeMargin = isMobile ? 48 : 56;
 
-    // Right side: strictly clamps inside window.innerWidth - containerWidth - 12
-    const x = side === 'left' ? 12 : Math.max(10, window.innerWidth - containerWidth - 12);
-    let y;
-    if (customY !== null && typeof customY === 'number') {
-      y = Math.max(60, Math.min(customY, window.innerHeight - widgetHeight - bottomSafeMargin));
+    if (side === 'left') {
+      return safeMargin;
     } else {
-      y = Math.max(60, window.innerHeight - widgetHeight - bottomSafeMargin);
+      return Math.max(safeMargin, window.innerWidth - widgetWidth - safeMargin);
     }
-    return { x, y };
   }, []);
 
-  // Butter-Smooth Animated Glide to Target Coordinates (With Direction Flip)
-  const glideTo = useCallback((targetCoords, newFacingLeft = null, onComplete = null) => {
+  // Butter-Smooth Animated Walk/Glide to Target X
+  const walkTo = useCallback((targetX, newFacingLeft = null, onComplete = null) => {
     setIsMoving(true);
-    setPosition((current) => {
+    setPositionX((currentX) => {
       if (newFacingLeft !== null) {
         setFacingLeft(newFacingLeft);
       } else {
-        if (targetCoords.x < current.x - 15) setFacingLeft(true);
-        else if (targetCoords.x > current.x + 15) setFacingLeft(false);
+        if (targetX < currentX - 10) setFacingLeft(true);
+        else if (targetX > currentX + 10) setFacingLeft(false);
       }
-      return targetCoords;
+      return targetX;
     });
 
     const moveTimer = setTimeout(() => {
@@ -87,7 +79,7 @@ export default function HalumAssistantWidget() {
     return () => clearTimeout(moveTimer);
   }, []);
 
-  // Restore saved preferences on mount (Always active on mobile!)
+  // Initialize position on mount (Active by default on mobile!)
   useEffect(() => {
     setMounted(true);
     let initialSide = 'right';
@@ -96,32 +88,32 @@ export default function HalumAssistantWidget() {
       if (savedSide === 'left') initialSide = 'left';
     } catch (e) {}
 
-    // On product detail page, default to LEFT side to keep right buy-box 100% unobstructed
+    // On product detail page, walk to LEFT side to leave right-side buy-box 100% unobstructed!
     if (pathname && pathname.startsWith('/products/')) {
       initialSide = 'left';
     }
 
     setDockSide(initialSide);
     setFacingLeft(initialSide === 'left');
-    const initialCoords = getSafeCoords(initialSide);
-    setPosition(initialCoords);
-  }, [pathname, getSafeCoords]);
+    const x = getSafeX(initialSide);
+    setPositionX(x);
+  }, [pathname, getSafeX]);
 
-  // Handle window resize dynamically
+  // Handle window resize dynamically without overflowing
   useEffect(() => {
     if (!mounted) return;
     const handleResize = () => {
-      if (!isDragging && !isNearButton) {
-        const coords = getSafeCoords(dockSide);
-        setPosition(coords);
+      if (!isDragging) {
+        const x = getSafeX(dockSide);
+        setPositionX(x);
       }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [mounted, dockSide, isDragging, isNearButton, getSafeCoords]);
+  }, [mounted, dockSide, isDragging, getSafeX]);
 
-  // Detect strictly ACTIVE DOM Modals (Avoid false-positives that silence Halum!)
+  // Detect strictly active modals
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -137,94 +129,58 @@ export default function HalumAssistantWidget() {
     return () => observer.disconnect();
   }, []);
 
-  // ── 1. Autonomous Target Button Locator & Proximity Guiding ──
-  // When an actionable button (Buy Now / Checkout) is visible on screen, Halum glides near it and points!
+  // ── 1. Target Button Locator on Product Page ──
+  // On product page, points directly towards Buy Now / Add to Cart button
   const checkTargetButtons = useCallback(() => {
     if (isDragging || isChatOpen || isCartDrawerOpen || isModalOpen) return;
 
-    let targetBtn = null;
-    let type = 'general';
-
     if (pathname.startsWith('/products/')) {
-      targetBtn =
+      const targetBtn =
         document.getElementById('halum-buy-now-btn') ||
         document.getElementById('halum-add-to-cart-btn') ||
         document.querySelector('[data-halum-target="add-to-cart"]');
-      type = 'add-to-cart';
-    } else if (pathname === '/cart') {
-      targetBtn =
-        document.getElementById('halum-checkout-btn') ||
-        document.querySelector('[data-halum-target="checkout"]');
-      type = 'checkout';
-    }
 
-    setTargetType(type);
+      if (targetBtn) {
+        const r = targetBtn.getBoundingClientRect();
+        const inViewport = r.top >= 40 && r.bottom <= window.innerHeight - 60;
 
-    if (targetBtn) {
-      const r = targetBtn.getBoundingClientRect();
-      const isMobile = window.innerWidth < 640;
-      const containerWidth = Math.min(270, window.innerWidth - 24);
-      const widgetHeight = isMobile ? 210 : 240;
-      const bottomSafeMargin = isMobile ? 84 : 28;
-
-      // Check if button is visibly inside the active viewport
-      const inViewport = r.top >= 40 && r.bottom <= window.innerHeight - bottomSafeMargin;
-
-      if (inViewport) {
-        setIsNearButton(true);
-        setHasTargetOnScreen(true);
-        setCharacterState('pointing');
-
-        let targetX, targetY;
-        if (!isMobile && r.right + containerWidth + 24 < window.innerWidth) {
-          // Right beside button on desktop
-          targetX = r.right + 16;
-          targetY = Math.max(60, Math.min(r.top - 20, window.innerHeight - widgetHeight - bottomSafeMargin));
-          setFacingLeft(true); // Point left at the button
-        } else if (!isMobile && r.left - containerWidth - 24 > 0) {
-          // Left beside button on desktop
-          targetX = r.left - containerWidth - 16;
-          targetY = Math.max(60, Math.min(r.top - 20, window.innerHeight - widgetHeight - bottomSafeMargin));
-          setFacingLeft(false); // Point right at the button
-        } else {
-          // Mobile screen: Dock at safe edge nearest to button level
-          targetX = 12;
-          targetY = Math.max(60, Math.min(r.top - 30, window.innerHeight - widgetHeight - bottomSafeMargin));
-          setFacingLeft(false);
+        if (inViewport) {
+          setHasTargetOnScreen(true);
+          setCharacterState('pointing');
+          // Safe on LEFT side pointing right towards buy-box
+          if (dockSide !== 'left') {
+            setDockSide('left');
+            const x = getSafeX('left');
+            walkTo(x, false);
+          }
+          return;
         }
-
-        glideTo({ x: targetX, y: targetY });
-        return;
       }
     }
 
-    // Button not in view: return to safe docking spot if we were previously locked to a button
-    if (isNearButton) {
-      setIsNearButton(false);
-      setHasTargetOnScreen(false);
-      setCharacterState('idle');
-      const safeCoords = getSafeCoords(dockSide);
-      glideTo(safeCoords, dockSide === 'left');
-    }
-  }, [isDragging, isChatOpen, isCartDrawerOpen, isModalOpen, pathname, isNearButton, dockSide, getSafeCoords, glideTo]);
+    setHasTargetOnScreen(false);
+  }, [isDragging, isChatOpen, isCartDrawerOpen, isModalOpen, pathname, dockSide, getSafeX, walkTo]);
 
-  // ── 2. Smart Obstruction & Collision Avoidance ──
-  // Detects if Halum is obstructing an interactive element (product card, button, form input) and moves away!
+  // ── 2. Obstruction Avoidance: Move to Empty Safe Space ──
   const checkObstruction = useCallback(() => {
-    if (isDragging || isChatOpen || isCartDrawerOpen || isModalOpen || isNearButton) return;
+    if (isDragging || isChatOpen || isCartDrawerOpen || isModalOpen) return;
+    if (pathname.startsWith('/products/')) return; // Product page stays left
 
-    const containerWidth = Math.min(270, window.innerWidth - 24);
-    const h = window.innerWidth < 640 ? 210 : 240;
+    const isMobile = window.innerWidth < 640;
+    const w = isMobile ? 96 : 128;
+    const h = isMobile ? 128 : 160;
+    const bottomPos = isMobile ? 80 : 24;
+    const topPos = window.innerHeight - bottomPos - h;
 
     const box = {
-      left: position.x,
-      top: position.y,
-      right: position.x + containerWidth,
-      bottom: position.y + h,
+      left: positionX,
+      top: topPos,
+      right: positionX + w,
+      bottom: window.innerHeight - bottomPos,
     };
 
     const candidates = document.querySelectorAll(
-      'button:not([data-halum-ignore]), a.product-card, .product-card, [data-product-card], input, form, #halum-buy-now-btn, #halum-add-to-cart-btn'
+      'button:not([data-halum-ignore]), a.product-card, .product-card, [data-product-card], input, form'
     );
 
     let isObstructed = false;
@@ -247,20 +203,20 @@ export default function HalumAssistantWidget() {
     }
 
     if (isObstructed) {
-      // Halum smoothly glides to the opposite safe side!
+      // Halum smoothly walks to the opposite safe side!
       setDockSide((currentSide) => {
         const nextSide = currentSide === 'left' ? 'right' : 'left';
-        const newCoords = getSafeCoords(nextSide);
-        glideTo(newCoords, nextSide === 'left');
+        const newX = getSafeX(nextSide);
+        walkTo(newX, nextSide === 'left');
         try {
           localStorage.setItem('halum_side', nextSide);
         } catch (e) {}
         return nextSide;
       });
     }
-  }, [isDragging, isChatOpen, isCartDrawerOpen, isModalOpen, isNearButton, position, getSafeCoords, glideTo]);
+  }, [isDragging, isChatOpen, isCartDrawerOpen, isModalOpen, pathname, positionX, getSafeX, walkTo]);
 
-  // ── 3. Scroll Listener with Proactive Interaction ──
+  // ── 3. Scroll Listener with Proactive Dialogue ──
   // Requirement: "ইউজার ওয়েব সাইটে স্ক্রল করলে হালুম মামা বার বার জিজ্ঞেস করবে ”কি লাগবে আমাকে বলুন খুজে দিচ্ছি”"
   useEffect(() => {
     let scrollTimer = null;
@@ -276,12 +232,12 @@ export default function HalumAssistantWidget() {
         checkTargetButtons();
         checkObstruction();
 
-        // Keep the speech bubble asking for assistance active for 8 seconds after scrolling stops
+        // Keep asking for assistance for 7 seconds after scrolling stops
         clearTimeout(scrollAskTimeoutRef.current);
         scrollAskTimeoutRef.current = setTimeout(() => {
           setIsScrollAsking(false);
           setCharacterState('idle');
-        }, 8000);
+        }, 7000);
       }, 300);
     };
 
@@ -294,17 +250,17 @@ export default function HalumAssistantWidget() {
   }, [checkTargetButtons, checkObstruction]);
 
   // ── 4. Autonomous Roaming & Idle Patrol ──
-  // Every 16 seconds of inactivity, Halum patrols from one side to the other, making the shop feel alive!
+  // Every 16 seconds of inactivity, Halum patrols from one side to the other
   useEffect(() => {
-    if (!mounted || isChatOpen || isCartDrawerOpen || isModalOpen || isNearButton || isDragging) return;
+    if (!mounted || isChatOpen || isCartDrawerOpen || isModalOpen || isDragging || pathname.startsWith('/products/')) return;
 
     const roamTimer = setInterval(() => {
-      if (document.hidden) return; // Don't roam when tab is in background
+      if (document.hidden) return;
 
       setDockSide((currentSide) => {
         const nextSide = currentSide === 'left' ? 'right' : 'left';
-        const newCoords = getSafeCoords(nextSide);
-        glideTo(newCoords, nextSide === 'left');
+        const newX = getSafeX(nextSide);
+        walkTo(newX, nextSide === 'left');
         try {
           localStorage.setItem('halum_side', nextSide);
         } catch (e) {}
@@ -313,21 +269,17 @@ export default function HalumAssistantWidget() {
     }, 16000);
 
     return () => clearInterval(roamTimer);
-  }, [mounted, isChatOpen, isCartDrawerOpen, isModalOpen, isNearButton, isDragging, getSafeCoords, glideTo]);
+  }, [mounted, isChatOpen, isCartDrawerOpen, isModalOpen, isDragging, pathname, getSafeX, walkTo]);
 
-  // Route Intelligence on Navigation
+  // Navigation intelligence
   useEffect(() => {
     if (!mounted) return;
 
     if (pathname.startsWith('/products/')) {
-      // Always safely dock on LEFT on product page initially
       setDockSide('left');
       setFacingLeft(false);
-      const coords = getSafeCoords('left');
-      glideTo(coords, false);
-      const timer = setTimeout(() => checkTargetButtons(), 600);
-      return () => clearTimeout(timer);
-    } else if (pathname === '/cart') {
+      const x = getSafeX('left');
+      walkTo(x, false);
       const timer = setTimeout(() => checkTargetButtons(), 600);
       return () => clearTimeout(timer);
     } else if (pathname === '/track-order') {
@@ -339,7 +291,7 @@ export default function HalumAssistantWidget() {
       const timer = setTimeout(() => setCharacterState('idle'), 3500);
       return () => clearTimeout(timer);
     }
-  }, [pathname, mounted, getSafeCoords, glideTo, checkTargetButtons]);
+  }, [pathname, mounted, getSafeX, walkTo, checkTargetButtons]);
 
   // Celebration on cart add
   useEffect(() => {
@@ -362,35 +314,14 @@ export default function HalumAssistantWidget() {
     return () => window.removeEventListener('halum:order-confirmed', handleOrderConfirmed);
   }, []);
 
-  // ── 5. Side Swap Toggle (Left <-> Right) with Butter-Smooth Glide ──
-  const handleToggleSide = () => {
-    setDockSide((prev) => {
-      const next = prev === 'left' ? 'right' : 'left';
-      try {
-        localStorage.setItem('halum_side', next);
-      } catch (e) {}
-      const newCoords = getSafeCoords(next);
-      glideTo(newCoords, next === 'left');
-      return next;
-    });
-  };
-
-  // Minimize / Expand toggle
-  const handleToggleMinimize = () => {
-    setIsMinimized((prev) => !prev);
-  };
-
-  // ── 6. Touch & Mouse Drag-and-Drop Implementation ──
+  // ── 5. Touch & Mouse Horizontal Drag-and-Drop ──
   const handlePointerDown = (e) => {
-    // Avoid dragging when clicking buttons inside bubble or chat
     if (e.target.closest('button, a, input, [role="button"]')) return;
 
     dragRef.current = {
       isDown: true,
       startX: e.clientX,
-      startY: e.clientY,
-      initX: position.x,
-      initY: position.y,
+      initX: positionX,
       hasMoved: false,
       startTime: Date.now(),
     };
@@ -404,21 +335,21 @@ export default function HalumAssistantWidget() {
   const handlePointerMove = (e) => {
     if (!dragRef.current.isDown) return;
     const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
 
-    if (Math.hypot(dx, dy) > 5) {
+    if (Math.abs(dx) > 5) {
       dragRef.current.hasMoved = true;
     }
 
-    const containerWidth = Math.min(270, window.innerWidth - 24);
-    const widgetHeight = window.innerWidth < 640 ? 210 : 240;
-    const bottomSafeMargin = window.innerWidth < 640 ? 84 : 28;
+    const isMobile = window.innerWidth < 640;
+    const widgetWidth = isMobile ? 96 : 128;
+    const safeMargin = isMobile ? 48 : 56;
 
-    // Boundary clamped: never exceeds screen edges!
-    const newX = Math.max(8, Math.min(dragRef.current.initX + dx, window.innerWidth - containerWidth - 8));
-    const newY = Math.max(60, Math.min(dragRef.current.initY + dy, window.innerHeight - widgetHeight - bottomSafeMargin));
+    // Strictly clamped inside the screen boundaries!
+    const minX = safeMargin;
+    const maxX = Math.max(safeMargin, window.innerWidth - widgetWidth - safeMargin);
+    const newX = Math.max(minX, Math.min(dragRef.current.initX + dx, maxX));
 
-    setPosition({ x: newX, y: newY });
+    setPositionX(newX);
   };
 
   const handlePointerUp = (e) => {
@@ -436,11 +367,9 @@ export default function HalumAssistantWidget() {
     }
 
     if (!wasMoved && duration < 320) {
-      // Clean single tap/click! Toggle chat window
       handleToggleChat();
     } else if (wasMoved) {
-      // Drag released: determine nearest dockSide and save preference
-      const newSide = position.x < window.innerWidth / 2 ? 'left' : 'right';
+      const newSide = positionX < window.innerWidth / 2 ? 'left' : 'right';
       setDockSide(newSide);
       try {
         localStorage.setItem('halum_side', newSide);
@@ -448,7 +377,7 @@ export default function HalumAssistantWidget() {
     }
   };
 
-  // ── 7. Direct 1-Tap Execution: Triggers on-screen target button ──
+  // Direct 1-Tap Trigger Target Action
   const handleTriggerTargetAction = useCallback(() => {
     if (pathname.startsWith('/products/')) {
       const buyNowBtn =
@@ -467,23 +396,8 @@ export default function HalumAssistantWidget() {
         setCharacterState('happy');
         setTimeout(() => setCharacterState('idle'), 4000);
       }
-    } else if (pathname === '/cart') {
-      const checkoutBtn =
-        document.getElementById('halum-checkout-btn') ||
-        document.querySelector('[data-halum-target="checkout"]');
-
-      if (checkoutBtn) {
-        checkoutBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        checkoutBtn.classList.add('ring-4', 'ring-[#FAB116]', 'ring-offset-2');
-        setTimeout(() => {
-          checkoutBtn.classList.remove('ring-4', 'ring-[#FAB116]', 'ring-offset-2');
-        }, 2200);
-
-        checkoutBtn.click();
-        setCharacterState('saluting');
-      }
     } else {
-      setIsChatOpen(true);
+      handleToggleChat();
     }
   }, [pathname]);
 
@@ -509,23 +423,18 @@ export default function HalumAssistantWidget() {
     });
   };
 
-  // Do not render on admin dashboard
-  if (pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/admin') || !mounted) {
     return null;
   }
 
-  if (!mounted) {
-    return null;
-  }
-
-  // Auto-Minimize Condition: Only when full Cart Drawer is visibly open or checkout modal active
   const shouldAutoMinimize = isCartDrawerOpen || isModalOpen;
   const effectiveMinimized = isMinimized || shouldAutoMinimize;
 
   return (
     <>
       {/* ── 2.5D Animated Flying / Roaming Character Container ── */}
-      {/* Width is clamped: min(270px, calc(100vw - 24px)) so it never overflows! */}
+      {/* Vertically anchored with bottom (never goes below screen!) */}
+      {/* Horizontally clamped with positionX (never goes outside left/right screen!) */}
       <div
         ref={widgetRef}
         onPointerDown={handlePointerDown}
@@ -534,38 +443,31 @@ export default function HalumAssistantWidget() {
         onPointerCancel={handlePointerUp}
         style={{
           position: 'fixed',
-          left: 0,
-          top: 0,
-          width: 'min(270px, calc(100vw - 24px))',
-          transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+          bottom: 'calc(76px + env(safe-area-inset-bottom, 0px))',
+          left: `${positionX}px`,
           transition: isDragging
             ? 'none'
             : isMoving
-            ? 'transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease'
-            : 'transform 0.35s ease-out, opacity 0.25s ease',
+            ? 'left 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease'
+            : 'left 0.35s ease-out, opacity 0.25s ease',
           zIndex: shouldAutoMinimize ? 20 : 50,
           touchAction: 'none',
         }}
-        className={`flex flex-col select-none ${
-          dockSide === 'left' ? 'items-start' : 'items-end'
-        } ${shouldAutoMinimize ? 'opacity-65 scale-90' : 'opacity-100'} ${
-          isScrolling ? 'opacity-70 scale-98' : ''
-        }`}
+        className={`flex flex-col items-center select-none pointer-events-none md:bottom-6 ${
+          shouldAutoMinimize ? 'opacity-65 scale-90' : 'opacity-100'
+        } ${isScrolling ? 'opacity-75' : ''}`}
       >
-        {/* Floating Speech Bubble (moves with Halum, clamped strictly within screen) */}
+        {/* Compact Smart Speech Bubble perched directly over Halum's head */}
         {!effectiveMinimized && (
-          <div className="pointer-events-auto w-full">
+          <div className="pointer-events-auto">
             <HalumSpeechBubble
               isOpen={isChatOpen}
               onOpenChat={() => handleToggleChat()}
               onSendMessage={(query) => handleToggleChat(query)}
               pathname={pathname}
               isLeftSide={dockSide === 'left'}
-              onToggleSide={handleToggleSide}
-              onMinimize={handleToggleMinimize}
               onTriggerTargetAction={handleTriggerTargetAction}
               hasTargetOnScreen={hasTargetOnScreen}
-              targetType={targetType}
               isScrollAsking={isScrollAsking}
             />
           </div>

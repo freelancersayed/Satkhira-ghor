@@ -106,9 +106,9 @@ export default function HalumTigerAnimation({
       {/* ── Pointing Finger Tooltip Tag (When pointing at an actionable button) ── */}
       {isPointing && (
         <div
-          className={`absolute -top-7 ${
-            pointDirection === 'left' ? '-left-6' : '-right-6'
-          } z-20 pointer-events-none flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full shadow-lg border border-amber-200 animate-bounce whitespace-nowrap`}
+          className={`absolute -top-6 ${
+            pointDirection === 'left' ? 'left-0' : 'right-0'
+          } z-20 pointer-events-none flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full shadow-md border border-amber-200 animate-bounce whitespace-nowrap`}
         >
           <span>{pointDirection === 'left' ? '👈' : '👉'}</span>
           <span>এখানে থাবা বসাও!</span>
@@ -117,21 +117,21 @@ export default function HalumTigerAnimation({
 
       {/* ── Thinking Floating Bubble (When pondering an answer) ── */}
       {isThinking && (
-        <div className="absolute -top-6 -right-2 z-20 pointer-events-none flex items-center gap-1 bg-white/95 text-[#016831] font-bold text-[10px] px-2 py-0.5 rounded-full shadow-md border border-emerald-300 animate-pulse whitespace-nowrap">
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1 bg-white/95 text-[#016831] font-bold text-[9px] px-2 py-0.5 rounded-full shadow-md border border-emerald-300 animate-pulse whitespace-nowrap">
           <span>💭 ভাবছি...</span>
         </div>
       )}
 
       {/* ── Proud Laurel / Pure Quality Tag (When talking about authentic heritage) ── */}
       {isProud && (
-        <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1 bg-[#016831] text-amber-300 font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-md border border-amber-400 animate-pulse whitespace-nowrap">
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1 bg-[#016831] text-amber-300 font-black text-[9px] px-2 py-0.5 rounded-full shadow-md border border-amber-400 animate-pulse whitespace-nowrap">
           <span>✨ বাঘের জবান (১০০% খাঁটি)</span>
         </div>
       )}
 
       {/* ── Full 2.5D Mascot Vector Canvas ── */}
       <div
-        className="w-28 sm:w-36 h-36 sm:h-44 relative flex items-center justify-center transition-transform duration-300"
+        className="w-24 sm:w-32 h-32 sm:h-40 relative flex items-center justify-center transition-transform duration-300"
         style={{ transform: facingLeft ? 'scaleX(-1)' : 'none' }}
       >
         <svg
