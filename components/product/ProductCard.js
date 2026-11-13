@@ -173,6 +173,7 @@ export default function ProductCard({ product, showProgress = false }) {
             <button
               type="button"
               onClick={handleBuyNow}
+              data-halum-product-card-btn="buy"
               className="flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg bg-[#016831] hover:bg-[#02833E] text-white text-[10px] sm:text-[11px] font-bold transition-all shadow-xs active:scale-95"
               aria-label="Direct Buy"
             >
@@ -183,6 +184,7 @@ export default function ProductCard({ product, showProgress = false }) {
             <button
               type="button"
               onClick={handleAddToCart}
+              data-halum-product-card-btn="cart"
               className={`flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all border active:scale-95 ${
                 isAdded
                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm scale-102'

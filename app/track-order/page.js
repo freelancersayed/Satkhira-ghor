@@ -117,6 +117,8 @@ function TrackOrderContent() {
             />
           </div>
           <button
+            id="halum-track-submit-btn"
+            data-halum-target="track"
             type="submit"
             disabled={loading}
             className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 disabled:opacity-50"

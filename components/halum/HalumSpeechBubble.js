@@ -10,6 +10,7 @@ export default function HalumSpeechBubble({
   isOpen = false,
   pathname = '/',
   isLeftSide = false,
+  tailPosition = null,
   onTriggerTargetAction,
   hasTargetOnScreen = false,
   isScrollAsking = false,
@@ -37,6 +38,36 @@ export default function HalumSpeechBubble({
 
   // ── Dynamic 2-Line Highlighted Dialogues (ইউজার জার্নি ও মিষ্টি রসিকতা) ──
   const guide = useMemo(() => {
+    // 0. High-Priority Autonomous Button Guidance (User Request: "এখানে ক্লিক কর")
+    if (hasTargetOnScreen) {
+      if (pathname.startsWith('/products/')) {
+        return {
+          line1: 'এখানে ক্লিক করো! 👉',
+          line2: 'পণ্যটা কার্টে রেখে দাও! 🛒🐾',
+          isActionTarget: true,
+        };
+      }
+      if (pathname === '/cart') {
+        return {
+          line1: 'এখানে ক্লিক করো! 👉',
+          line2: 'এবার অর্ডার করে ফেলো! ⚡📦',
+          isActionTarget: true,
+        };
+      }
+      if (pathname === '/track' || pathname === '/track-order') {
+        return {
+          line1: 'এখানে ক্লিক করো! 👉',
+          line2: 'লাইভ পার্সেল ট্র্যাক করো! 🚚💨',
+          isActionTarget: true,
+        };
+      }
+      return {
+        line1: 'এখানে ক্লিক করো! 👉',
+        line2: 'খাঁটি খাবারের সেরা স্বাদ নাও! 🍯✨',
+        isActionTarget: true,
+      };
+    }
+
     // 1. Welcome Sequence on Homepage Entry / Refresh
     if (pathname === '/' && welcomeStep === 1) {
       return {
@@ -157,52 +188,76 @@ export default function HalumSpeechBubble({
     return null;
   }
 
+  const resolvedTailPos = tailPosition || (isLeftSide ? 'left' : 'right');
+
   return (
     <div
-      className={`relative mb-1.5 w-max max-w-[calc(100vw-96px)] sm:max-w-[280px] select-none animate-slideUp flex flex-col ${
-        isLeftSide ? 'items-start' : 'items-end'
+      className={`relative mb-2.5 w-max max-w-[calc(100vw-96px)] sm:max-w-[280px] select-none animate-slideUp flex flex-col ${
+        resolvedTailPos === 'left' ? 'items-start' : 'items-end'
       }`}
     >
-      {/* ── Ultra-Slim Smart Floating Pill (2 Highlighted Lines, Mobile Safe) ── */}
+      {/* ── Stitched Comic Speech Bubble (Matching User's Uploaded Screenshot Exactly) ── */}
       <div
         onClick={handleClickBubble}
-        className="bg-white/95 backdrop-blur-md px-3 py-1.5 sm:py-2 rounded-2xl shadow-lg shadow-amber-500/15 border-2 border-[#FAB116] cursor-pointer transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 relative group max-w-full"
-        title="ক্লিক করে চ্যাট করুন"
+        className="bg-white p-1 rounded-2xl shadow-[0_10px_25px_-4px_rgba(0,0,0,0.22),0_4px_10px_-2px_rgba(0,0,0,0.12)] border border-stone-200/90 cursor-pointer transition-all hover:scale-[1.02] active:scale-95 relative group max-w-full"
+        title="ক্লিক করে চ্যাট করুন বা নির্দেশ দেখুন"
       >
-        <span className="text-sm flex-shrink-0">🐯</span>
+        {/* Inner Stitched Dashed Frame (User's Screenshot Style: Dark Charcoal Stitched Line) */}
+        <div className="border-[1.5px] border-dashed border-stone-600/80 sm:border-stone-700/85 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center gap-2 bg-white">
+          <span className="text-sm flex-shrink-0 animate-bounce">🐯</span>
 
-        {/* 2 Highlighted Lines with break-words to guarantee zero horizontal overflow */}
-        <div className="flex flex-col text-left min-w-0 pr-0.5 break-words">
-          <span className="text-[10.5px] sm:text-[11px] font-extrabold text-amber-900 leading-tight">
-            {guide.line1}
-          </span>
-          <span className="text-[11px] sm:text-[12px] font-black text-[#016831] leading-tight">
-            {guide.line2}
-          </span>
+          {/* 2 Highlighted Lines with break-words */}
+          <div className="flex flex-col text-left min-w-0 pr-0.5 break-words">
+            {guide.isActionTarget ? (
+              <span className="text-[10px] sm:text-[10.5px] font-black text-amber-900 flex items-center gap-1 leading-tight">
+                <span className="text-xs animate-pulse">👉</span>
+                <span className="bg-[#FAB116] text-black px-1.5 py-0.2 rounded-md shadow-2xs font-black">
+                  {guide.line1}
+                </span>
+              </span>
+            ) : (
+              <span className="text-[10.5px] sm:text-[11px] font-black text-amber-900 leading-tight">
+                {guide.line1}
+              </span>
+            )}
+            <span className="text-[11px] sm:text-[12px] font-black text-[#016831] leading-tight drop-shadow-[0_1px_1px_rgba(1,104,49,0.15)] mt-0.5">
+              {guide.line2}
+            </span>
+          </div>
+
+          {/* 44x44px Touch Target Close Button for Mobile Thumbs */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setVisible(false);
+            }}
+            className="min-w-[44px] min-h-[44px] -my-2 -mr-2 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-700 flex-shrink-0 transition-colors"
+            title="লুকান"
+            aria-label="লুকান"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
 
-        {/* 44x44px Touch Target Close Button for Mobile Thumbs */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setVisible(false);
-          }}
-          className="min-w-[44px] min-h-[44px] -my-2 -mr-2.5 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-700 flex-shrink-0 transition-colors"
-          title="লুকান"
-          aria-label="লুকান"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
-
-        {/* Cute Comic Tail Pointing Down to Halum's Head */}
-        <div
-          className={`absolute -bottom-1.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-[#FAB116] ${
-            isLeftSide ? 'left-7' : 'right-7'
+        {/* ── Curved Comic Swoop Tail (Matching User's Screenshot Exactly) ── */}
+        <svg
+          viewBox="0 0 32 24"
+          className={`absolute -bottom-[19px] w-8 h-6 fill-white filter drop-shadow(0 3px 2px rgba(0,0,0,0.16)) pointer-events-none ${
+            resolvedTailPos === 'left' ? 'left-6' : 'right-6 -scale-x-100'
           }`}
         >
-          <div className="absolute -top-[5px] -left-[4px] w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white" />
-        </div>
+          <path
+            d="M4 0 C4 8, 2 15, 0 24 C9 18, 20 12, 28 0 Z"
+            fill="white"
+          />
+          <path
+            d="M4 0 C4 8, 2 15, 0 24 C9 18, 20 12, 28 0"
+            stroke="#E5E7EB"
+            strokeWidth="1.2"
+            fill="none"
+          />
+        </svg>
       </div>
     </div>
   );
