@@ -6,6 +6,7 @@ import HalumTigerAnimation from './HalumTigerAnimation';
 import HalumSpeechBubble from './HalumSpeechBubble';
 import HalumChatWindow from './HalumChatWindow';
 import { useCartStore } from '@/store/cartStore';
+import { getHalumConfigForRoute } from './halumConfig';
 
 export default function HalumAssistantWidget() {
   const pathname = usePathname();
@@ -82,16 +83,11 @@ export default function HalumAssistantWidget() {
     return () => clearTimeout(moveTimer);
   }, []);
 
-  // Initialize position on mount - DEFAULT LEFT at vertical middle
+  // Initialize position on mount - Controlled by Central Route Config
   useEffect(() => {
     setMounted(true);
-    let initialSide = 'left';
-    try {
-      const savedSide = localStorage.getItem('halum_side');
-      if (savedSide === 'right' && !pathname.startsWith('/products/') && pathname !== '/') {
-        initialSide = 'right';
-      }
-    } catch (e) {}
+    const config = getHalumConfigForRoute(pathname);
+    const initialSide = config.side || 'left';
 
     setDockSide(initialSide);
     setFacingLeft(initialSide === 'right');
@@ -140,20 +136,39 @@ export default function HalumAssistantWidget() {
     return () => window.removeEventListener('resize', handleResize);
   }, [mounted, dockSide, isDragging, getSafeX]);
 
-  // Detect strictly active modals
+  // Detect strictly active modals, drawers & mobile hamburger menu
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const checkModal = () => {
       const modal =
         document.querySelector('dialog[open]') ||
-        document.querySelector('.admin-modal');
+        document.querySelector('[role="dialog"]') ||
+        document.querySelector('.admin-modal') ||
+        document.querySelector('[aria-modal="true"]') ||
+        (document.body && (
+          document.body.classList.contains('overflow-hidden') ||
+          document.body.style.overflow === 'hidden'
+        ));
       setIsModalOpen(Boolean(modal));
     };
 
+    checkModal();
     const observer = new MutationObserver(checkModal);
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class', 'open'],
+    });
+
+    const handleMenuEvent = () => setTimeout(checkModal, 50);
+    window.addEventListener('toggle-mobile-menu', handleMenuEvent);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('toggle-mobile-menu', handleMenuEvent);
+    };
   }, []);
 
   // ── 1. Target Button Locator on Product & Checkout Pages ──
@@ -277,45 +292,28 @@ export default function HalumAssistantWidget() {
     };
   }, [checkTargetButtons, checkObstruction]);
 
-  // ── 4. Autonomous Roaming & Idle Patrol ──
-  // Every 16 seconds of inactivity, Halum patrols from one side to the other
-  useEffect(() => {
-    if (!mounted || isChatOpen || isCartDrawerOpen || isModalOpen || isDragging || pathname.startsWith('/products/')) return;
-
-    const roamTimer = setInterval(() => {
-      if (document.hidden) return;
-
-      setDockSide((currentSide) => {
-        const nextSide = currentSide === 'left' ? 'right' : 'left';
-        const newX = getSafeX(nextSide);
-        walkTo(newX, nextSide === 'left');
-        try {
-          localStorage.setItem('halum_side', nextSide);
-        } catch (e) {}
-        return nextSide;
-      });
-    }, 16000);
-
-    return () => clearInterval(roamTimer);
-  }, [mounted, isChatOpen, isCartDrawerOpen, isModalOpen, isDragging, pathname, getSafeX, walkTo]);
-
-  // Navigation intelligence
+  // Navigation intelligence - Controlled by Central Route Config
   useEffect(() => {
     if (!mounted) return;
 
-    if (pathname.startsWith('/products/')) {
-      setDockSide('left');
-      setFacingLeft(false);
-      const x = getSafeX('left');
-      walkTo(x, false);
-      const timer = setTimeout(() => checkTargetButtons(), 600);
-      return () => clearTimeout(timer);
-    } else if (pathname === '/track-order') {
-      setCharacterState('saluting');
-      const timer = setTimeout(() => setCharacterState('idle'), 4000);
+    const config = getHalumConfigForRoute(pathname);
+    const targetSide = config.side || 'left';
+    setDockSide(targetSide);
+    setFacingLeft(targetSide === 'right');
+    const x = getSafeX(targetSide);
+    setPositionX(x);
+
+    if (config.defaultState && config.defaultState !== 'idle') {
+      setCharacterState(config.defaultState);
+      const timer = setTimeout(() => setCharacterState('idle'), 4500);
       return () => clearTimeout(timer);
     }
-  }, [pathname, mounted, getSafeX, walkTo, checkTargetButtons]);
+
+    if (pathname.startsWith('/products/')) {
+      const timer = setTimeout(() => checkTargetButtons(), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname, mounted, getSafeX, checkTargetButtons]);
 
   // Celebration on cart add
   useEffect(() => {
@@ -459,8 +457,9 @@ export default function HalumAssistantWidget() {
     return null;
   }
 
-  const shouldAutoMinimize = isCartDrawerOpen || isModalOpen;
-  const effectiveMinimized = isMinimized || shouldAutoMinimize;
+  const shouldAutoHide = isCartDrawerOpen || isModalOpen;
+  const effectiveMinimized = isMinimized;
+  const cartSubtotal = useCartStore((state) => state.getTotalPrice());
 
   return (
     <>
@@ -477,7 +476,7 @@ export default function HalumAssistantWidget() {
           position: 'fixed',
           top: '48%',
           transform: `translateY(-50%) scale(${
-            welcomeStep === 1 ? 1.22 : shouldAutoMinimize ? 0.9 : 1
+            welcomeStep === 1 ? 1.22 : shouldAutoHide ? 0 : 1
           })`,
           left: `${positionX}px`,
           transition: isDragging
@@ -485,17 +484,19 @@ export default function HalumAssistantWidget() {
             : isMoving
             ? 'left 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease'
             : 'left 0.35s ease-out, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
-          zIndex: shouldAutoMinimize ? 20 : 50,
+          zIndex: shouldAutoHide ? 0 : 50,
           touchAction: 'none',
         }}
-        className={`flex flex-col select-none pointer-events-none ${
+        className={`flex flex-col select-none ${
           dockSide === 'left' ? 'items-start' : 'items-end'
-        } ${shouldAutoMinimize ? 'opacity-65' : 'opacity-100'} ${
-          isScrolling ? 'opacity-75' : ''
-        }`}
+        } ${
+          shouldAutoHide
+            ? 'opacity-0 scale-0 pointer-events-none invisible'
+            : 'opacity-100 scale-100 pointer-events-none'
+        } ${isScrolling ? 'opacity-75' : ''} transition-all duration-300`}
       >
         {/* Compact Smart Speech Bubble perched directly over Halum's head */}
-        {!effectiveMinimized && (
+        {!effectiveMinimized && !shouldAutoHide && (
           <div className="pointer-events-auto">
             <HalumSpeechBubble
               isOpen={isChatOpen}
@@ -525,6 +526,7 @@ export default function HalumAssistantWidget() {
             pointDirection={dockSide === 'left' ? 'right' : 'left'}
             isMoving={isMoving}
             facingLeft={facingLeft}
+            cartSubtotal={cartSubtotal}
           />
         </div>
       </div>

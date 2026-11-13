@@ -197,6 +197,95 @@ export default function HalumChatWindow({
 
     if (onStateChange) onStateChange('thinking');
 
+    // ── Zero-Typing Recommender Quiz Flow (Requirement 4) ──
+    const textLower = text.toLowerCase();
+    if (
+      text.includes('কোনটা আমার জন্য সেরা') ||
+      text.includes('কোনটা নেব') ||
+      text.includes('সেরা খাবার খুঁজি') ||
+      text.includes('কুইজ') ||
+      textLower.includes('recommend')
+    ) {
+      setTimeout(() => {
+        const botMsg = {
+          id: `quiz-step1-${Date.now()}`,
+          sender: 'halum',
+          text: 'হালুম! আমি আপনাকে সবচেয়ে সেরা ও খাঁটি খাবারটি বেছে দিচ্ছি 🐯\nপ্রথমে বলুন, খাবারটি মূলত কার জন্য নিচ্ছেন?',
+          quickReplies: ['🙋‍♂️ নিজের পরিবারের জন্য', '🎁 উপহার ও বিশেষ কাউকে দিতে'],
+          characterState: 'greeting',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        setIsLoading(false);
+        if (onStateChange) onStateChange('greeting');
+      }, 180);
+      return;
+    }
+
+    if (text.includes('নিজের পরিবারের জন্য') || text.includes('উপহার ও বিশেষ কাউকে দিতে')) {
+      const isGift = text.includes('উপহার');
+      setTimeout(() => {
+        const botMsg = {
+          id: `quiz-step2-${Date.now()}`,
+          sender: 'halum',
+          text: isGift
+            ? 'উপহারের জন্য সুন্দরবনের খাঁটি খাবার সবসময় সেরা ও আভিজাত্যের প্রতীক! 🎁 এবার বলুন আপনার আনুমানিক বাজেট কেমন?'
+            : 'পরিবারের সবার পুষ্টি ও সুস্বাস্থ্যের জন্য খাঁটি খাবার অতুলনীয়! 🍯 এবার বলুন আপনার আনুমানিক বাজেট কেমন?',
+          quickReplies: ['💵 ৳১,০০০ এর মধ্যে', '👑 ৳১,৫০০+ মেগা কম্বো ও ফ্রি ডেলিভারি'],
+          characterState: 'thinking',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        setIsLoading(false);
+        if (onStateChange) onStateChange('thinking');
+      }, 180);
+      return;
+    }
+
+    if (text.includes('৳১,০০০ এর মধ্যে') || text.includes('১০০০') || text.includes('1000')) {
+      const khalsiHoney = products.find((p) => p.slug === 'sundarbans-pure-khalsi-honey') || products[0];
+      setTimeout(() => {
+        const botMsg = {
+          id: `quiz-res-1000-${Date.now()}`,
+          sender: 'halum',
+          text: 'আপনার বাজেটে সবচেয়ে খাঁটি ও জনপ্রিয় খাবার: সুন্দরবনের খাঁটি খলসী ফুলের মধু! নিচে +কার্ট বাটনে থাবা দিয়ে সহজে অর্ডার করে ফেলুন 🐯🍯',
+          products: khalsiHoney ? [khalsiHoney] : [],
+          quickReplies: ['👉 এখনই অর্ডার করব', '🧈 গাওয়া ঘিও দেখতে চাই', '🎯 আবার কুইজ দিন'],
+          characterState: 'happy',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        setIsLoading(false);
+        if (onStateChange) onStateChange('happy');
+      }, 180);
+      return;
+    }
+
+    if (
+      text.includes('৳১,৫০০+ মেগা কম্বো') ||
+      text.includes('১,৫০০+') ||
+      text.includes('1500+') ||
+      text.includes('ফ্রি ডেলিভারি')
+    ) {
+      const combo = products.find((p) => p.slug === 'satkhira-sundarbans-mega-family-combo') || products[2];
+      const ghee = products.find((p) => p.slug === 'bilona-gawa-ghee') || products[1];
+      setTimeout(() => {
+        const botMsg = {
+          id: `quiz-res-1500-${Date.now()}`,
+          sender: 'halum',
+          text: 'অসাধারণ সিদ্ধান্ত! ৳১,৫০০-র বেশি অর্ডার করলে সারা দেশে হোম ডেলিভারি একদম ফ্রি! আমাদের মেগা ফ্যামিলি কম্বো ও বিলোনা গাওয়া ঘি আপনার জন্য সেরা 🎁🚚',
+          products: [combo, ghee].filter(Boolean),
+          quickReplies: ['👉 এখনই অর্ডার করব', '🚚 ডেলিভারি কতদিনে পাব?', '🎯 আবার কুইজ দিন'],
+          characterState: 'happy',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        setIsLoading(false);
+        if (onStateChange) onStateChange('happy');
+      }, 180);
+      return;
+    }
+
     // 2. Check Local Intent Engine First (0ms Response Time)
     const localMatch = matchLocalHalumIntent(text, { pathname });
 
@@ -265,7 +354,7 @@ export default function HalumChatWindow({
         sender: 'halum',
         text: data.reply || 'হালুম! আমি আপনার কথাটি বুঝতে পেরেছি।',
         products: data.products || [],
-        quickReplies: data.quickReplies || ['🍯 সুন্দরবনের মধু', '🧈 বিলোনা ঘি', '🎁 মেগা কম্বো'],
+        quickReplies: data.quickReplies || ['🍯 সুন্দরবনের মধু', '🎁 মেগা কম্বো'],
         action: data.action || null,
         timestamp: new Date(),
       };
@@ -323,52 +412,82 @@ export default function HalumChatWindow({
   if (!isOpen) return null;
 
   return (
-    <div
-      className={`fixed ${
-        isLeftSide ? 'left-3 sm:left-6' : 'right-3 sm:right-6'
-      } bottom-[calc(80px+env(safe-area-inset-bottom,0px))] sm:bottom-6 z-50 w-[calc(100vw-24px)] sm:w-[380px] max-h-[75dvh] sm:max-h-[82vh] h-[520px] bg-white rounded-3xl shadow-2xl border-2 border-[#FAB116] flex flex-col overflow-hidden animate-slideUp transition-all duration-300`}
-    >
-      {/* ── Chat Header (Touch-Friendly 44px Controls) ── */}
-      <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#016831] via-[#015829] to-[#014D24] text-white flex items-center justify-between shadow-xs">
-        <div className="flex items-center gap-2.5">
-          <div className="relative w-10 h-10 rounded-full bg-gradient-to-b from-[#FEF3C7] to-[#FDE68A] p-0.5 border-2 border-[#FAB116] flex items-center justify-center flex-shrink-0 shadow-xs">
-            <span className="text-xl">🐯</span>
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <h3 className="text-sm font-black text-white leading-tight">
-                হালুম মামা
-              </h3>
-              <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-[#FAB116] text-black">
-                শপিং গাইড
-              </span>
+    <>
+      {/* ── Mobile Backdrop Overlay (Tap Outside to Close) ── */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-black/50 backdrop-blur-2xs z-50 sm:hidden animate-fadeIn"
+        aria-hidden="true"
+      />
+
+      {/* ── Mobile Bottom-Sheet (<640px) & Desktop Floating Window (>=640px) ── */}
+      <div
+        className={`fixed z-50 flex flex-col bg-white overflow-hidden animate-slideUp transition-all duration-300
+          /* Mobile Bottom-Sheet: w-[calc(100vw-16px)], max-h-[75dvh], rounded-t-2xl */
+          bottom-0 left-2 right-2 w-[calc(100vw-16px)] max-h-[75dvh] h-[72dvh] rounded-t-2xl rounded-b-none border-t-2 border-x-2 border-[#FAB116] shadow-2xl
+          /* Desktop Floating Popup: sm:w-[380px], sm:h-[530px], sm:rounded-3xl, sm:border-2 */
+          sm:bottom-6 sm:h-[530px] sm:max-h-[82vh] sm:w-[380px] sm:rounded-3xl sm:border-2 ${
+            isLeftSide ? 'sm:left-6 sm:right-auto' : 'sm:right-6 sm:left-auto'
+          }
+        `}
+      >
+        {/* Mobile Top Drag Handle Indicator */}
+        <div className="w-12 h-1 bg-amber-400/80 rounded-full mx-auto my-1.5 sm:hidden flex-shrink-0" />
+
+        {/* ── Chat Header (Touch-Friendly 44px Controls & 1-Tap WhatsApp Handoff) ── */}
+        <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#016831] via-[#015829] to-[#014D24] text-white flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="relative w-10 h-10 rounded-full bg-gradient-to-b from-[#FEF3C7] to-[#FDE68A] p-0.5 border-2 border-[#FAB116] flex items-center justify-center flex-shrink-0 shadow-xs">
+              <span className="text-xl">🐯</span>
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-white" />
             </div>
-            <p className="text-[10px] text-emerald-200 leading-tight">
-              চিফ টেস্ট অফিসার ও খাঁটি বন্ধু
-            </p>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-sm font-black text-white leading-tight">
+                  হালুম মামা
+                </h3>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-[#FAB116] text-black">
+                  শপিং গাইড
+                </span>
+              </div>
+              <p className="text-[10px] text-emerald-200 leading-tight">
+                চিফ টেস্ট অফিসার ও খাঁটি বন্ধু
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1">
+            {/* 1-Tap WhatsApp Handoff (Requirement 4) */}
+            <a
+              href={deliveryConfig.supportWhatsApp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white shadow-xs transition-all active:scale-95"
+              title="হোয়াটসঅ্যাপে সরাসরি কথা বলুন"
+              aria-label="হোয়াটসঅ্যাপে সরাসরি কথা বলুন"
+            >
+              <MessageCircle className="w-5 h-5 text-white" />
+            </a>
+
+            {/* 44x44px Touch Target Close Button (Requirement 4) */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white transition-all active:scale-95"
+              aria-label="চ্যাট বন্ধ করুন"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
-
-        {/* 44x44px Touch Target Close Button (Requirement 4) */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white transition-all active:scale-95"
-          aria-label="চ্যাট বন্ধ করুন"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
 
       {/* ── Scrollable Messages Area with pb-8 and overflow-x-hidden (Requirement 1 & 4) ── */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 pb-8 space-y-3.5 bg-[#FCFBF7]">
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex flex-col ${
-              msg.sender === 'user' ? 'items-end' : 'items-start'
-            }`}
+            className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'
+              }`}
           >
             {/* Sender Label & Avatar */}
             {msg.sender === 'halum' && (
@@ -380,11 +499,10 @@ export default function HalumChatWindow({
 
             {/* Message Bubble */}
             <div
-              className={`max-w-[92%] sm:max-w-[88%] p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs break-words ${
-                msg.sender === 'user'
-                  ? 'bg-[#016831] text-white rounded-br-xs font-medium'
-                  : 'bg-white text-stone-800 rounded-bl-xs border border-amber-200/80 font-normal'
-              }`}
+              className={`max-w-[92%] sm:max-w-[88%] p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs break-words ${msg.sender === 'user'
+                ? 'bg-[#016831] text-white rounded-br-xs font-medium'
+                : 'bg-white text-stone-800 rounded-bl-xs border border-amber-200/80 font-normal'
+                }`}
             >
               <p>{msg.text}</p>
 
@@ -439,21 +557,20 @@ export default function HalumChatWindow({
                           #{ord.orderNumber}
                         </span>
                         <span
-                          className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
-                            ord.status === 'delivered'
-                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                              : ord.status === 'shipped'
+                          className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${ord.status === 'delivered'
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                            : ord.status === 'shipped'
                               ? 'bg-cyan-100 text-cyan-800 border-cyan-300'
                               : 'bg-amber-100 text-amber-800 border-amber-300'
-                          }`}
+                            }`}
                         >
                           {ord.status === 'delivered'
                             ? 'ডেলিভারি সম্পন্ন ✓'
                             : ord.status === 'processing'
-                            ? 'প্যাকিং চলছে 📦'
-                            : ord.status === 'shipped'
-                            ? 'কুরিয়ারে হস্তান্তর 🚚'
-                            : 'অর্ডার গৃহীত'}
+                              ? 'প্যাকিং চলছে 📦'
+                              : ord.status === 'shipped'
+                                ? 'কুরিয়ারে হস্তান্তর 🚚'
+                                : 'অর্ডার গৃহীত'}
                         </span>
                       </div>
 
@@ -516,77 +633,85 @@ export default function HalumChatWindow({
                 </div>
               )}
 
-              {/* ── Ultra-Slim Proposed Product Cards (খুব ছোট চিকন স্ট্রিপ) ── */}
+              {/* ── Embedded Product Cards (Compact 2-Cards per row Grid) ── */}
               {msg.products && msg.products.length > 0 && (
-                <div className="mt-2 pt-1.5 border-t border-amber-100 space-y-1.5">
-                  <div className="text-[9.5px] font-bold text-[#016831] flex items-center gap-1">
+                <div className="mt-3 pt-2 border-t border-amber-100">
+                  <div className="text-[10px] font-bold text-[#016831] flex items-center gap-1 mb-2">
                     <Sparkles className="w-3 h-3 text-[#FAB116]" />
                     <span>প্রস্তাবিত খাঁটি খাবার:</span>
                   </div>
 
-                  <div className="space-y-1.5">
+                  {/* 2-Columns Grid Layout */}
+                  <div className="grid grid-cols-2 gap-2">
                     {msg.products.map((prod) => (
                       <div
                         key={prod.id || prod.slug}
-                        className="px-2 py-1 rounded-xl bg-white border border-amber-200 hover:border-[#016831]/60 transition-all flex items-center gap-2 shadow-2xs group"
+                        className="p-2 rounded-2xl bg-[#FAF9F5] border border-amber-200/90 hover:border-[#016831]/60 transition-all flex flex-col justify-between overflow-hidden shadow-xs group"
                       >
-                        {/* Micro Image (32x32px) */}
+                        {/* Compact Top Image + Badge */}
                         <Link
                           href={`/products/${prod.slug}`}
-                          className="w-8 h-8 relative rounded-lg overflow-hidden bg-stone-100 flex-shrink-0 block"
+                          className="w-full h-20 sm:h-24 relative rounded-xl overflow-hidden bg-stone-100 flex-shrink-0 block mb-1.5 group-hover:scale-[1.02] transition-transform"
                         >
                           <Image
                             src={prod.image}
                             alt={prod.name}
                             fill
-                            sizes="32px"
+                            sizes="(max-width: 640px) 130px, 160px"
                             className="object-cover"
                           />
+                          {prod.badge && (
+                            <span className="absolute top-1 left-1 bg-amber-500/95 text-slate-950 font-black text-[8px] px-1.5 py-0.2 rounded-md shadow-xs">
+                              {prod.badge}
+                            </span>
+                          )}
                         </Link>
 
-                        {/* Title & Price on Slim Row */}
+                        {/* Title (line-clamp-2) & Unit */}
                         <div className="flex-1 min-w-0">
                           <Link
                             href={`/products/${prod.slug}`}
-                            className="text-[11px] font-bold text-stone-900 hover:text-[#016831] truncate block leading-tight"
+                            className="text-[11px] font-bold text-stone-900 hover:text-[#016831] line-clamp-2 leading-tight block mb-0.5"
                           >
                             {prod.name}
                           </Link>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[11px] font-black text-[#016831]">
-                              ৳{prod.price}
-                            </span>
-                            {prod.unit && (
-                              <span className="text-[9px] text-stone-400">
-                                • {prod.unit}
-                              </span>
-                            )}
+                          <div className="text-[9px] text-stone-500 truncate mb-1">
+                            {prod.unit}
                           </div>
                         </div>
 
-                        {/* Ultra-Slim +কার্ট Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleAddToCartFromAgent(prod)}
-                          className={`h-7 px-2.5 rounded-lg text-[9.5px] font-black flex items-center justify-center gap-1 transition-all active:scale-90 flex-shrink-0 shadow-2xs ${
-                            addedItemSlug === prod.slug
+                        {/* Price & Add to Cart button */}
+                        <div className="pt-1.5 border-t border-amber-100 flex items-center justify-between gap-1 mt-auto">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-black text-[#016831]">
+                              ৳{prod.price}
+                            </span>
+                            {prod.originalPrice && prod.originalPrice > prod.price && (
+                              <span className="text-[9px] text-stone-400 line-through">
+                                ৳{prod.originalPrice}
+                              </span>
+                            )}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleAddToCartFromAgent(prod)}
+                            className={`min-h-[34px] px-2 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 transition-all active:scale-90 shadow-xs ${addedItemSlug === prod.slug
                               ? 'bg-emerald-600 text-white'
                               : 'bg-[#016831] hover:bg-[#02833E] text-white'
-                          }`}
-                          title="কার্টে যোগ করুন"
-                        >
-                          {addedItemSlug === prod.slug ? (
-                            <>
-                              <Check className="w-3 h-3 stroke-[3]" />
-                              <span>যুক্ত ✓</span>
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingBag className="w-2.5 h-2.5 text-[#FAB116]" />
-                              <span>+কার্ট</span>
-                            </>
-                          )}
-                        </button>
+                              }`}
+                            title="কার্টে যোগ করুন"
+                          >
+                            {addedItemSlug === prod.slug ? (
+                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            ) : (
+                              <>
+                                <ShoppingBag className="w-3 h-3 text-[#FAB116]" />
+                                <span>+কার্ট</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -613,13 +738,13 @@ export default function HalumChatWindow({
 
               {/* 44px Min Touch-Target Quick Reply Chips (Requirement 4) */}
               {msg.quickReplies && msg.quickReplies.length > 0 && (
-                <div className="mt-2.5 pt-2 border-t border-amber-100 flex flex-wrap gap-1.5">
+                <div className="mt-2.5 pt-2 border-t border-amber-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar touch-pan-x py-1">
                   {msg.quickReplies.map((qr, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => handleSendMessage(qr)}
-                      className="min-h-[44px] text-[11px] font-bold px-3 py-2 rounded-xl bg-amber-50 hover:bg-[#FEF9E7] text-[#016831] border border-amber-200 transition-colors active:scale-95 flex items-center justify-center"
+                      className="min-h-[44px] text-[11px] font-bold px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-[#FEF9E7] text-[#016831] border border-amber-200 transition-colors active:scale-95 flex items-center justify-center whitespace-nowrap flex-shrink-0 shadow-2xs"
                     >
                       {qr}
                     </button>
@@ -655,47 +780,56 @@ export default function HalumChatWindow({
 
       {/* ── Quick Categories Shortcut Strip (Touch-pan-x, overflow-x-auto, 44px touch height) ── */}
       <div className="px-3 py-2 bg-[#FAF9F5] border-t border-amber-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar touch-pan-x text-[11px] font-bold">
+        {/* Zero-Typing Recommender Button (Requirement 4) */}
+        <button
+          onClick={() => handleSendMessage('🎯 কোনটা আমার জন্য সেরা?')}
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-[#FAB116] to-yellow-400 text-slate-950 font-black border border-amber-300 shadow-xs active:scale-95 flex items-center gap-1.5 flex-shrink-0"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>🎯 কোনটা আমার জন্য সেরা?</span>
+        </button>
+
         <button
           onClick={() => handleSendMessage('মধু দেখতে চাই')}
-          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831] active:scale-95 flex items-center"
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831] active:scale-95 flex items-center flex-shrink-0"
         >
           🍯 মধু
         </button>
         <button
           onClick={() => handleSendMessage('গাওয়া ঘি দেখতে চাই')}
-          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831] active:scale-95 flex items-center"
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831] active:scale-95 flex items-center flex-shrink-0"
         >
           🧈 গাওয়া ঘি
         </button>
         <button
           onClick={() => handleSendMessage('সরিষার তেল কেমন?')}
-          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831] active:scale-95 flex items-center"
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-[#016831] hover:border-[#016831] active:scale-95 flex items-center flex-shrink-0"
         >
           🌿 ঘানি তেল
         </button>
         <button
           onClick={() => handleSendMessage('অর্ডার ট্র্যাক করব')}
-          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-amber-300 text-[#016831] active:scale-95 flex items-center gap-1"
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-white border border-amber-300 text-[#016831] active:scale-95 flex items-center gap-1 flex-shrink-0"
         >
           <Package className="w-3.5 h-3.5 text-amber-500" />
           <span>অর্ডার ট্র্যাক</span>
         </button>
         <button
           onClick={() => handleSendMessage('কম্বো অফার দেখাও')}
-          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 active:scale-95 flex items-center gap-1"
+          className="whitespace-nowrap min-h-[44px] px-3.5 py-2 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 active:scale-95 flex items-center gap-1 flex-shrink-0"
         >
           <Flame className="w-3.5 h-3.5 text-amber-600" />
           <span>মেগা কম্বো</span>
         </button>
       </div>
 
-      {/* ── Sticky Bottom Input Bar (Ensures Keyboard Doesn't Cover It) ── */}
+      {/* ── Sticky Bottom Input Bar (Ensures Virtual Keyboard Doesn't Cover It) ── */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleSendMessage();
         }}
-        className="p-2 sm:p-2.5 bg-white border-t border-stone-200 flex items-center gap-2 sticky bottom-0 z-10"
+        className="p-2 sm:p-2.5 pb-[calc(8px+env(safe-area-inset-bottom,0px))] bg-white border-t border-stone-200 flex items-center gap-2 sticky bottom-0 z-10"
       >
         <input
           ref={inputRef}
@@ -717,5 +851,6 @@ export default function HalumChatWindow({
         </button>
       </form>
     </div>
+  </>
   );
 }

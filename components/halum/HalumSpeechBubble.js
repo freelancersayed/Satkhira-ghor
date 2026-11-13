@@ -97,15 +97,23 @@ export default function HalumSpeechBubble({
       };
     }
 
-    // 7. Track Order Page (/track-order)
-    if (pathname === '/track-order') {
+    // 7. About Us Page (/about-us or /about) - Requirement 1
+    if (pathname === '/about-us' || pathname === '/about') {
       return {
-        line1: 'পার্সেল কোথায় আছে দেখতে',
-        line2: '১১ ডিজিটের মোবাইল নম্বর দাও! 📦',
+        line1: 'শ্যামনগর ও সুন্দরবনের',
+        line2: 'মৌয়ালদের আসল গল্পটা জেনে নাও! 🌿🍯',
       };
     }
 
-    // 8. Scrolling / Search Help
+    // 8. Track Order Page (/track or /track-order) - Requirement 1
+    if (pathname === '/track' || pathname === '/track-order') {
+      return {
+        line1: 'পার্সেল কোথায় আছে জানতে',
+        line2: '১১ ডিজিটের ফোন নম্বর দাও! 📦',
+      };
+    }
+
+    // 9. Scrolling / Search Help
     if (isScrollAsking) {
       return {
         line1: 'পণ্য পছন্দ করতে সমস্যা?',
@@ -151,40 +159,40 @@ export default function HalumSpeechBubble({
 
   return (
     <div
-      className={`relative mb-1.5 w-max max-w-[230px] sm:max-w-[270px] select-none animate-slideUp flex flex-col ${
+      className={`relative mb-1.5 w-max max-w-[calc(100vw-96px)] sm:max-w-[280px] select-none animate-slideUp flex flex-col ${
         isLeftSide ? 'items-start' : 'items-end'
       }`}
     >
-      {/* ── Ultra-Slim Smart Floating Pill (2 Highlighted Lines) ── */}
+      {/* ── Ultra-Slim Smart Floating Pill (2 Highlighted Lines, Mobile Safe) ── */}
       <div
         onClick={handleClickBubble}
-        className="bg-white/95 backdrop-blur-md px-3 py-1.5 sm:py-2 rounded-2xl shadow-lg shadow-amber-500/15 border-2 border-[#FAB116] cursor-pointer transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 relative group"
+        className="bg-white/95 backdrop-blur-md px-3 py-1.5 sm:py-2 rounded-2xl shadow-lg shadow-amber-500/15 border-2 border-[#FAB116] cursor-pointer transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 relative group max-w-full"
         title="ক্লিক করে চ্যাট করুন"
       >
         <span className="text-sm flex-shrink-0">🐯</span>
 
-        {/* 2 Highlighted Lines */}
-        <div className="flex flex-col text-left min-w-0 pr-0.5">
-          <span className="text-[10.5px] sm:text-[11px] font-extrabold text-amber-900 leading-tight whitespace-nowrap">
+        {/* 2 Highlighted Lines with break-words to guarantee zero horizontal overflow */}
+        <div className="flex flex-col text-left min-w-0 pr-0.5 break-words">
+          <span className="text-[10.5px] sm:text-[11px] font-extrabold text-amber-900 leading-tight">
             {guide.line1}
           </span>
-          <span className="text-[11px] sm:text-[12px] font-black text-[#016831] leading-tight whitespace-nowrap">
+          <span className="text-[11px] sm:text-[12px] font-black text-[#016831] leading-tight">
             {guide.line2}
           </span>
         </div>
 
-        {/* Mini close button */}
+        {/* 44x44px Touch Target Close Button for Mobile Thumbs */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             setVisible(false);
           }}
-          className="p-0.5 rounded-full text-stone-400 hover:text-stone-700 flex-shrink-0 transition-colors"
+          className="min-w-[44px] min-h-[44px] -my-2 -mr-2.5 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-700 flex-shrink-0 transition-colors"
           title="লুকান"
           aria-label="লুকান"
         >
-          <X className="w-2.5 h-2.5" />
+          <X className="w-3.5 h-3.5" />
         </button>
 
         {/* Cute Comic Tail Pointing Down to Halum's Head */}

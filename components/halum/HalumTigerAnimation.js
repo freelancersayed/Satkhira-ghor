@@ -25,6 +25,7 @@ export default function HalumTigerAnimation({
   pointDirection = 'right', // 'left' | 'right'
   isMoving = false,
   facingLeft = false,
+  cartSubtotal = 0,
 }) {
   const [blink, setBlink] = useState(false);
 
@@ -42,12 +43,17 @@ export default function HalumTigerAnimation({
   const isProud = state === 'proud';
   const isThinking = state === 'thinking';
   const isHappy = state === 'happy' || state === 'dancing';
+  const isSearching = state === 'searching';
   const isListening = state === 'listening';
   const isSaluting = state === 'saluting';
   const isGreeting = state === 'greeting';
   const isTalking = state === 'talking';
 
   if (isMinimized) {
+    const progress = Math.min(100, Math.round((cartSubtotal / 1500) * 100));
+    const circumference = 2 * Math.PI * 30; // ~188.5
+    const strokeDashoffset = circumference * (1 - progress / 100);
+
     return (
       <div
         onClick={onClick}
@@ -55,12 +61,39 @@ export default function HalumTigerAnimation({
         title="হালুম মামা - বড় করতে ক্লিক করুন 🐯"
         aria-label="হালুম মামা শপিং গাইড"
       >
+        {/* Smart Free Delivery Progress Ring around Tiger Badge */}
+        {cartSubtotal > 0 && (
+          <svg className="absolute -inset-2 w-[72px] h-[72px] -rotate-90 pointer-events-none" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="30" stroke="#FEF3C7" strokeWidth="3" fill="none" opacity="0.7" />
+            <circle
+              cx="36"
+              cy="36"
+              r="30"
+              stroke="#016831"
+              strokeWidth="3.5"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="none"
+              className="transition-all duration-500"
+            />
+          </svg>
+        )}
+
         <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 via-[#FAB116] to-yellow-300 p-1 shadow-xl border-2 border-white flex items-center justify-center animate-pulse">
           <span className="text-2xl drop-shadow-md">🐯</span>
         </div>
-        <div className="absolute -bottom-1 -right-1 bg-[#016831] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-white shadow">
-          হালুম মামা
-        </div>
+
+        {/* Dynamic Badge: Free delivery percentage or Halum Mama label */}
+        {cartSubtotal > 0 ? (
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#016831] text-amber-300 text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white shadow whitespace-nowrap">
+            {progress >= 100 ? 'ফ্রি ডেলিভারি! ✓' : `${progress}% ফ্রি শিপিং`}
+          </div>
+        ) : (
+          <div className="absolute -bottom-1 -right-1 bg-[#016831] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-white shadow">
+            হালুম মামা
+          </div>
+        )}
       </div>
     );
   }
@@ -126,6 +159,13 @@ export default function HalumTigerAnimation({
       {isProud && (
         <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1 bg-[#016831] text-amber-300 font-black text-[9px] px-2 py-0.5 rounded-full shadow-md border border-amber-400 animate-pulse whitespace-nowrap">
           <span>✨ বাঘের জবান (১০০% খাঁটি)</span>
+        </div>
+      )}
+
+      {/* ── Searching Floating Tag (When tracking parcel or searching products) ── */}
+      {isSearching && (
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded-full shadow-md border border-amber-200 animate-bounce whitespace-nowrap">
+          <span>🔍 পার্সেল খুঁজছি...</span>
         </div>
       )}
 
@@ -631,24 +671,32 @@ export default function HalumTigerAnimation({
           ) : (
             /* Open Glossy Anime Eyes */
             <g>
+              {/* Left Eye */}
               <ellipse cx="56" cy="47" rx="7.5" ry="9" fill="#1E293B" />
               <circle cx="54" cy="44" r="3" fill="#FFFFFF" />
               <circle cx="58" cy="49" r="1.5" fill="#FFFFFF" />
 
-              <ellipse cx="84" cy="47" rx="7.5" ry="9" fill="#1E293B" />
-              <circle cx="82" cy="44" r="3" fill="#FFFFFF" />
-              <circle cx="86" cy="49" r="1.5" fill="#FFFFFF" />
+              {/* Right Eye: Cheerful Wink when Happy, or Glossy Open Eye */}
+              {isHappy ? (
+                <path d="M78 48 Q84 53 90 48" stroke="#1E293B" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+              ) : (
+                <g>
+                  <ellipse cx="84" cy="47" rx="7.5" ry="9" fill="#1E293B" />
+                  <circle cx="82" cy="44" r="3" fill="#FFFFFF" />
+                  <circle cx="86" cy="49" r="1.5" fill="#FFFFFF" />
+                </g>
+              )}
 
               {/* Expressive Eyebrows */}
               <path
-                d={isThinking ? 'M48 35 L62 40' : isListening ? 'M48 36 L62 38' : 'M48 38 Q55 34 62 38'}
+                d={isThinking ? 'M48 35 L62 40' : isSearching ? 'M48 33 Q55 29 62 33' : isListening ? 'M48 36 L62 38' : 'M48 38 Q55 34 62 38'}
                 stroke="#1E293B"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 fill="none"
               />
               <path
-                d={isThinking ? 'M92 37 L78 35' : isListening ? 'M92 34 L78 38' : 'M92 38 Q85 34 78 38'}
+                d={isThinking ? 'M92 37 L78 35' : isSearching ? 'M92 35 Q85 32 78 36' : isListening ? 'M92 34 L78 38' : 'M92 38 Q85 34 78 38'}
                 stroke="#1E293B"
                 strokeWidth="2.5"
                 strokeLinecap="round"
@@ -666,6 +714,15 @@ export default function HalumTigerAnimation({
               {/* Little glass glint reflection */}
               <path d="M52 42 L56 42" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
               <path d="M80 42 L84 42" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+            </g>
+          )}
+
+          {/* ── Detective Magnifying Glass Overlay when Searching / Tracking ── */}
+          {isSearching && (
+            <g className="animate-pulse">
+              <circle cx="86" cy="47" r="11" stroke="#FAB116" strokeWidth="2.5" fill="#FEF3C7" fillOpacity="0.35" />
+              <line x1="94" y1="55" x2="105" y2="66" stroke="#D97706" strokeWidth="3.5" strokeLinecap="round" />
+              <path d="M81 42 Q86 39 90 43" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" fill="none" />
             </g>
           )}
 
