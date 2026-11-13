@@ -77,3 +77,4 @@ export function getHalumConfigForRoute(pathname = '/') {
     defaultState: 'idle',
   };
 }
+

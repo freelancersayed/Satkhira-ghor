@@ -46,6 +46,8 @@ export default function HalumAssistantWidget() {
   // Cart drawer state for Auto-Minimize
   const isCartDrawerOpen = useCartStore((state) => state.isOpen);
   const lastAddedItem = useCartStore((state) => state.lastAddedItem);
+  const getTotalPrice = useCartStore((state) => state.getTotalPrice);
+  const cartSubtotal = getTotalPrice ? getTotalPrice() : 0;
 
   // Helper: Calculate strictly bounded horizontal safe coordinates
   // Mathematical guarantee: Halum and his speech bubble NEVER cross screen left or right edges!
@@ -459,7 +461,6 @@ export default function HalumAssistantWidget() {
 
   const shouldAutoHide = isCartDrawerOpen || isModalOpen;
   const effectiveMinimized = isMinimized;
-  const cartSubtotal = useCartStore((state) => state.getTotalPrice());
 
   return (
     <>
