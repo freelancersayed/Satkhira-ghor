@@ -11,6 +11,7 @@ export default function HalumSpeechBubble({
   pathname = '/',
   isLeftSide = false,
   tailPosition = null,
+  flipBelow = false,
   onTriggerTargetAction,
   hasTargetOnScreen = false,
   isScrollAsking = false,
@@ -128,7 +129,7 @@ export default function HalumSpeechBubble({
       };
     }
 
-    // 7. About Us Page (/about-us or /about) - Requirement 1
+    // 7. About Us Page (/about-us or /about)
     if (pathname === '/about-us' || pathname === '/about') {
       return {
         line1: 'শ্যামনগর ও সুন্দরবনের',
@@ -136,7 +137,7 @@ export default function HalumSpeechBubble({
       };
     }
 
-    // 8. Track Order Page (/track or /track-order) - Requirement 1
+    // 8. Track Order Page (/track or /track-order)
     if (pathname === '/track' || pathname === '/track-order') {
       return {
         line1: 'পার্সেল কোথায় আছে জানতে',
@@ -192,35 +193,39 @@ export default function HalumSpeechBubble({
 
   return (
     <div
-      className={`relative mb-2.5 w-max max-w-[calc(100vw-96px)] sm:max-w-[280px] select-none animate-slideUp flex flex-col ${
-        resolvedTailPos === 'left' ? 'items-start' : 'items-end'
+      style={{
+        filter:
+          'drop-shadow(0 10px 18px rgba(0, 0, 0, 0.20)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.10))',
+      }}
+      className={`relative select-none animate-slideUp w-max max-w-full ${
+        resolvedTailPos === 'left' ? 'origin-bottom-left' : 'origin-bottom-right'
       }`}
     >
-      {/* ── Stitched Comic Speech Bubble (Matching User's Uploaded Screenshot Exactly) ── */}
+      {/* ── Stitched Comic Speech Bubble Card (Matching User's Reference Screenshot) ── */}
       <div
         onClick={handleClickBubble}
-        className="bg-white p-1 rounded-2xl shadow-[0_10px_25px_-4px_rgba(0,0,0,0.22),0_4px_10px_-2px_rgba(0,0,0,0.12)] border border-stone-200/90 cursor-pointer transition-all hover:scale-[1.02] active:scale-95 relative group max-w-full"
+        className="bg-white p-1 sm:p-1.5 rounded-2xl border border-stone-200/90 cursor-pointer transition-transform hover:scale-[1.02] active:scale-95 relative group max-w-full"
         title="ক্লিক করে চ্যাট করুন বা নির্দেশ দেখুন"
       >
         {/* Inner Stitched Dashed Frame (User's Screenshot Style: Dark Charcoal Stitched Line) */}
-        <div className="border-[1.5px] border-dashed border-stone-600/80 sm:border-stone-700/85 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center gap-2 bg-white">
+        <div className="border-[1.5px] border-dashed border-stone-700/80 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center gap-2 bg-white">
           <span className="text-sm flex-shrink-0 animate-bounce">🐯</span>
 
           {/* 2 Highlighted Lines with break-words */}
           <div className="flex flex-col text-left min-w-0 pr-0.5 break-words">
             {guide.isActionTarget ? (
-              <span className="text-[10px] sm:text-[10.5px] font-black text-amber-900 flex items-center gap-1 leading-tight">
+              <span className="text-[10px] sm:text-[10.5px] font-black text-amber-950 flex items-center gap-1 leading-tight">
                 <span className="text-xs animate-pulse">👉</span>
-                <span className="bg-[#FAB116] text-black px-1.5 py-0.2 rounded-md shadow-2xs font-black">
+                <span className="bg-[#FAB116] text-black px-1.5 py-0.5 rounded shadow-2xs font-black">
                   {guide.line1}
                 </span>
               </span>
             ) : (
-              <span className="text-[10.5px] sm:text-[11px] font-black text-amber-900 leading-tight">
+              <span className="text-[10.5px] sm:text-[11px] font-bold text-amber-950 leading-tight">
                 {guide.line1}
               </span>
             )}
-            <span className="text-[11px] sm:text-[12px] font-black text-[#016831] leading-tight drop-shadow-[0_1px_1px_rgba(1,104,49,0.15)] mt-0.5">
+            <span className="text-[11px] sm:text-[12px] font-black text-[#016831] leading-tight drop-shadow-[0_1px_1px_rgba(1,104,49,0.12)] mt-0.5 break-words">
               {guide.line2}
             </span>
           </div>
@@ -232,7 +237,7 @@ export default function HalumSpeechBubble({
               e.stopPropagation();
               setVisible(false);
             }}
-            className="min-w-[44px] min-h-[44px] -my-2 -mr-2 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-700 flex-shrink-0 transition-colors"
+            className="min-w-[40px] min-h-[40px] -my-1.5 -mr-1.5 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-700 active:scale-90 flex-shrink-0 transition-colors"
             title="লুকান"
             aria-label="লুকান"
           >
@@ -240,19 +245,30 @@ export default function HalumSpeechBubble({
           </button>
         </div>
 
-        {/* ── Curved Comic Swoop Tail (Matching User's Screenshot Exactly) ── */}
+        {/* ── Curved Comic Swoop Tail (Matching User's Reference Screenshot Exactly) ── */}
         <svg
           viewBox="0 0 32 24"
-          className={`absolute -bottom-[19px] w-8 h-6 fill-white filter drop-shadow(0 3px 2px rgba(0,0,0,0.16)) pointer-events-none ${
-            resolvedTailPos === 'left' ? 'left-6' : 'right-6 -scale-x-100'
+          className={`absolute w-8 h-6 pointer-events-none fill-white ${
+            flipBelow
+              ? '-top-[19px] ' +
+                (resolvedTailPos === 'left'
+                  ? 'left-5 -scale-y-100'
+                  : 'right-5 -scale-x-100 -scale-y-100')
+              : '-bottom-[19px] ' +
+                (resolvedTailPos === 'left'
+                  ? 'left-5'
+                  : 'right-5 -scale-x-100')
           }`}
+          style={{ overflow: 'visible' }}
         >
+          {/* Solid white fill merging seamlessly into the card */}
           <path
-            d="M4 0 C4 8, 2 15, 0 24 C9 18, 20 12, 28 0 Z"
-            fill="white"
+            d="M 6 0 C 6 7, 2 15, 0 24 C 8 18, 19 12, 30 0 Z"
+            fill="#FFFFFF"
           />
+          {/* Subtle outer stroke matching card outline */}
           <path
-            d="M4 0 C4 8, 2 15, 0 24 C9 18, 20 12, 28 0"
+            d="M 6 0 C 6 7, 2 15, 0 24 C 8 18, 19 12, 30 0"
             stroke="#E5E7EB"
             strokeWidth="1.2"
             fill="none"

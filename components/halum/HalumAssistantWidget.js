@@ -60,8 +60,8 @@ export default function HalumAssistantWidget() {
   const getSafeX = useCallback((side) => {
     if (typeof window === 'undefined') return 14;
     const isMobile = window.innerWidth < 640;
-    const widgetWidth = isMobile ? 74 : 96;
-    const safeMargin = isMobile ? 12 : 20;
+    const widgetWidth = isMobile ? 80 : 108;
+    const safeMargin = isMobile ? 10 : 20;
 
     if (side === 'left') {
       return safeMargin;
@@ -272,8 +272,8 @@ export default function HalumAssistantWidget() {
       // Target Identified! Compute non-obstructive safe adjacent coordinates
       const r = targetBtn.getBoundingClientRect();
       const isMobile = window.innerWidth < 640;
-      const halumW = isMobile ? 74 : 96;
-      const halumH = isMobile ? 74 : 96;
+      const halumW = isMobile ? 80 : 108;
+      const halumH = isMobile ? 112 : 148;
       const screenW = window.innerWidth;
       const screenH = window.innerHeight;
 
@@ -286,23 +286,23 @@ export default function HalumAssistantWidget() {
       // ── Zero-Obstruction Placement Math: Halum and speech bubble NEVER cover the button or text! ──
       if (roomOnLeft >= requiredRoom && roomOnLeft >= roomOnRight) {
         // Option A: Stand to the LEFT of the button
-        targetX = Math.max(10, r.left - halumW - 10);
+        targetX = Math.max(10, r.left - halumW - 8);
         targetY = Math.max(70, Math.min(screenH - halumH - 85, r.top + r.height / 2 - halumH / 2));
         newFacing = false; // look right at button
         newPointDir = 'right'; // point elongated finger right at button
-        newDock = 'right'; // bubble anchored to stay leftwards, clear of button
+        newDock = 'left';
       } else if (roomOnRight >= requiredRoom) {
         // Option B: Stand to the RIGHT of the button
-        targetX = Math.min(screenW - halumW - 10, r.right + 10);
+        targetX = Math.min(screenW - halumW - 10, r.right + 8);
         targetY = Math.max(70, Math.min(screenH - halumH - 85, r.top + r.height / 2 - halumH / 2));
         newFacing = true; // look left at button
         newPointDir = 'left'; // point elongated finger left at button
-        newDock = 'left'; // bubble anchored to stay rightwards, clear of button
+        newDock = 'right';
       } else {
         // Option C: Full-width button on mobile (e.g. wide checkout button)
         // Stand safely ABOVE button at left margin
         targetX = 12;
-        targetY = Math.max(65, r.top - halumH - 18);
+        targetY = Math.max(65, r.top - halumH - 12);
         newFacing = false;
         newPointDir = 'right';
         newDock = 'left';
@@ -439,7 +439,10 @@ export default function HalumAssistantWidget() {
 
       const isMobile = window.innerWidth < 640;
       const isBrowsingRoute =
-        pathname === '/' || pathname === '/shop' || pathname.startsWith('/shop');
+        pathname === '/' ||
+        pathname === '/shop' ||
+        pathname.startsWith('/shop') ||
+        pathname.startsWith('/products/');
       const scrolledDown = window.scrollY > 80;
 
       if (isMobile && isBrowsingRoute && scrolledDown) {
@@ -553,8 +556,8 @@ export default function HalumAssistantWidget() {
     }
 
     const isMobile = window.innerWidth < 640;
-    const widgetWidth = isMobile ? 74 : 96;
-    const widgetHeight = isMobile ? 74 : 96;
+    const widgetWidth = isMobile ? 80 : 108;
+    const widgetHeight = isMobile ? 112 : 148;
     const safeMarginX = isMobile ? 10 : 20;
 
     // Strictly clamped inside 2D screen boundaries!
@@ -668,6 +671,12 @@ export default function HalumAssistantWidget() {
 
   const shouldAutoHide = isCartDrawerOpen || isModalOpen;
   const effectiveMinimized = isMinimized || isScrollMinimized;
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
+  const isProductPageMinimized = isMobile && pathname.startsWith('/products/') && effectiveMinimized;
+  const widgetW = isMobile ? 80 : 108;
+  const widgetH = isMobile ? 112 : 148;
+  const isLeftSide = positionX < (typeof window !== 'undefined' ? window.innerWidth / 2 : 200);
+  const flipBelow = positionY !== null && positionY < 95;
 
   return (
     <>
@@ -681,35 +690,50 @@ export default function HalumAssistantWidget() {
         onPointerCancel={handlePointerUp}
         style={{
           position: 'fixed',
-          top: `${positionY !== null ? positionY : 300}px`,
-          left: `${positionX}px`,
-          transform: `scale(${welcomeStep === 1 ? 1.22 : shouldAutoHide ? 0 : 1})`,
+          top: isProductPageMinimized ? 'auto' : `${positionY !== null ? positionY : 300}px`,
+          bottom: isProductPageMinimized ? '80px' : 'auto',
+          right: isProductPageMinimized ? '12px' : 'auto',
+          left: isProductPageMinimized ? 'auto' : `${positionX}px`,
+          width: isProductPageMinimized ? '56px' : `${widgetW}px`,
+          height: isProductPageMinimized ? '56px' : `${widgetH}px`,
+          transform: `scale(${welcomeStep === 1 ? 1.18 : shouldAutoHide ? 0 : 1})`,
           transition: isDragging
             ? 'none'
             : isMoving
             ? 'left 0.8s cubic-bezier(0.22, 1, 0.36, 1), top 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease'
-            : 'left 0.35s ease-out, top 0.35s ease-out, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
+            : 'left 0.35s ease-out, top 0.35s ease-out, bottom 0.35s ease-out, right 0.35s ease-out, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
           zIndex: shouldAutoHide ? 0 : 50,
           touchAction: 'none',
         }}
-        className={`flex flex-col select-none ${
-          dockSide === 'left' ? 'items-start' : 'items-end'
-        } ${
+        className={`select-none ${
           shouldAutoHide
             ? 'opacity-0 scale-0 pointer-events-none invisible'
-            : 'opacity-100 scale-100 pointer-events-none'
-        } ${isScrolling ? 'opacity-75' : ''} transition-all duration-300`}
+            : 'opacity-100 scale-100'
+        } ${isScrolling ? 'opacity-80' : ''} transition-opacity duration-300`}
       >
         {/* Stitched Comic Speech Bubble Matching User's Screenshot Exactly */}
         {!effectiveMinimized && !shouldAutoHide && (
-          <div className="pointer-events-auto">
+          <div
+            className={`absolute pointer-events-auto z-10 ${
+              flipBelow ? 'top-[calc(100%+12px)]' : 'bottom-[calc(100%+12px)]'
+            } ${isLeftSide ? 'left-0' : 'right-0'}`}
+            style={{
+              maxWidth:
+                typeof window !== 'undefined'
+                  ? isLeftSide
+                    ? `min(280px, ${Math.max(160, window.innerWidth - positionX - 14)}px)`
+                    : `min(280px, ${Math.max(160, positionX + widgetW - 14)}px)`
+                  : '280px',
+            }}
+          >
             <HalumSpeechBubble
               isOpen={isChatOpen}
               onOpenChat={() => handleToggleChat()}
               onSendMessage={(query) => handleToggleChat(query)}
               pathname={pathname}
-              isLeftSide={dockSide === 'left'}
-              tailPosition={dockSide === 'left' ? 'left' : 'right'}
+              isLeftSide={isLeftSide}
+              tailPosition={isLeftSide ? 'left' : 'right'}
+              flipBelow={flipBelow}
               onTriggerTargetAction={handleTriggerTargetAction}
               hasTargetOnScreen={hasTargetOnScreen}
               isScrollAsking={isScrollAsking}
@@ -720,11 +744,7 @@ export default function HalumAssistantWidget() {
         )}
 
         {/* 2.5D Animated Mascot Character */}
-        <div
-          className={`pointer-events-auto cursor-grab active:cursor-grabbing ${
-            dockSide === 'left' ? 'ml-1' : 'mr-1'
-          }`}
-        >
+        <div className="w-full h-full pointer-events-auto cursor-grab active:cursor-grabbing flex items-center justify-center">
           <HalumTigerAnimation
             state={characterState}
             onClick={() => handleToggleChat()}

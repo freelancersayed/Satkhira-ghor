@@ -199,9 +199,9 @@ export const products = [
     stock: 15,
     badge: 'ঐতিহ্যবাহী স্বাদ',
     badgeType: 'honey',
-    image: 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800',
     images: [
-      'https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800'
     ],
     shortDescription: 'সাতক্ষীরার শতবর্ষের ঐতিহ্যবাহী রেসিপিতে দেশি গরুর টাটকা ছানা ও ক্ষীর দিয়ে তৈরি অমৃততুল্য ক্ষীর সন্দেশ।',
     description: 'সাতক্ষীরার ক্ষীর সন্দেশের খ্যাতি দেশজুড়ে। মুখে দেওয়া মাত্রই গলে যায় এর মোলায়েম স্বাদ। কোনো গুঁড়ো দুধ বা ময়দার ভেজাল নেই, কেবল খাঁটি গরুর দুধের নির্যাস। বিশেষ বক্স প্যাকেজিংয়ে ঢাকাসহ সারাদেশে ২৪ ঘণ্টার মধ্যে পৌঁছে দেওয়া হয়।',
@@ -338,9 +338,9 @@ export const products = [
     stock: 12,
     badge: 'ঐতিহ্যবাহী নলেন গুড়',
     badgeType: 'ochre',
-    image: 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800',
     images: [
-      'https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800'
     ],
     shortDescription: 'শীতের সুবাসিত খেজুরের খাঁটি নলেন গুড় ও গরুর তাজা ছানা দিয়ে তৈরি মুখে জল আনা নলেন গুড়ের সন্দেশ।',
     description: 'সাতক্ষীরার ঐতিহ্যবাহী খেজুর গুড়ের মন মাতানো ঘ্রাণ আর দেশি ছানার মিশেলে তৈরি এক অপরূপ মিষ্টান্ন। এতে কোনো ধরনের চিনি বা কৃত্রিম সুগন্ধি নেই। মিষ্টিপ্রেমীদের জন্য এটি এক রাজকীয় অভিজ্ঞতা।',

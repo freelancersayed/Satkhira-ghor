@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { products } from '@/data/products';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
+import Review from '@/models/Review';
 import ProductGallery from '@/components/product/ProductGallery';
 import AddToCartButton from '@/components/product/AddToCartButton';
 import ProductCard from '@/components/product/ProductCard';
@@ -30,15 +31,39 @@ async function getProductBySlug(slug) {
       if (dbProduct.isDeleted) {
         return null; // Explicitly deleted by admin
       }
-      return {
-        ...dbProduct,
-        id: dbProduct._id ? dbProduct._id.toString() : dbProduct.id,
-      };
+      return JSON.parse(
+        JSON.stringify({
+          ...dbProduct,
+          id: dbProduct._id ? dbProduct._id.toString() : dbProduct.id,
+        })
+      );
     }
   } catch (e) {
     // fallback
   }
   return products.find((p) => p.slug === slug) || null;
+}
+
+async function getProductReviewsSummary(productId, productSlug) {
+  try {
+    await connectToDatabase();
+    const query = {
+      isApproved: true,
+      $or: [
+        { productSlug },
+        ...(productId ? [{ product: productId }] : []),
+      ],
+    };
+    const reviews = await Review.find(query).select('rating').lean();
+    const count = reviews.length;
+    const avg =
+      count > 0
+        ? reviews.reduce((sum, r) => sum + (r.rating || 5), 0) / count
+        : 0;
+    return { count, avg: avg > 0 ? Number(avg.toFixed(1)) : 0 };
+  } catch (e) {
+    return { count: 0, avg: 0 };
+  }
 }
 
 export async function generateStaticParams() {
@@ -74,6 +99,11 @@ export default async function ProductDetailPage({ params }) {
     notFound();
   }
 
+  const reviewSummary = await getProductReviewsSummary(
+    product.id || product._id,
+    product.slug
+  );
+
   // Related products (prefer same category, fallback to others)
   const relatedSameCat = products.filter(
     (p) => p.category === product.category && p.slug !== product.slug
@@ -83,11 +113,15 @@ export default async function ProductDetailPage({ params }) {
   );
   const relatedProducts = [...relatedSameCat, ...relatedOther].slice(0, 4);
 
-  const discountPercentage = product.originalPrice
-    ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100
-      )
-    : null;
+  const hasOrigin = Boolean(product.origin && String(product.origin).trim());
+  const hasHarvestDate = Boolean(
+    product.harvestDate && String(product.harvestDate).trim()
+  );
+  const hasBenefits = Array.isArray(product.benefits) && product.benefits.length > 0;
+  const hasNutrition =
+    product.nutritionalInfo &&
+    typeof product.nutritionalInfo === 'object' &&
+    Object.keys(product.nutritionalInfo).length > 0;
 
   return (
     <div className="py-10 sm:py-16 bg-[#FDFBF7]">
@@ -126,7 +160,7 @@ export default async function ProductDetailPage({ params }) {
                 </span>
                 <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                  স্টকে আছে ({product.stock} টি অবশিষ্ট)
+                  স্টকে আছে ({product.stock || 25} টি অবশিষ্ট)
                 </span>
               </div>
 
@@ -135,71 +169,76 @@ export default async function ProductDetailPage({ params }) {
                 <h1 className="text-2xl sm:text-3xl font-black text-[#016831] leading-snug">
                   {product.name}
                 </h1>
-                <p className="text-xs text-[#4B5563] mt-1 font-medium">
-                  {product.nameEn}
-                </p>
+                {product.nameEn && (
+                  <p className="text-xs text-[#4B5563] mt-1 font-medium">
+                    {product.nameEn}
+                  </p>
+                )}
               </div>
 
-              {/* Rating & Review */}
+              {/* Rating & Review (Live Synced with Real Reviews - No Hardcoded Counts) */}
               <div className="flex items-center gap-3 pb-2 border-b border-[#E8E2D5]">
-                <div className="flex items-center text-[#F59E0B]">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <span className="text-xs font-bold text-[#016831]">
-                  {product.rating} / ৫.০
-                </span>
-                <span className="text-xs text-[#4B5563]">
-                  ({product.reviewCount} জন সন্তুষ্ট গ্রাহকের রিভিউ)
-                </span>
-              </div>
-
-              {/* Price Row */}
-              <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-4 pt-1">
-                <span className="text-2xl sm:text-3xl font-black text-[#016831]">
-                  ৳{product.price}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-sm sm:text-base text-[#4B5563]/70 line-through">
-                    ৳{product.originalPrice}
+                {reviewSummary.count > 0 ? (
+                  <>
+                    <div className="flex items-center text-[#F59E0B]">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= Math.round(reviewSummary.avg)
+                              ? 'fill-current'
+                              : 'text-stone-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs font-bold text-[#016831]">
+                      {reviewSummary.avg} / ৫.০
+                    </span>
+                    <span className="text-xs text-[#4B5563]">
+                      ({reviewSummary.count} জন ক্রেতার রিভিউ)
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xs text-[#78716C] font-medium">
+                    এখনো কোনো রিভিউ নেই (আপনিই প্রথম রিভিউ দিন!)
                   </span>
                 )}
-                {discountPercentage && (
-                  <span className="text-xs font-black text-[#B45309] bg-[#FEF3C7] px-2.5 py-1 rounded-lg border border-[#FDE68A]">
-                    {discountPercentage}% ছাড়!
-                  </span>
-                )}
-                <span className="text-xs font-semibold text-[#4B5563] bg-[#FDFBF7] px-2.5 py-1 rounded-lg border border-[#E8E2D5]">
-                  পরিমাণ: {product.unit}
-                </span>
               </div>
 
               {/* Short Summary */}
-              <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed">
-                {product.shortDescription}
-              </p>
+              {product.shortDescription && (
+                <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed">
+                  {product.shortDescription}
+                </p>
+              )}
 
-              {/* Origin & Harvest Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
-                <div className="flex items-center gap-2 p-3 bg-[#FDFBF7] rounded-2xl border border-[#E8E2D5]">
-                  <MapPin className="w-4 h-4 text-[#016831] flex-shrink-0" />
-                  <div>
-                    <span className="block font-bold text-[#016831]">উৎস স্থল:</span>
-                    <span className="text-[#4B5563]">{product.origin}</span>
-                  </div>
+              {/* Origin & Harvest Info: Rendered only if values exist (Zero Empty Boxes) */}
+              {(hasOrigin || hasHarvestDate) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+                  {hasOrigin && (
+                    <div className="flex items-center gap-2 p-3 bg-[#FDFBF7] rounded-2xl border border-[#E8E2D5]">
+                      <MapPin className="w-4 h-4 text-[#016831] flex-shrink-0" />
+                      <div>
+                        <span className="block font-bold text-[#016831]">উৎস স্থল:</span>
+                        <span className="text-[#4B5563]">{product.origin}</span>
+                      </div>
+                    </div>
+                  )}
+                  {hasHarvestDate && (
+                    <div className="flex items-center gap-2 p-3 bg-[#FDFBF7] rounded-2xl border border-[#E8E2D5]">
+                      <Calendar className="w-4 h-4 text-[#F59E0B] flex-shrink-0" />
+                      <div>
+                        <span className="block font-bold text-[#016831]">সংগ্রহ কাল:</span>
+                        <span className="text-[#4B5563]">{product.harvestDate}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-2 p-3 bg-[#FDFBF7] rounded-2xl border border-[#E8E2D5]">
-                  <Calendar className="w-4 h-4 text-[#F59E0B] flex-shrink-0" />
-                  <div>
-                    <span className="block font-bold text-[#016831]">সংগ্রহ কাল:</span>
-                    <span className="text-[#4B5563]">{product.harvestDate}</span>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Interactive Add to Cart & Buy Now Button */}
+            {/* Interactive Dynamic Variant Selector & Add To Cart Button */}
             <div
               id="halum-product-action-anchor"
               data-halum-slug={product.slug}
@@ -235,13 +274,13 @@ export default async function ProductDetailPage({ params }) {
               <h2 className="text-lg font-bold text-[#016831] border-b border-[#E8E2D5] pb-3 mb-4">
                 পণ্যের বিস্তারিত বিবরণ
               </h2>
-              <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed">
-                {product.description}
+              <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed whitespace-pre-line">
+                {product.description || product.shortDescription}
               </p>
             </div>
 
-            {/* Health Benefits */}
-            {product.benefits && (
+            {/* Health Benefits: Rendered only if array is non-empty */}
+            {hasBenefits && (
               <div>
                 <h3 className="text-sm font-bold text-[#016831] mb-3">
                   মূল স্বাস্থ্য উপকারিতা ও বিশেষত্ব:
@@ -263,27 +302,25 @@ export default async function ProductDetailPage({ params }) {
             )}
           </div>
 
-          {/* Nutritional Facts Sidebar */}
+          {/* Nutritional Facts & Storage Advice Sidebar */}
           <div className="lg:col-span-4 bg-white p-6 sm:p-8 rounded-3xl border border-[#E8E2D5] shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-[#016831] border-b border-[#E8E2D5] pb-3">
-              পুষ্টি উপাদান (Nutrition Facts)
-            </h2>
-            {product.nutritionalInfo ? (
-              <div className="divide-y divide-[#E8E2D5] text-xs">
-                {Object.entries(product.nutritionalInfo).map(([key, value]) => (
-                  <div key={key} className="py-2.5 flex justify-between">
-                    <span className="text-[#4B5563]">{key}</span>
-                    <span className="font-bold text-[#016831]">{value}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-[#4B5563]">
-                প্রাকৃতিক উপাদানে প্রস্তুত, কোনো কৃত্রিম সংযোজন নেই।
-              </p>
+            {hasNutrition && (
+              <>
+                <h2 className="text-base font-bold text-[#016831] border-b border-[#E8E2D5] pb-3">
+                  পুষ্টি উপাদান (Nutrition Facts)
+                </h2>
+                <div className="divide-y divide-[#E8E2D5] text-xs">
+                  {Object.entries(product.nutritionalInfo).map(([key, value]) => (
+                    <div key={key} className="py-2.5 flex justify-between">
+                      <span className="text-[#4B5563]">{key}</span>
+                      <span className="font-bold text-[#016831]">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
 
-            <div className="mt-4 p-4 rounded-2xl bg-[#FEF3C7] text-[#92400E] text-xs leading-relaxed border border-[#FDE68A]">
+            <div className="p-4 rounded-2xl bg-[#FEF3C7] text-[#92400E] text-xs leading-relaxed border border-[#FDE68A]">
               💡 <strong>সংরক্ষণ পদ্ধতি:</strong> আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক থেকে দূরে রাখুন।
             </div>
           </div>
@@ -292,7 +329,7 @@ export default async function ProductDetailPage({ params }) {
         {/* Live Customer Reviews & Ratings Section */}
         <ProductReviewsSection product={product} />
 
-        {/* Related Products */}
+        {/* Related Products - Mobile Compact 2-Column Grid */}
         <div className="space-y-6 pt-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl sm:text-2xl font-extrabold text-[#016831]">
@@ -305,7 +342,7 @@ export default async function ProductDetailPage({ params }) {
               সব পণ্য দেখুন →
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id || p.slug} product={p} />
             ))}

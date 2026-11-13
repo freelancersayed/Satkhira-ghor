@@ -166,29 +166,31 @@ export default function MobileBottomNav() {
     <>
       {/* ═════════════════════════════════════════════════════════════════
           ১. ফ্লোটিং সাইড কার্ট উইজেট (Floating Side Cart Pill on Right Edge)
-          (Polli Bazar & Ghorer Bazar স্টাইলে স্ক্রিনের ডান পাশে আটকে থাকে)
+          প্রোডাক্ট ডিটেইলস পেজে লেখা ঢেকে যেন না যায়, তাই এই পেজে হাইড রাখা হলো
           ═════════════════════════════════════════════════════════════════ */}
-      <aside
-        onClick={openCart}
-        aria-label="Open Cart Drawer"
-        className={`fixed right-0 top-[52%] -translate-y-1/2 z-40 flex flex-col items-center justify-center bg-[#00000052] hover:bg-black active:scale-95 text-white px-2 sm:px-2.5 py-3 rounded-l-2xl shadow-2xl border-y border-l border-amber-300/40 cursor-pointer transition-all duration-300 group ${cartBadgeAnimate ? 'scale-110 shadow-amber-500/60 ring-2 ring-white animate-pulse' : ''
-          }`}
-      >
-        <div className="relative mb-1">
-          <ShoppingBag className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
-          {totalItems > 0 && (
-            <span className="absolute -top-1.5 -right-2 bg-black text-[#FAB116] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-xs">
-              {totalItems}
-            </span>
-          )}
-        </div>
-        <div className="text-[10px] font-black text-white leading-tight">
-          {totalItems} Items
-        </div>
-        <div className="text-[9px] font-extrabold text-[#FEF3C7] leading-tight mt-0.5">
-          ৳{totalPrice.toLocaleString('en-US')}
-        </div>
-      </aside>
+      {!pathname.startsWith('/products/') && (
+        <aside
+          onClick={openCart}
+          aria-label="Open Cart Drawer"
+          className={`fixed right-0 top-[52%] -translate-y-1/2 z-40 flex flex-col items-center justify-center bg-[#00000052] hover:bg-black active:scale-95 text-white px-2 sm:px-2.5 py-3 rounded-l-2xl shadow-2xl border-y border-l border-amber-300/40 cursor-pointer transition-all duration-300 group ${cartBadgeAnimate ? 'scale-110 shadow-amber-500/60 ring-2 ring-white animate-pulse' : ''
+            }`}
+        >
+          <div className="relative mb-1">
+            <ShoppingBag className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1.5 -right-2 bg-black text-[#FAB116] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-xs">
+                {totalItems}
+              </span>
+            )}
+          </div>
+          <div className="text-[10px] font-black text-white leading-tight">
+            {totalItems} Items
+          </div>
+          <div className="text-[9px] font-extrabold text-[#FEF3C7] leading-tight mt-0.5">
+            ৳{totalPrice.toLocaleString('en-US')}
+          </div>
+        </aside>
+      )}
 
       {/* ফ্লোটিং কাস্টমার সাপোর্ট বাটনটি এখন интерактив 'হালুম ভাই' AI অ্যাসিস্ট্যান্ট উইজেটে ইন্টিগ্রেটেড */}
 
