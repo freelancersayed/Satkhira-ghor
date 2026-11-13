@@ -27,6 +27,7 @@ export default function HalumAssistantWidget() {
   const [facingLeft, setFacingLeft] = useState(false); // looking towards webpage content
   const [isDragging, setIsDragging] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false); // ALWAYS false by default on mobile!
+  const [isScrollMinimized, setIsScrollMinimized] = useState(false); // Auto-minimize when scrolling down on product routes
   const [isScrolling, setIsScrolling] = useState(false);
   const [isScrollAsking, setIsScrollAsking] = useState(false);
   const [hasTargetOnScreen, setHasTargetOnScreen] = useState(false);
@@ -427,31 +428,36 @@ export default function HalumAssistantWidget() {
     glideTo,
   ]);
 
-  // ── 3. Scroll Listener with Proactive AI Guidance ──
+  // ── 3. Scroll Listener: Auto-Minimize on Product Browsing routes (Requirement 3) ──
+  // User Requirement: "হোম বা /shop পেজে মোবাইল ইউজার যখন প্রোডাক্ট দেখার জন্য নিচে স্ক্রল করবে,
+  // তখন বাঘ মামার স্পিচ বাবল স্বয়ংক্রিয়ভাবে কলাপ্স হয়ে শুধু ছোট মিনিমাইজড আইকন অবস্থায় থাকবে—যেন কোনো প্রোডাক্ট কার্ড বা বাটন ঢেকে না যায়।"
   useEffect(() => {
     let scrollTimer = null;
 
     const handleScroll = () => {
       setIsScrolling(true);
-      setIsScrollAsking(true);
-      if (!hasTargetOnScreen) {
-        setCharacterState('listening');
+
+      const isMobile = window.innerWidth < 640;
+      const isBrowsingRoute =
+        pathname === '/' || pathname === '/shop' || pathname.startsWith('/shop');
+      const scrolledDown = window.scrollY > 80;
+
+      if (isMobile && isBrowsingRoute && scrolledDown) {
+        setIsScrollMinimized(true);
+        setIsScrollAsking(false);
+      } else if (window.scrollY <= 40) {
+        setIsScrollMinimized(false);
       }
 
       clearTimeout(scrollTimer);
       scrollTimer = setTimeout(() => {
         setIsScrolling(false);
-        checkTargetButtons();
-        checkObstruction();
 
-        // Keep asking for assistance for 7 seconds after scrolling stops
-        clearTimeout(scrollAskTimeoutRef.current);
-        scrollAskTimeoutRef.current = setTimeout(() => {
-          setIsScrollAsking(false);
-          if (!hasTargetOnScreen) {
-            setCharacterState('idle');
-          }
-        }, 7000);
+        // When not auto-minimized on browsing route, perform target locator
+        if (!(isMobile && isBrowsingRoute && scrolledDown)) {
+          checkTargetButtons();
+          checkObstruction();
+        }
       }, 250);
     };
 
@@ -461,12 +467,13 @@ export default function HalumAssistantWidget() {
       clearTimeout(scrollTimer);
       clearTimeout(scrollAskTimeoutRef.current);
     };
-  }, [checkTargetButtons, checkObstruction, hasTargetOnScreen]);
+  }, [pathname, checkTargetButtons, checkObstruction]);
 
   // Navigation intelligence - Controlled by Central Route Config
   useEffect(() => {
     if (!mounted) return;
 
+    setIsScrollMinimized(false);
     const config = getHalumConfigForRoute(pathname);
     const targetSide = config.side || 'left';
     setDockSide(targetSide);
@@ -640,6 +647,8 @@ export default function HalumAssistantWidget() {
 
     if (effectiveMinimized) {
       setIsMinimized(false);
+      setIsScrollMinimized(false);
+      setIsChatOpen(true);
       return;
     }
 
@@ -658,7 +667,7 @@ export default function HalumAssistantWidget() {
   }
 
   const shouldAutoHide = isCartDrawerOpen || isModalOpen;
-  const effectiveMinimized = isMinimized;
+  const effectiveMinimized = isMinimized || isScrollMinimized;
 
   return (
     <>

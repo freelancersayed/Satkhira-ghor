@@ -267,9 +267,9 @@ export default function ModernProductShowcase({ initialProducts = [] }) {
               {loopedFlashProducts.map((product, idx) => (
                 <div
                   key={`flash-${product.id || product.slug}-${idx}`}
-                  className="flex-shrink-0 w-[140px] sm:w-[170px] md:w-[195px]"
+                  className="flex-shrink-0 w-[150px] sm:w-[170px] md:w-[195px]"
                 >
-                  <ProductCard product={product} showProgress={true} />
+                  <ProductCard product={product} />
                 </div>
               ))}
             </div>

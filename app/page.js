@@ -2,10 +2,6 @@ import HeroBanner from '@/components/home/HeroBanner';
 import CategorySection from '@/components/home/CategorySection';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
-import Testimonials from '@/components/home/Testimonials';
-import Link from 'next/link';
-import { Sparkles, ArrowRight } from 'lucide-react';
-
 import SpecialBanner from '@/components/home/SpecialBanner';
 
 // Enable ISR (Incremental Static Regeneration) for instant <30ms load time
@@ -26,11 +22,10 @@ export default function HomePage() {
       {/* Organic Heritage Special Banner */}
       <SpecialBanner />
 
-      {/* Why Choose Us */}
+      {/* Real Trust Points: Why Choose Us */}
       <WhyChooseUs />
 
-      {/* Customer Testimonials */}
-      <Testimonials />
+      {/* জেনেরিক টেমপ্লেট কাস্টমার রিভিউ সেকশনটি আসল ক্রেতার রিভিউ যুক্ত না হওয়া পর্যন্ত সাময়িকভাবে হাইড রাখা হলো */}
     </div>
   );
 }

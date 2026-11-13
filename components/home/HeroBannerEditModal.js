@@ -92,10 +92,10 @@ export default function HeroBannerEditModal() {
       secondaryBtnLink: hero.secondaryBtnLink || '/about-us',
       stat1Number: hero.stat1Number || '১০০%',
       stat1Label: hero.stat1Label || 'প্রাকৃতিক ও খাঁটি',
-      stat2Number: hero.stat2Number || '১২,৫০০+',
-      stat2Label: hero.stat2Label || 'সন্তুষ্ট পরিবার',
-      stat3Number: hero.stat3Number || '২৪-৪৮ ঘণ্টা',
-      stat3Label: hero.stat3Label || 'সারাদেশে ডেলিভারি',
+      stat2Number: hero.stat2Number || 'সরাসরি',
+      stat2Label: hero.stat2Label || 'শ্যামনগর ও সাতক্ষীরা থেকে সংগ্রহ',
+      stat3Number: hero.stat3Number || 'ক্যাশ অন ডেলিভারি',
+      stat3Label: hero.stat3Label || 'সারাদেশে হোম ডেলিভারি',
       floatingBadge1Title: hero.floatingBadge1Title || 'ল্যাব টেস্টে পরীক্ষিত',
       floatingBadge1Sub: hero.floatingBadge1Sub || 'শূন্য ভেজাল গ্যারান্টি',
       floatingBadge2Title: hero.floatingBadge2Title || 'খাঁটি গাওয়া ঘি',
@@ -722,14 +722,14 @@ export default function HeroBannerEditModal() {
                         type="text"
                         value={formData.stat2Number}
                         onChange={(e) => setFormData({ ...formData, stat2Number: e.target.value })}
-                        placeholder="স্ট্যাট ২ মান (১২,৫০০+)"
+                        placeholder="স্ট্যাট ২ মান (সরাসরি)"
                         className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                       <input
                         type="text"
                         value={formData.stat2Label}
                         onChange={(e) => setFormData({ ...formData, stat2Label: e.target.value })}
-                        placeholder="স্ট্যাট ২ লেবেল (সন্তুষ্ট পরিবার)"
+                        placeholder="স্ট্যাট ২ লেবেল (শ্যামনগর ও সাতক্ষীরা থেকে সংগ্রহ)"
                         className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                     </div>
