@@ -38,30 +38,9 @@ export default function HalumChatWindow({
     {
       id: 'step-1-welcome',
       sender: 'halum',
-      text: 'হালুম! সুন্দরবনের খাঁটি মধুর দুনিয়ায় আপনাকে স্বাগতম! আমি হালুম মামা—বনের রাজা ও আপনার শপিং গাইড! আজ কোন খাঁটি খাবারটা চেখে দেখবেন? 🐯',
-      products: [
-        {
-          id: 'prod-001',
-          name: 'সুন্দরবনের খাঁটি খলসী ফুলের মধু',
-          slug: 'sundarbans-pure-khalsi-honey',
-          price: 1250,
-          originalPrice: 1450,
-          image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800',
-          unit: '১ কেজি (1 kg)',
-          badge: 'সেরা বিক্রয়',
-        },
-        {
-          id: 'prod-003',
-          name: 'সাতক্ষীরা সুন্দরবন মেগা ফ্যামিলি কম্বো',
-          slug: 'satkhira-sundarbans-mega-family-combo',
-          price: 2450,
-          originalPrice: 2880,
-          image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=800',
-          unit: '৩টি সেরা পণ্য বান্ডেল',
-          badge: '২০০৳ সাশ্রয়',
-        },
-      ],
-      quickReplies: ['🍯 খাঁটি খলসী মধু', '🧈 বিলোনা গাওয়া ঘি', '🎁 মেগা কম্বো প্যাক', '📦 অর্ডার ট্র্যাক'],
+      text: 'হালুম! সুন্দরবনের খাঁটি মধুর দুনিয়ায় আপনাকে স্বাগতম! আমি হালুম মামা—বনের রাজা ও আপনার শপিং গাইড! আজ কোন বিষয়ে সহযোগিতা করতে পারি? 🐯',
+      products: [],
+      quickReplies: ['🍯 খাঁটি মধু', '🧈 বিলোনা গাওয়া ঘি', '🎁 মেগা কম্বো প্যাক', '📦 অর্ডার ট্র্যাক'],
       timestamp: new Date(),
     },
   ]);

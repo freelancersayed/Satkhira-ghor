@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Sparkles, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
-import { categories as fallbackCategories, products } from '@/data/products';
+import { categories as fallbackCategories } from '@/data/products';
 import { useSiteContentStore } from '@/store/siteContentStore';
 import AdminSectionEditModal from '@/components/common/AdminSectionEditModal';
 import CategoryEditModal from '@/components/home/CategoryEditModal';
@@ -12,6 +12,18 @@ import CategoryEditModal from '@/components/home/CategoryEditModal';
 export default function CategorySection() {
   const { content } = useSiteContentStore();
   const catContent = content?.categorySection || {};
+  const [liveProducts, setLiveProducts] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.products)) {
+          setLiveProducts(data.products);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Extract dynamic categories from database, fallback to initial categories
   const categoriesList = useMemo(() => {
@@ -25,7 +37,7 @@ export default function CategorySection() {
 
   // Dynamically compute product counts per category
   const getCategoryCount = (slug) => {
-    return products.filter((p) => p.category === slug).length;
+    return liveProducts.filter((p) => p.category === slug).length;
   };
 
   const toBanglaNum = (num) => {

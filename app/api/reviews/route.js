@@ -5,7 +5,6 @@ import Review from '@/models/Review';
 import Product from '@/models/Product';
 import Order from '@/models/Order';
 import { getSessionUser } from '@/lib/auth';
-import { products as fallbackProducts } from '@/data/products';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,40 +120,6 @@ export async function POST(request) {
     // 3. Try by name
     if (!product && productName) {
       product = await Product.findOne({ name: productName });
-    }
-
-    // 4. If product still not in MongoDB, find in fallbackProducts and auto-seed it into MongoDB!
-    if (!product) {
-      const targetIdentifier = productSlug || productId || productName;
-      const foundFallback = fallbackProducts.find(
-        (p) =>
-          p.slug === targetIdentifier ||
-          p.id === targetIdentifier ||
-          p.name === targetIdentifier
-      );
-
-      if (foundFallback) {
-        product = await Product.create({
-          name: foundFallback.name,
-          nameEn: foundFallback.nameEn || '',
-          slug: foundFallback.slug,
-          category: foundFallback.category,
-          categoryName: foundFallback.categoryName,
-          price: foundFallback.price,
-          originalPrice: foundFallback.originalPrice || null,
-          unit: foundFallback.unit || '১ কেজি',
-          rating: foundFallback.rating || 5.0,
-          reviewCount: foundFallback.reviewCount || 0,
-          stock: foundFallback.stock || 20,
-          badge: foundFallback.badge || '',
-          badgeType: foundFallback.badgeType || 'forest',
-          image: foundFallback.image,
-          images: foundFallback.images || [foundFallback.image],
-          shortDescription: foundFallback.shortDescription || '',
-          description: foundFallback.description || '',
-          origin: foundFallback.origin || 'সাতক্ষীরা',
-        });
-      }
     }
 
     if (!product) {

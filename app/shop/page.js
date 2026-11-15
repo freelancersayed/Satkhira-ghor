@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
-import { products, categories } from '@/data/products';
+import { categories } from '@/data/products';
 import ProductGrid from '@/components/product/ProductGrid';
 
 function ShopContent() {
@@ -14,9 +14,9 @@ function ShopContent() {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [sortBy, setSortBy] = useState('featured');
-  const [productList, setProductList] = useState(products);
+  const [productList, setProductList] = useState([]);
   const [categoriesList, setCategoriesList] = useState(categories);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Sync state if URL query params change
   useEffect(() => {
@@ -27,19 +27,21 @@ function ShopContent() {
   }, [searchParams]);
 
   useEffect(() => {
+    setLoading(true);
     fetch('/api/products')
       .then((res) => res.json())
       .then((data) => {
-        if (data.products && data.products.length > 0) {
+        if (data && Array.isArray(data.products)) {
           setProductList(data.products);
         }
       })
-      .catch((e) => console.warn('Products fetch error:', e));
+      .catch((e) => console.warn('Products fetch error:', e))
+      .finally(() => setLoading(false));
 
     fetch('/api/categories')
       .then((res) => res.json())
       .then((data) => {
-        if (data.categories && data.categories.length > 0) {
+        if (data && Array.isArray(data.categories) && data.categories.length > 0) {
           setCategoriesList(data.categories);
         }
       })

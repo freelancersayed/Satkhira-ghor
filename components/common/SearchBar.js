@@ -5,13 +5,23 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Search, X, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
-import { products } from '@/data/products';
-
 export default function SearchBar({ isMobile = false, onCloseMobile }) {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [productList, setProductList] = useState([]);
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.products)) {
+          setProductList(data.products);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const popularSearches = [
     'সুন্দরবনের মধু',
@@ -27,7 +37,7 @@ export default function SearchBar({ isMobile = false, onCloseMobile }) {
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) return [];
 
-    return products
+    return productList
       .filter((p) => {
         return (
           p.name?.toLowerCase().includes(trimmed) ||
@@ -37,7 +47,7 @@ export default function SearchBar({ isMobile = false, onCloseMobile }) {
         );
       })
       .slice(0, 6);
-  }, [query]);
+  }, [query, productList]);
 
   // Click outside listener to close search dropdown
   useEffect(() => {

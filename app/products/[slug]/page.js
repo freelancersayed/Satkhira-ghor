@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { products } from '@/data/products';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import Review from '@/models/Review';
@@ -41,7 +40,7 @@ async function getProductBySlug(slug) {
   } catch (e) {
     // fallback
   }
-  return products.find((p) => p.slug === slug) || null;
+  return null;
 }
 
 async function getProductReviewsSummary(productId, productSlug) {
@@ -67,9 +66,15 @@ async function getProductReviewsSummary(productId, productSlug) {
 }
 
 export async function generateStaticParams() {
-  return products.map((product) => ({
-    slug: product.slug,
-  }));
+  try {
+    await connectToDatabase();
+    const prods = await Product.find({ isDeleted: { $ne: true } }, { slug: 1 }).lean();
+    return (prods || []).map((product) => ({
+      slug: product.slug,
+    }));
+  } catch (e) {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }) {
@@ -104,14 +109,23 @@ export default async function ProductDetailPage({ params }) {
     product.slug
   );
 
-  // Related products (prefer same category, fallback to others)
-  const relatedSameCat = products.filter(
-    (p) => p.category === product.category && p.slug !== product.slug
-  );
-  const relatedOther = products.filter(
-    (p) => p.category !== product.category && p.slug !== product.slug
-  );
-  const relatedProducts = [...relatedSameCat, ...relatedOther].slice(0, 4);
+  // Related products from MongoDB database
+  let relatedProducts = [];
+  try {
+    const relatedDb = await Product.find({
+      isDeleted: { $ne: true },
+      slug: { $ne: product.slug },
+    })
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .lean();
+    if (relatedDb && relatedDb.length > 0) {
+      relatedProducts = JSON.parse(JSON.stringify(relatedDb)).map((p) => ({
+        ...p,
+        id: p._id ? String(p._id) : p.slug,
+      }));
+    }
+  } catch (e) {}
 
   const hasOrigin = Boolean(product.origin && String(product.origin).trim());
   const hasHarvestDate = Boolean(

@@ -26,13 +26,14 @@ import {
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { useSiteContentStore } from '@/store/siteContentStore';
-import { products, categories } from '@/data/products';
+import { categories } from '@/data/products';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const router = useRouter();
 
   const [mounted, setMounted] = useState(false);
+  const [productList, setProductList] = useState([]);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [chatModalOpen, setChatModalOpen] = useState(false);
@@ -108,6 +109,18 @@ export default function MobileBottomNav() {
     ? items.reduce((sum, item) => sum + item.quantity, 0)
     : 0;
 
+  // Fetch live products for search
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.products)) {
+          setProductList(data.products);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const totalPrice = mounted
     ? items.reduce((sum, item) => sum + item.price * item.quantity, 0)
     : 0;
@@ -116,7 +129,7 @@ export default function MobileBottomNav() {
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return [];
-    return products
+    return productList
       .filter((p) => {
         return (
           p.name?.toLowerCase().includes(q) ||
@@ -126,7 +139,7 @@ export default function MobileBottomNav() {
         );
       })
       .slice(0, 8);
-  }, [searchQuery]);
+  }, [searchQuery, productList]);
 
   const popularSearches = [
     'সুন্দরবনের মধু',

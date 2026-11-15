@@ -1,4 +1,3 @@
-import { products as fallbackProducts } from '@/data/products';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import ModernProductShowcase from '@/components/home/ModernProductShowcase';
@@ -8,7 +7,6 @@ export default async function FeaturedProducts() {
 
   try {
     await connectToDatabase();
-    // Fast lean query with projection
     const dbProducts = await Product.find({ isDeleted: { $ne: true } })
       .sort({ createdAt: -1 })
       .limit(24)
@@ -22,24 +20,9 @@ export default async function FeaturedProducts() {
         id: p._id ? String(p._id) : p.slug,
       }));
     }
-
-    // Only query deleted slugs to avoid resurrecting them from fallbacks
-    const deletedInDb = await Product.find({ isDeleted: true }, { slug: 1 }).lean();
-    const blockedSlugs = new Set(deletedInDb.map((p) => p.slug));
-
-    for (const fb of fallbackProducts) {
-      if (!blockedSlugs.has(fb.slug) && !displayProducts.some((p) => p.slug === fb.slug)) {
-        displayProducts.push(fb);
-      }
-    }
   } catch (e) {
     console.warn('Failed to load featured products from DB:', e.message);
-    displayProducts = [...fallbackProducts];
-  }
-
-  // Ensure we at least have fallback products if DB returned empty
-  if (displayProducts.length === 0) {
-    displayProducts = [...fallbackProducts];
+    displayProducts = [];
   }
 
   return (

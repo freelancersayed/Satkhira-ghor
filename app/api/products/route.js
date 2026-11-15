@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/auth';
-import { products as fallbackProducts } from '@/data/products';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,30 +35,10 @@ export async function GET(request) {
       id: p._id ? p._id.toString() : p.slug,
     }));
 
-    // Only query deleted slugs (extremely lightweight)
-    const deletedDocs = await Product.find({ isDeleted: true }, { slug: 1 }).lean();
-    const blockedSlugs = new Set(deletedDocs.map((p) => p.slug));
-
-    const matchingFallbacks = fallbackProducts.filter((fb) => {
-      if (blockedSlugs.has(fb.slug)) return false;
-      if (category && category !== 'all' && fb.category !== category) return false;
-      if (search) {
-        const s = search.toLowerCase();
-        const matches =
-          fb.name?.toLowerCase().includes(s) ||
-          fb.nameEn?.toLowerCase().includes(s) ||
-          fb.shortDescription?.toLowerCase().includes(s);
-        if (!matches) return false;
-      }
-      return true;
-    });
-
-    const finalProducts = [...formattedProducts, ...matchingFallbacks];
-
     return NextResponse.json(
       {
-        products: finalProducts,
-        source: dbProducts.length > 0 ? 'database' : 'fallback',
+        products: formattedProducts,
+        source: 'database',
       },
       {
         headers: {
@@ -68,11 +47,11 @@ export async function GET(request) {
       }
     );
   } catch (error) {
-    console.warn('MongoDB products fetch error, using fallback:', error.message);
+    console.warn('MongoDB products fetch error:', error.message);
     return NextResponse.json({
-      products: fallbackProducts,
-      source: 'fallback',
-      warning: 'ডাটাবেজ কানেক্ট হতে পারেনি, ডিফল্ট ডাটা দেখানো হচ্ছে।',
+      products: [],
+      source: 'database',
+      error: 'ডাটাবেজ কানেক্ট হতে পারেনি।',
     });
   }
 }

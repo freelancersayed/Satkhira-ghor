@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireManagerOrAdmin } from '@/lib/auth';
-import { products as fallbackProducts } from '@/data/products';
 
 export async function GET(request, { params }) {
   try {

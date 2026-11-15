@@ -181,9 +181,9 @@ export default function ModernProductShowcase({ initialProducts = [] }) {
     <div className="space-y-12 sm:space-y-16">
       {/* =========================================================================
           SECTION 1: DARAZ-STYLE FLASH SALE / আজকের ধামাকা অফার (Auto-Swipe Carousel)
-          (Only shown if enabled by admin; admin can edit/customize/delete)
+          (Only shown if enabled by admin and products exist)
       ========================================================================= */}
-      {isFlashSaleEnabled && (
+      {isFlashSaleEnabled && flashSaleProducts.length > 0 && (
         <div className="bg-gradient-to-br from-[#FFFBEB] via-[#FEF3C7]/40 to-white rounded-3xl p-4 sm:p-7 border border-[#FDE68A]/80 shadow-sm relative overflow-hidden">
           {/* Decorative background glow */}
           <div className="absolute top-0 right-0 w-72 h-72 bg-amber-300/10 rounded-full blur-3xl pointer-events-none" />
