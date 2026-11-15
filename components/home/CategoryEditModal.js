@@ -15,9 +15,13 @@ import {
   Check,
   Image as ImageIcon,
   ExternalLink,
+  ArrowUp,
+  ArrowDown,
+  Smartphone,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useSiteContentStore } from '@/store/siteContentStore';
+import ImageUploadInput from '@/components/common/ImageUploadInput';
 
 export default function CategoryEditModal({ onCategoriesUpdated }) {
   const { user } = useAuthStore();
@@ -27,6 +31,7 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
   const [activeTab, setActiveTab] = useState('list'); // 'list' | 'add'
   const [categoriesList, setCategoriesList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [reordering, setReordering] = useState(false);
   const [uploadingSlug, setUploadingSlug] = useState(null);
   const [notification, setNotification] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -40,16 +45,19 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
     image: '',
     description: '',
   });
-  const [uploadingNewImage, setUploadingNewImage] = useState(false);
-  const newFileInputRef = useRef(null);
+
   const editFileInputRef = useRef(null);
   const activeEditSlugRef = useRef(null);
 
   // Only admins can see and edit
   if (!user || user.role !== 'admin') return null;
 
+  const toBanglaNum = (num) => {
+    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    return String(num).replace(/\d/g, (d) => bnDigits[d]);
+  };
+
   const handleOpen = () => {
-    // Read categories from siteContentStore or fetch
     const current = Array.isArray(content?.categories) && content.categories.length > 0
       ? content.categories
       : [];
@@ -86,7 +94,7 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
     return data.url;
   };
 
-  // Handle image upload for an existing category
+  // Handle image upload for an existing category from gallery/device
   const handleEditImageUpload = async (e) => {
     const file = e.target.files?.[0];
     const slug = activeEditSlugRef.current;
@@ -97,22 +105,19 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
       setErrorMsg('');
       const url = await uploadImageFile(file);
       if (url) {
-        // Update local list
         const updated = categoriesList.map((c) => (c.slug === slug ? { ...c, image: url } : c));
         setCategoriesList(updated);
 
-        // Save to DB
         await fetch('/api/categories', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ slug, image: url }),
         });
 
-        // Update global store
         updateSection('categories', updated);
         if (onCategoriesUpdated) onCategoriesUpdated(updated);
 
-        setNotification('ছবি সফলভাবে পরিবর্তন ও সেভ হয়েছে!');
+        setNotification('গ্যালারি থেকে ছবি সফলভাবে পরিবর্তন ও সেভ হয়েছে!');
         setTimeout(() => setNotification(''), 3000);
       }
     } catch (err) {
@@ -123,26 +128,56 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
     }
   };
 
-  // Handle image upload for new category
-  const handleNewImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  // Save reordered category list
+  const saveReorderedCategories = async (updatedList, successMsg = 'ক্যাটাগরির সিরিয়াল সফলভাবে সেভ হয়েছে!') => {
     try {
-      setUploadingNewImage(true);
+      setReordering(true);
       setErrorMsg('');
-      const url = await uploadImageFile(file);
-      if (url) {
-        setNewCat((prev) => ({ ...prev, image: url }));
-        setNotification('নতুন ক্যাটাগরির ছবি আপলোড সম্পন্ন!');
-        setTimeout(() => setNotification(''), 3000);
-      }
+      const res = await fetch('/api/categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categories: updatedList }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'সিরিয়াল সংরক্ষণ ব্যর্থ');
+
+      updateSection('categories', updatedList);
+      if (onCategoriesUpdated) onCategoriesUpdated(updatedList);
+      setNotification(successMsg);
+      setTimeout(() => setNotification(''), 2500);
     } catch (err) {
-      setErrorMsg(err.message || 'ছবি আপলোড ব্যর্থ');
+      setErrorMsg(err.message || 'সিরিয়াল আপডেট করতে সমস্যা হয়েছে');
     } finally {
-      setUploadingNewImage(false);
-      e.target.value = '';
+      setReordering(false);
     }
+  };
+
+  const handleMoveUp = async (slug) => {
+    const index = categoriesList.findIndex((c) => c.slug === slug || c.id === slug);
+    if (index <= 0) return;
+    if (index === 1 && (categoriesList[0]?.slug === 'all' || categoriesList[0]?.id === 'all')) return;
+
+    const updated = [...categoriesList];
+    const temp = updated[index];
+    updated[index] = updated[index - 1];
+    updated[index - 1] = temp;
+
+    setCategoriesList(updated);
+    await saveReorderedCategories(updated, `"${temp.name}" উপরে (সিরিয়ালে আগে) নেওয়া হয়েছে!`);
+  };
+
+  const handleMoveDown = async (slug) => {
+    const index = categoriesList.findIndex((c) => c.slug === slug || c.id === slug);
+    if (index < 0 || index >= categoriesList.length - 1) return;
+    if (index === 0 && (categoriesList[0]?.slug === 'all' || categoriesList[0]?.id === 'all')) return;
+
+    const updated = [...categoriesList];
+    const temp = updated[index];
+    updated[index] = updated[index + 1];
+    updated[index + 1] = temp;
+
+    setCategoriesList(updated);
+    await saveReorderedCategories(updated, `"${temp.name}" নিচে (সিরিয়ালে পরে) নেওয়া হয়েছে!`);
   };
 
   // Update a single category field in local state
@@ -206,11 +241,11 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
     }
   };
 
-  // Submit New Category
+  // Create new category
   const handleCreateCategory = async (e) => {
     e.preventDefault();
     if (!newCat.name.trim()) {
-      setErrorMsg('ক্যাটাগরির বাংলা নাম লিখুন');
+      setErrorMsg('ক্যাটাগরির বাংলা নাম আবশ্যক');
       return;
     }
 
@@ -247,6 +282,8 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
     }
   };
 
+  const hasAllAtZero = categoriesList[0]?.slug === 'all' || categoriesList[0]?.id === 'all';
+
   return (
     <>
       {/* ── Trigger Button for Admin ── */}
@@ -254,10 +291,10 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
         type="button"
         onClick={handleOpen}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#016831] text-white hover:bg-[#015629] text-xs font-bold shadow-sm transition-all hover:scale-105 active:scale-95"
-        title="ক্যাটাগরি যোগ ও ছবি এডিট করুন"
+        title="ক্যাটাগরি যোগ, ছবি এডিট ও সিরিয়াল পরিবর্তন করুন"
       >
         <FolderPlus className="w-3.5 h-3.5 text-[#F59E0B]" />
-        <span>ক্যাটাগরি ম্যানেজ</span>
+        <span>ক্যাটাগরি কন্ট্রোল</span>
       </button>
 
       {/* Hidden File Input for Editing Category Image */}
@@ -283,11 +320,11 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
                   <h3 className="text-base font-extrabold text-white flex items-center gap-2">
                     <span>ডাইনামিক ক্যাটাগরি কন্ট্রোল</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F59E0B] text-slate-950 font-black">
-                      এডমিন
+                      অ্যাডমিন
                     </span>
                   </h3>
                   <p className="text-[11px] text-white/70">
-                    নতুন ক্যাটাগরি যোগ করুন, বিদ্যমান ক্যাটাগরির লোগো/ছবি পরিবর্তন করুন
+                    নতুন ক্যাটাগরি তৈরি, গ্যালারি থেকে ছবি আপলোড এবং ⬆️ ⬇️ তীর চেপে সিরিয়াল পরিবর্তন করুন
                   </p>
                 </div>
               </div>
@@ -317,32 +354,41 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
             )}
 
             {/* Tabs */}
-            <div className="flex items-center gap-2 px-5 pt-3 bg-white border-b border-[#E8E2D5]">
-              <button
-                type="button"
-                onClick={() => setActiveTab('list')}
-                className={`px-4 py-2 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 ${
-                  activeTab === 'list'
-                    ? 'border-[#016831] text-[#016831]'
-                    : 'border-transparent text-[#8E9C96] hover:text-[#016831]'
-                }`}
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-                <span>ক্যাটাগরি তালিকা ও ছবি পরিবর্তন ({categoriesList.length})</span>
-              </button>
+            <div className="flex items-center justify-between px-5 pt-3 bg-white border-b border-[#E8E2D5]">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('list')}
+                  className={`px-4 py-2 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 ${
+                    activeTab === 'list'
+                      ? 'border-[#016831] text-[#016831]'
+                      : 'border-transparent text-[#8E9C96] hover:text-[#016831]'
+                  }`}
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  <span>ক্যাটাগরি সিরিয়াল ও এডিট ({categoriesList.length})</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => setActiveTab('add')}
-                className={`px-4 py-2 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 ${
-                  activeTab === 'add'
-                    ? 'border-[#016831] text-[#016831]'
-                    : 'border-transparent text-[#8E9C96] hover:text-[#016831]'
-                }`}
-              >
-                <Plus className="w-3.5 h-3.5 text-[#D97706]" />
-                <span>নতুন ক্যাটাগরি যোগ করুন</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('add')}
+                  className={`px-4 py-2 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 ${
+                    activeTab === 'add'
+                      ? 'border-[#016831] text-[#016831]'
+                      : 'border-transparent text-[#8E9C96] hover:text-[#016831]'
+                  }`}
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#D97706]" />
+                  <span>নতুন ক্যাটাগরি যোগ করুন</span>
+                </button>
+              </div>
+
+              {reordering && (
+                <span className="text-[11px] text-[#016831] font-bold flex items-center gap-1 animate-pulse">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>সিরিয়াল সেভ হচ্ছে...</span>
+                </span>
+              )}
             </div>
 
             {/* Modal Body */}
@@ -350,36 +396,104 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
               {/* TAB 1: CATEGORIES LIST & IMAGE EDITING */}
               {activeTab === 'list' && (
                 <div className="space-y-3">
-                  <p className="text-xs text-[#56625D]">
-                    💡 প্রতিটি ক্যাটাগরির ছবি সরাসরি পরিবর্তন করতে <strong>&ldquo;ছবি পরিবর্তন&rdquo;</strong> বাটনে ক্লিক করে ফাইল আপলোড করুন:
-                  </p>
+                  <div className="bg-[#FEF3C7]/60 border border-[#FDE68A] p-2.5 rounded-xl text-xs text-amber-950 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span>💡</span>
+                      <span>
+                        হোমপেজ ও শপ পেজে ক্যাটাগরি আগে বা পরে নিতে কার্ডের <strong>⬆️ ⬇️</strong> তীর বাটন ব্যবহার করুন।
+                      </span>
+                    </span>
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    {categoriesList.map((cat) => {
+                    {categoriesList.map((cat, idx) => {
                       const isUploadingThis = uploadingSlug === cat.slug;
+                      const actualIndex = idx;
+                      const isUpDisabled = actualIndex <= (hasAllAtZero ? 1 : 0);
+                      const isDownDisabled = actualIndex >= categoriesList.length - 1 || (actualIndex === 0 && hasAllAtZero);
+                      const serialNumber = hasAllAtZero ? actualIndex : actualIndex + 1;
+
                       return (
                         <div
                           key={cat.slug || cat.id}
-                          className="bg-white p-3.5 rounded-2xl border border-[#E8E2D5] shadow-xs flex flex-col justify-between space-y-3"
+                          className="bg-white p-3.5 rounded-2xl border border-[#E8E2D5] shadow-xs flex flex-col justify-between space-y-3 hover:border-[#016831]/40 transition-colors"
                         >
+                          {/* Card Header: Serial Number & Up/Down Arrows */}
+                          <div className="flex items-center justify-between pb-2 border-b border-[#F0EBE1]">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]">
+                                {cat.slug === 'all' ? 'সব পণ্য (ডিফল্ট)' : `সিরিয়াল #${toBanglaNum(serialNumber)}`}
+                              </span>
+                              {cat.slug !== 'all' && (
+                                <span className="text-[10px] text-stone-400 hidden xs:inline">ক্রম</span>
+                              )}
+                            </div>
+
+                            {/* Up / Down Reorder Arrows */}
+                            {cat.slug !== 'all' && (
+                              <div className="flex items-center gap-1 bg-[#FAF8F5] p-0.5 rounded-lg border border-[#E8E2D5]">
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveUp(cat.slug)}
+                                  disabled={isUpDisabled || reordering || loading}
+                                  className="p-1 rounded-md text-stone-700 hover:bg-[#016831] hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                                  title="উপরে নিন (সিরিয়ালে আগে)"
+                                >
+                                  <ArrowUp className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveDown(cat.slug)}
+                                  disabled={isDownDisabled || reordering || loading}
+                                  className="p-1 rounded-md text-stone-700 hover:bg-[#016831] hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                                  title="নিচে নিন (সিরিয়ালে পরে)"
+                                >
+                                  <ArrowDown className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
                           <div className="flex items-start gap-3">
                             {/* Category Image with Change Button */}
-                            <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 flex-shrink-0 border border-[#E8E2D5] group/img">
-                              {cat.image ? (
-                                <Image
-                                  src={cat.image}
-                                  alt={cat.name}
-                                  fill
-                                  className="object-cover"
-                                  sizes="80px"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-2xl">
-                                  {cat.icon || '🌿'}
-                                </div>
-                              )}
+                            <div className="flex flex-col items-center flex-shrink-0">
+                              <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 border border-[#E8E2D5] group/img">
+                                {cat.image ? (
+                                  <Image
+                                    src={cat.image}
+                                    alt={cat.name}
+                                    fill
+                                    className="object-cover"
+                                    sizes="80px"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-2xl">
+                                    {cat.icon || '🌿'}
+                                  </div>
+                                )}
 
-                              {/* Upload Overlay Button */}
+                                {/* Upload Overlay Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    activeEditSlugRef.current = cat.slug;
+                                    editFileInputRef.current?.click();
+                                  }}
+                                  disabled={isUploadingThis}
+                                  className="absolute inset-0 bg-black/60 text-white text-[10px] font-bold flex flex-col items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity"
+                                  title="নতুন ছবি আপলোড করুন"
+                                >
+                                  {isUploadingThis ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <Upload className="w-4 h-4 mb-0.5" />
+                                      <span>ছবি পাল্টান</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+
                               <button
                                 type="button"
                                 onClick={() => {
@@ -387,17 +501,11 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
                                   editFileInputRef.current?.click();
                                 }}
                                 disabled={isUploadingThis}
-                                className="absolute inset-0 bg-black/60 text-white text-[10px] font-bold flex flex-col items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity"
-                                title="নতুন ছবি আপলোড করুন"
+                                className="text-[10px] text-[#016831] font-bold hover:underline flex items-center gap-1 mt-1.5"
+                                title="গ্যালারি থেকে ছবি আপলোড"
                               >
-                                {isUploadingThis ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <>
-                                    <Upload className="w-4 h-4 mb-0.5" />
-                                    <span>ছবি পাল্টান</span>
-                                  </>
-                                )}
+                                <Smartphone className="w-3 h-3 text-[#D97706]" />
+                                <span>গ্যালারি ছবি</span>
                               </button>
                             </div>
 
@@ -476,7 +584,7 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
                 </div>
               )}
 
-              {/* TAB 2: ADD NEW CATEGORY */}
+              {/* TAB 2: ADD NEW CATEGORY WITH DIRECT GALLERY UPLOAD */}
               {activeTab === 'add' && (
                 <form onSubmit={handleCreateCategory} className="bg-white p-5 rounded-2xl border border-[#E8E2D5] space-y-4 max-w-xl mx-auto">
                   <div className="flex items-center gap-2 pb-2 border-b border-[#E8E2D5]">
@@ -549,58 +657,16 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
                     </div>
                   </div>
 
-                  {/* Image Upload Area */}
-                  <div>
-                    <label className="block text-xs font-bold text-[#016831] mb-1">
-                      ক্যাটাগরির ছবি / লোগো
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-stone-100 border border-[#E8E2D5] flex-shrink-0">
-                        {newCat.image ? (
-                          <Image
-                            src={newCat.image}
-                            alt="Preview"
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xl text-stone-400">
-                            {newCat.icon || '📷'}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex-1 space-y-2">
-                        <input
-                          ref={newFileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={handleNewImageUpload}
-                          className="hidden"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => newFileInputRef.current?.click()}
-                          disabled={uploadingNewImage}
-                          className="px-3.5 py-1.5 rounded-xl bg-[#016831] text-white hover:bg-[#015629] text-xs font-bold flex items-center gap-1.5 transition-colors"
-                        >
-                          {uploadingNewImage ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <Upload className="w-3.5 h-3.5" />
-                          )}
-                          <span>কম্পিউটার/মোবাইল থেকে আপলোড</span>
-                        </button>
-
-                        <input
-                          type="text"
-                          value={newCat.image}
-                          onChange={(e) => setNewCat({ ...newCat, image: e.target.value })}
-                          placeholder="অথবা সরাসরি ছবির URL লিঙ্ক দিন"
-                          className="w-full px-3 py-1.5 text-xs border rounded-xl bg-[#FAF8F5] focus:outline-none focus:border-[#016831]"
-                        />
-                      </div>
-                    </div>
+                  {/* Direct Gallery Image Upload Component with Instant Preview & Drag-Drop */}
+                  <div className="pt-1">
+                    <ImageUploadInput
+                      value={newCat.image}
+                      onChange={(url) => setNewCat((prev) => ({ ...prev, image: url }))}
+                      label="ক্যাটাগরি ছবি / ব্যানার (গ্যালারি থেকে সিলেক্ট করুন)"
+                      required={false}
+                      helpText="মোবাইল গ্যালারি বা কম্পিউটার ফাইল থেকে সরাসরি ছবি আপলোড করুন (JPG, PNG, WEBP)"
+                      allowUrlPaste={true}
+                    />
                   </div>
 
                   <div>
@@ -626,7 +692,7 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
                     </button>
                     <button
                       type="submit"
-                      disabled={loading || uploadingNewImage}
+                      disabled={loading}
                       className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#F59E0B] to-[#D97706] hover:from-[#D97706] hover:to-[#B45309] text-slate-950 text-xs font-black shadow-md flex items-center gap-1.5 transition-all"
                     >
                       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}

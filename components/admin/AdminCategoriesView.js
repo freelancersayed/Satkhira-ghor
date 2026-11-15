@@ -14,13 +14,19 @@ import {
   Search,
   Sparkles,
   ExternalLink,
+  ArrowUp,
+  ArrowDown,
+  Smartphone,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useSiteContentStore } from '@/store/siteContentStore';
+import ImageUploadInput from '@/components/common/ImageUploadInput';
 
 export default function AdminCategoriesView() {
   const { content, updateSection } = useSiteContentStore();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [reordering, setReordering] = useState(false);
   const [uploadingSlug, setUploadingSlug] = useState(null);
   const [notification, setNotification] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -36,11 +42,9 @@ export default function AdminCategoriesView() {
     image: '',
     description: '',
   });
-  const [uploadingNewImage, setUploadingNewImage] = useState(false);
 
   const editFileInputRef = useRef(null);
   const activeEditSlugRef = useRef(null);
-  const newFileInputRef = useRef(null);
 
   useEffect(() => {
     fetchCategories();
@@ -90,7 +94,7 @@ export default function AdminCategoriesView() {
         });
 
         updateSection('categories', updated);
-        setNotification('ছবি সফলভাবে পরিবর্তন ও সংরক্ষণ হয়েছে!');
+        setNotification('গ্যালারি থেকে ছবি সফলভাবে আপডেট ও সেভ হয়েছে!');
         setTimeout(() => setNotification(''), 3000);
       }
     } catch (err) {
@@ -101,31 +105,66 @@ export default function AdminCategoriesView() {
     }
   };
 
-  const handleNewImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploadingNewImage(true);
-      setErrorMsg('');
-      const url = await uploadFile(file);
-      if (url) {
-        setNewCat((prev) => ({ ...prev, image: url }));
-        setNotification('ছবি সফলভাবে আপলোড হয়েছে!');
-        setTimeout(() => setNotification(''), 3000);
-      }
-    } catch (err) {
-      setErrorMsg(err.message || 'ছবি আপলোড ব্যর্থ');
-    } finally {
-      setUploadingNewImage(false);
-      e.target.value = '';
-    }
-  };
-
   const handleFieldChange = (slug, field, value) => {
     setCategories((prev) =>
       prev.map((c) => (c.slug === slug ? { ...c, [field]: value } : c))
     );
+  };
+
+  const toBanglaNum = (num) => {
+    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    return String(num).replace(/\d/g, (d) => bnDigits[d]);
+  };
+
+  // Save full reordered list
+  const saveReorderedCategories = async (updatedList, successMsg = 'ক্যাটাগরির সিরিয়াল সফলভাবে সেভ হয়েছে!') => {
+    try {
+      setReordering(true);
+      setErrorMsg('');
+      const res = await fetch('/api/categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categories: updatedList }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'সিরিয়াল সংরক্ষণ ব্যর্থ');
+
+      updateSection('categories', updatedList);
+      setNotification(successMsg);
+      setTimeout(() => setNotification(''), 2500);
+    } catch (err) {
+      setErrorMsg(err.message || 'সিরিয়াল আপডেট করতে সমস্যা হয়েছে');
+    } finally {
+      setReordering(false);
+    }
+  };
+
+  const handleMoveUp = async (slug) => {
+    const index = categories.findIndex((c) => c.slug === slug || c.id === slug);
+    if (index <= 0) return;
+    if (index === 1 && (categories[0]?.slug === 'all' || categories[0]?.id === 'all')) return;
+
+    const updated = [...categories];
+    const temp = updated[index];
+    updated[index] = updated[index - 1];
+    updated[index - 1] = temp;
+
+    setCategories(updated);
+    await saveReorderedCategories(updated, `"${temp.name}" উপরে (সিরিয়ালে আগে) নেওয়া হয়েছে!`);
+  };
+
+  const handleMoveDown = async (slug) => {
+    const index = categories.findIndex((c) => c.slug === slug || c.id === slug);
+    if (index < 0 || index >= categories.length - 1) return;
+    if (index === 0 && (categories[0]?.slug === 'all' || categories[0]?.id === 'all')) return;
+
+    const updated = [...categories];
+    const temp = updated[index];
+    updated[index] = updated[index + 1];
+    updated[index + 1] = temp;
+
+    setCategories(updated);
+    await saveReorderedCategories(updated, `"${temp.name}" নিচে (সিরিয়ালে পরে) নেওয়া হয়েছে!`);
   };
 
   const handleSaveCategory = async (cat) => {
@@ -223,9 +262,11 @@ export default function AdminCategoriesView() {
     );
   });
 
+  const hasAllAtZero = categories[0]?.slug === 'all' || categories[0]?.id === 'all';
+
   return (
     <div className="space-y-6">
-      {/* Hidden file input */}
+      {/* Hidden file input for editing category thumbnail from gallery/device */}
       <input
         ref={editFileInputRef}
         type="file"
@@ -242,7 +283,7 @@ export default function AdminCategoriesView() {
             <span>ডাইনামিক ক্যাটাগরি ম্যানেজমেন্ট</span>
           </h2>
           <p className="text-xs text-stone-500 mt-0.5">
-            নতুন ক্যাটাগরি যোগ করুন এবং প্রতিটি ক্যাটাগরির লোগো/ছবি ও তথ্য সরাসরি পরিবর্তন করুন
+            নতুন ক্যাটাগরি যোগ করুন, গ্যালারি থেকে ছবি আপলোড করুন এবং ⬆️ ⬇️ তীর চেপে সিরিয়াল/ক্রম পরিবর্তন করুন
           </p>
         </div>
 
@@ -269,6 +310,22 @@ export default function AdminCategoriesView() {
         </div>
       </div>
 
+      {/* Reorder Guide Banner */}
+      <div className="bg-[#FEF3C7]/60 border border-[#FDE68A] p-3 rounded-2xl flex items-center justify-between text-xs text-amber-950">
+        <span className="flex items-center gap-2 font-medium">
+          <span className="text-base">💡</span>
+          <span>
+            প্রতিটি ক্যাটাগরি কার্ডের <strong>⬆️ ⬇️</strong> তীর বাটন চেপে ওয়েবসাইট এবং শপ পেজে ক্যাটাগরির সিরিয়াল বা ডিসপ্লে ক্রম পরিবর্তন করতে পারেন।
+          </span>
+        </span>
+        {reordering && (
+          <span className="flex items-center gap-1 text-[11px] font-bold text-[#016831] animate-pulse">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <span>সিরিয়াল সেভ হচ্ছে...</span>
+          </span>
+        )}
+      </div>
+
       {/* Notifications */}
       {notification && (
         <div className="bg-emerald-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm animate-fadeIn">
@@ -287,27 +344,91 @@ export default function AdminCategoriesView() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredCategories.map((cat) => {
           const isUploading = uploadingSlug === cat.slug;
+          const actualIndex = categories.findIndex((c) => c.slug === cat.slug || c.id === cat.id);
+          const isUpDisabled = actualIndex <= (hasAllAtZero ? 1 : 0);
+          const isDownDisabled = actualIndex >= categories.length - 1 || (actualIndex === 0 && hasAllAtZero);
+          const serialNumber = hasAllAtZero ? actualIndex : actualIndex + 1;
+
           return (
             <div
               key={cat.slug || cat.id}
               className="bg-white rounded-2xl border border-[#E8E2D5] shadow-xs hover:border-[#016831]/40 p-4 flex flex-col justify-between space-y-3 transition-colors"
             >
+              {/* Card Header: Serial Number & Up/Down Arrows */}
+              <div className="flex items-center justify-between pb-2 border-b border-[#F0EBE1]">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]">
+                    {cat.slug === 'all' ? 'সব পণ্য (ডিফল্ট)' : `সিরিয়াল #${toBanglaNum(serialNumber)}`}
+                  </span>
+                  {cat.slug !== 'all' && (
+                    <span className="text-[10px] text-stone-400 hidden xs:inline">ক্রমরীতি</span>
+                  )}
+                </div>
+
+                {/* Up / Down Reorder Arrows */}
+                {cat.slug !== 'all' && (
+                  <div className="flex items-center gap-1 bg-[#FAF8F5] p-0.5 rounded-lg border border-[#E8E2D5]">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveUp(cat.slug)}
+                      disabled={isUpDisabled || reordering || loading}
+                      className="p-1 rounded-md text-stone-700 hover:bg-[#016831] hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                      title="উপরে নিন (সিরিয়ালে আগে)"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMoveDown(cat.slug)}
+                      disabled={isDownDisabled || reordering || loading}
+                      className="p-1 rounded-md text-stone-700 hover:bg-[#016831] hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                      title="নিচে নিন (সিরিয়ালে পরে)"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Main Content Row */}
               <div className="flex items-start gap-3">
                 {/* Category Thumbnail with Upload Button */}
-                <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 border border-[#E8E2D5] flex-shrink-0 group/thumb">
-                  {cat.image ? (
-                    <Image
-                      src={cat.image}
-                      alt={cat.name}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl">
-                      {cat.icon || '🌿'}
-                    </div>
-                  )}
+                <div className="flex flex-col items-center flex-shrink-0">
+                  <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 border border-[#E8E2D5] group/thumb">
+                    {cat.image ? (
+                      <Image
+                        src={cat.image}
+                        alt={cat.name}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-3xl">
+                        {cat.icon || '🌿'}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        activeEditSlugRef.current = cat.slug;
+                        editFileInputRef.current?.click();
+                      }}
+                      disabled={isUploading}
+                      className="absolute inset-0 bg-black/60 text-white text-[10px] font-bold flex flex-col items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity"
+                      title="গ্যালারি থেকে ছবি পরিবর্তন করুন"
+                    >
+                      {isUploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4 mb-0.5" />
+                          <span>ছবি পাল্টান</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
 
                   <button
                     type="button"
@@ -316,17 +437,11 @@ export default function AdminCategoriesView() {
                       editFileInputRef.current?.click();
                     }}
                     disabled={isUploading}
-                    className="absolute inset-0 bg-black/60 text-white text-[10px] font-bold flex flex-col items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity"
-                    title="ছবি পরিবর্তন করুন"
+                    className="text-[10px] text-[#016831] font-bold hover:underline flex items-center gap-1 mt-1.5"
+                    title="গ্যালারি থেকে ছবি আপলোড"
                   >
-                    {isUploading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mb-0.5" />
-                        <span>ছবি পাল্টান</span>
-                      </>
-                    )}
+                    <Smartphone className="w-3 h-3 text-[#D97706]" />
+                    <span>গ্যালারি ছবি</span>
                   </button>
                 </div>
 
@@ -362,7 +477,7 @@ export default function AdminCategoriesView() {
                     type="text"
                     value={cat.image || ''}
                     onChange={(e) => handleFieldChange(cat.slug, 'image', e.target.value)}
-                    placeholder="ছবির URL"
+                    placeholder="ছবির URL লিঙ্ক"
                     className="w-full px-2.5 py-1 text-[10px] border rounded-lg bg-[#FAF8F5] text-stone-500 focus:outline-none focus:border-[#016831] truncate"
                   />
                 </div>
@@ -401,10 +516,10 @@ export default function AdminCategoriesView() {
         })}
       </div>
 
-      {/* Add New Category Modal */}
+      {/* Add New Category Modal with Direct Gallery Image Upload */}
       {newCatModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-3xl border border-[#E8E2D5] shadow-2xl w-full max-w-lg p-6 space-y-4">
+          <div className="bg-white rounded-3xl border border-[#E8E2D5] shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center pb-3 border-b border-[#E8E2D5]">
               <h3 className="text-base font-extrabold text-[#016831] flex items-center gap-2">
                 <Plus className="w-5 h-5 text-[#D97706]" />
@@ -477,50 +592,16 @@ export default function AdminCategoriesView() {
                 </div>
               </div>
 
-              {/* Image Upload Area */}
-              <div>
-                <label className="block font-bold text-[#016831] mb-1">ক্যাটাগরি ছবি / লোগো</label>
-                <div className="flex items-center gap-3">
-                  <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-stone-100 border border-[#E8E2D5] flex-shrink-0">
-                    {newCat.image ? (
-                      <Image src={newCat.image} alt="Preview" fill className="object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-2xl text-stone-400">
-                        {newCat.icon || '📷'}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1 space-y-1.5">
-                    <input
-                      ref={newFileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleNewImageUpload}
-                      className="hidden"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => newFileInputRef.current?.click()}
-                      disabled={uploadingNewImage}
-                      className="px-3.5 py-1.5 rounded-xl bg-[#016831] text-white hover:bg-[#015629] text-xs font-bold flex items-center gap-1.5 transition-colors"
-                    >
-                      {uploadingNewImage ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Upload className="w-3.5 h-3.5" />
-                      )}
-                      <span>ফাইল আপলোড করুন</span>
-                    </button>
-                    <input
-                      type="text"
-                      value={newCat.image}
-                      onChange={(e) => setNewCat({ ...newCat, image: e.target.value })}
-                      placeholder="বা ছবির URL দিন"
-                      className="w-full px-2.5 py-1 text-xs border rounded-xl bg-[#FAF8F5] focus:outline-none focus:border-[#016831]"
-                    />
-                  </div>
-                </div>
+              {/* Direct Gallery Image Upload with Preview & Drag-Drop */}
+              <div className="pt-1">
+                <ImageUploadInput
+                  value={newCat.image}
+                  onChange={(url) => setNewCat((prev) => ({ ...prev, image: url }))}
+                  label="ক্যাটাগরি ছবি / ব্যানার (গ্যালারি থেকে সিলেক্ট করুন)"
+                  required={false}
+                  helpText="মোবাইল গ্যালারি বা কম্পিউটার ফাইল থেকে সরাসরি ছবি আপলোড করুন (JPG, PNG, WEBP)"
+                  allowUrlPaste={true}
+                />
               </div>
 
               <div>
@@ -529,7 +610,7 @@ export default function AdminCategoriesView() {
                   rows={2}
                   value={newCat.description}
                   onChange={(e) => setNewCat({ ...newCat, description: e.target.value })}
-                  placeholder="ক্যাটাগরির বিবরণ..."
+                  placeholder="ক্যাটাগরির সংক্ষিপ্ত বিবরণ..."
                   className="w-full px-3 py-2 border rounded-xl bg-[#FAF8F5] focus:outline-none focus:border-[#016831]"
                 />
               </div>
@@ -544,7 +625,7 @@ export default function AdminCategoriesView() {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || uploadingNewImage}
+                  disabled={loading}
                   className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-slate-950 font-black shadow-md flex items-center gap-1.5"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
