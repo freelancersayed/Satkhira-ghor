@@ -111,7 +111,7 @@ export default function Header() {
 
   const allCategories = Array.isArray(content?.categories) && content.categories.length > 0
     ? content.categories
-    : categories;
+    : (Array.isArray(categories) ? categories : []);
   const displayCategories = allCategories.filter((c) => c.id !== 'all' && c.slug !== 'all').slice(0, 7);
 
   return (
@@ -528,33 +528,35 @@ export default function Header() {
                 </div>
 
                 {/* Categories Grid */}
-                <div className="space-y-2 pt-3 border-t border-[#E8E2D5]">
-                  <div className="flex items-center justify-between px-2">
-                    <p className="text-[10px] font-bold text-[#829289] uppercase tracking-wider">
-                      পণ্য ক্যাটাগরি
-                    </p>
-                    <Link
-                      href="/shop"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-[10px] font-bold text-[#016831] hover:underline"
-                    >
-                      সব দেখুন →
-                    </Link>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {displayCategories.map((cat) => (
+                {displayCategories.length > 0 && (
+                  <div className="space-y-2 pt-3 border-t border-[#E8E2D5]">
+                    <div className="flex items-center justify-between px-2">
+                      <p className="text-[10px] font-bold text-[#829289] uppercase tracking-wider">
+                        পণ্য ক্যাটাগরি
+                      </p>
                       <Link
-                        key={cat.id || cat.slug}
-                        href={`/shop?cat=${cat.slug}`}
+                        href="/shop"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-1.5 p-2 rounded-xl bg-[#FAF9F5] border border-[#E8E2D5] text-[11px] font-bold text-[#122118] hover:border-[#016831] hover:text-[#016831] transition-all"
+                        className="text-[10px] font-bold text-[#016831] hover:underline"
                       >
-                        <span>{cat.icon}</span>
-                        <span className="truncate">{cat.name.split(' (')[0]}</span>
+                        সব দেখুন →
                       </Link>
-                    ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {displayCategories.map((cat) => (
+                        <Link
+                          key={cat.id || cat.slug}
+                          href={`/shop?cat=${cat.slug}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-1.5 p-2 rounded-xl bg-[#FAF9F5] border border-[#E8E2D5] text-[11px] font-bold text-[#122118] hover:border-[#016831] hover:text-[#016831] transition-all"
+                        >
+                          <span>{cat.icon}</span>
+                          <span className="truncate">{cat.name.split(' (')[0]}</span>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Quick Call Helpline */}
                 <div className="pt-3 border-t border-[#E8E2D5] space-y-2">

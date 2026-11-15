@@ -30,7 +30,7 @@ export default function CategorySection() {
     if (Array.isArray(content?.categories) && content.categories.length > 0) {
       return content.categories;
     }
-    return fallbackCategories;
+    return Array.isArray(fallbackCategories) ? fallbackCategories : [];
   }, [content?.categories]);
 
   const displayCategories = categoriesList.filter((c) => c.id !== 'all' && c.slug !== 'all');
@@ -93,54 +93,61 @@ export default function CategorySection() {
         </div>
 
         {/* ── Category Cards Grid (Responsive: Horizontal scroll on small mobile, grid on md/lg) ── */}
-        <div className="flex sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 sm:pb-0 -mx-3 px-3 sm:mx-0 sm:px-0">
-          {displayCategories.map((cat) => {
-            const count = getCategoryCount(cat.slug);
-            return (
-              <Link
-                key={cat.id || cat.slug}
-                href={`/shop?cat=${cat.slug}`}
-                className="group flex-shrink-0 w-32 xs:w-36 sm:w-auto bg-white rounded-2xl p-2.5 sm:p-3.5 border border-[#E8E2D5] hover:border-[#016831]/50 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden"
-              >
-                {/* Visual Category Thumbnail with Rounded Container */}
-                <div className="relative w-18 h-18 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#FAF8F5] mb-2 sm:mb-3 border border-[#E8E2D5]/70 group-hover:scale-105 transition-transform duration-300">
-                  {cat.image ? (
-                    <Image
-                      src={cat.image}
-                      alt={cat.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 120px, 150px"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl">
-                      {cat.icon || '🌿'}
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                  <span className="absolute bottom-1 right-1 text-base sm:text-lg select-none">
-                    {cat.icon}
-                  </span>
-                </div>
+        {displayCategories.length > 0 ? (
+          <div className="flex sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 sm:pb-0 -mx-3 px-3 sm:mx-0 sm:px-0">
+            {displayCategories.map((cat) => {
+              const count = getCategoryCount(cat.slug);
+              return (
+                <Link
+                  key={cat.id || cat.slug}
+                  href={`/shop?cat=${cat.slug}`}
+                  className="group flex-shrink-0 w-32 xs:w-36 sm:w-auto bg-white rounded-2xl p-2.5 sm:p-3.5 border border-[#E8E2D5] hover:border-[#016831]/50 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden"
+                >
+                  {/* Visual Category Thumbnail with Rounded Container */}
+                  <div className="relative w-18 h-18 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#FAF8F5] mb-2 sm:mb-3 border border-[#E8E2D5]/70 group-hover:scale-105 transition-transform duration-300">
+                    {cat.image ? (
+                      <Image
+                        src={cat.image}
+                        alt={cat.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 120px, 150px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-3xl">
+                        {cat.icon || '🌿'}
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                    <span className="absolute bottom-1 right-1 text-base sm:text-lg select-none">
+                      {cat.icon}
+                    </span>
+                  </div>
 
-                {/* Category Name */}
-                <h3 className="text-xs sm:text-sm font-extrabold text-[#016831] group-hover:text-[#D97706] transition-colors line-clamp-1">
-                  {cat.name}
-                </h3>
+                  {/* Category Name */}
+                  <h3 className="text-xs sm:text-sm font-extrabold text-[#016831] group-hover:text-[#D97706] transition-colors line-clamp-1">
+                    {cat.name}
+                  </h3>
 
-                {/* English Subtitle */}
-                <p className="text-[10px] text-[#8E9C96] mt-0.5 line-clamp-1">
-                  {cat.nameEn}
-                </p>
+                  {/* English Subtitle */}
+                  <p className="text-[10px] text-[#8E9C96] mt-0.5 line-clamp-1">
+                    {cat.nameEn}
+                  </p>
 
-                {/* Item Count Badge */}
-                <div className="mt-2 text-[10px] font-bold text-[#016831] bg-[#F0FDF4] px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  {count > 0 ? `${toBanglaNum(count)} টি পণ্য` : 'উপলব্ধ'}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+                  {/* Item Count Badge */}
+                  <div className="mt-2 text-[10px] font-bold text-[#016831] bg-[#F0FDF4] px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    {count > 0 ? `${toBanglaNum(count)} টি পণ্য` : 'উপলব্ধ'}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="py-8 text-center bg-white rounded-2xl border border-dashed border-[#E8E2D5] p-6 max-w-lg mx-auto">
+            <p className="text-xs sm:text-sm font-bold text-[#016831] mb-1">ক্যাটাগরি তালিকা খালি</p>
+            <p className="text-[11px] text-[#56625D]">অ্যাডমিন প্যানেল থেকে নতুন ক্যাটাগরি ও ছবি যোগ করুন।</p>
+          </div>
+        )}
 
         {/* Mobile View All Link */}
         <div className="mt-4 text-center sm:hidden">

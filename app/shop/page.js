@@ -15,7 +15,7 @@ function ShopContent() {
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [sortBy, setSortBy] = useState('featured');
   const [productList, setProductList] = useState([]);
-  const [categoriesList, setCategoriesList] = useState(categories);
+  const [categoriesList, setCategoriesList] = useState(Array.isArray(categories) ? categories : []);
   const [loading, setLoading] = useState(true);
 
   // Sync state if URL query params change
@@ -41,7 +41,7 @@ function ShopContent() {
     fetch('/api/categories')
       .then((res) => res.json())
       .then((data) => {
-        if (data && Array.isArray(data.categories) && data.categories.length > 0) {
+        if (data && Array.isArray(data.categories)) {
           setCategoriesList(data.categories);
         }
       })
@@ -138,23 +138,36 @@ function ShopContent() {
               <SlidersHorizontal className="w-3.5 h-3.5 text-[#D97706]" />
               ক্যাটাগরি:
             </span>
-            {categoriesList.map((cat) => {
-              const isSelected = selectedCategory === cat.slug || selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id || cat.slug}
-                  onClick={() => setSelectedCategory(cat.slug || cat.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-[#016831] text-white shadow-md scale-105'
-                      : 'bg-[#FDFBF7] text-[#4B5563] hover:bg-[#FEF3C7] hover:text-[#016831] border border-[#E8E2D5]'
-                  }`}
-                >
-                  {cat.icon && <span className="mr-1">{cat.icon}</span>}
-                  {cat.name}
-                </button>
-              );
-            })}
+            <button
+              type="button"
+              onClick={() => setSelectedCategory('all')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+                selectedCategory === 'all'
+                  ? 'bg-[#016831] text-white shadow-md scale-105'
+                  : 'bg-[#FDFBF7] text-[#4B5563] hover:bg-[#FEF3C7] hover:text-[#016831] border border-[#E8E2D5]'
+              }`}
+            >
+              🌾 সব পণ্য
+            </button>
+            {categoriesList
+              .filter((cat) => cat.slug !== 'all' && cat.id !== 'all')
+              .map((cat) => {
+                const isSelected = selectedCategory === cat.slug || selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id || cat.slug}
+                    onClick={() => setSelectedCategory(cat.slug || cat.id)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+                      isSelected
+                        ? 'bg-[#016831] text-white shadow-md scale-105'
+                        : 'bg-[#FDFBF7] text-[#4B5563] hover:bg-[#FEF3C7] hover:text-[#016831] border border-[#E8E2D5]'
+                    }`}
+                  >
+                    {cat.icon && <span className="mr-1">{cat.icon}</span>}
+                    {cat.name}
+                  </button>
+                );
+              })}
           </div>
         </div>
 

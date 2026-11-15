@@ -580,6 +580,22 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
                         </div>
                       );
                     })}
+
+                    {categoriesList.length === 0 && !loading && (
+                      <div className="col-span-full py-10 text-center bg-white rounded-2xl border border-dashed border-[#E8E2D5] p-6">
+                        <FolderPlus className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+                        <p className="text-sm font-bold text-stone-600 mb-1">কোনো ক্যাটাগরি নেই</p>
+                        <p className="text-xs text-stone-400 mb-4">উপরের 'নতুন ক্যাটাগরি তৈরি' ট্যাবে ক্লিক করে প্রথম ক্যাটাগরি যুক্ত করুন।</p>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('add')}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#016831] text-white text-xs font-bold hover:bg-[#015629]"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>নতুন ক্যাটাগরি যোগ করুন</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

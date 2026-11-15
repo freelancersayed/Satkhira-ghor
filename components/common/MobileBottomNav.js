@@ -26,7 +26,6 @@ import {
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { useSiteContentStore } from '@/store/siteContentStore';
-import { categories } from '@/data/products';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -60,6 +59,9 @@ export default function MobileBottomNav() {
 
   const { user, logout, checkAuth } = useAuthStore();
   const { content } = useSiteContentStore();
+  const navCategories = (Array.isArray(content?.categories) ? content.categories : [])
+    .filter((c) => c.id !== 'all' && c.slug !== 'all')
+    .slice(0, 6);
 
   const helpline = content?.hero?.helpline || '০১৭১২-৩৪৫৬৭৮';
   // Clean phone number for tel: and wa.me:
@@ -547,16 +549,14 @@ export default function MobileBottomNav() {
               </div>
             ) : (
               /* Quick Category explorer when no query */
-              <div className="pt-2">
-                <div className="text-xs font-bold text-stone-500 mb-2">ক্যাটাগরি সমূহ</div>
-                <div className="grid grid-cols-2 gap-2">
-                  {categories
-                    .filter((c) => c.id !== 'all')
-                    .slice(0, 6)
-                    .map((cat) => (
+              navCategories.length > 0 ? (
+                <div className="pt-2">
+                  <div className="text-xs font-bold text-stone-500 mb-2">ক্যাটাগরি সমূহ</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {navCategories.map((cat) => (
                       <Link
-                        key={cat.id}
-                        href={`/shop?cat=${cat.id}`}
+                        key={cat.id || cat.slug}
+                        href={`/shop?cat=${cat.slug || cat.id}`}
                         onClick={() => setSearchModalOpen(false)}
                         className="flex items-center gap-2 p-2 rounded-xl bg-[#FAF9F5] border border-stone-200/80 hover:bg-[#FEF9E7] transition-colors"
                       >
@@ -566,8 +566,9 @@ export default function MobileBottomNav() {
                         </span>
                       </Link>
                     ))}
+                  </div>
                 </div>
-              </div>
+              ) : null
             )}
           </div>
         </div>,

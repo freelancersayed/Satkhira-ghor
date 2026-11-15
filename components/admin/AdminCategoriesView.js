@@ -516,6 +516,22 @@ export default function AdminCategoriesView() {
         })}
       </div>
 
+      {filteredCategories.length === 0 && !loading && (
+        <div className="py-12 text-center bg-white rounded-2xl border border-dashed border-[#E8E2D5] p-6">
+          <FolderPlus className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+          <p className="text-sm font-bold text-stone-600 mb-1">কোনো ক্যাটাগরি পাওয়া যায়নি</p>
+          <p className="text-xs text-stone-400 mb-4">উপরের 'নতুন ক্যাটাগরি' বাটনে ক্লিক করে প্রথম ক্যাটাগরি যুক্ত করুন।</p>
+          <button
+            type="button"
+            onClick={() => setNewCatModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#016831] text-white text-xs font-bold hover:bg-[#015629]"
+          >
+            <Plus className="w-4 h-4" />
+            <span>প্রথম ক্যাটাগরি তৈরি করুন</span>
+          </button>
+        </div>
+      )}
+
       {/* Add New Category Modal with Direct Gallery Image Upload */}
       {newCatModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">

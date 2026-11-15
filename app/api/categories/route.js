@@ -9,10 +9,10 @@ export const dynamic = 'force-dynamic';
 async function getStoredCategories() {
   await connectToDatabase();
   const doc = await SiteContent.findOne({ key: 'categories' }).lean();
-  if (doc && Array.isArray(doc.data) && doc.data.length > 0) {
+  if (doc && Array.isArray(doc.data)) {
     return doc.data;
   }
-  return defaultCategories;
+  return defaultCategories || [];
 }
 
 // GET all categories
@@ -22,7 +22,7 @@ export async function GET() {
     return NextResponse.json({ success: true, categories });
   } catch (error) {
     console.warn('Categories GET fallback:', error.message);
-    return NextResponse.json({ success: true, categories: defaultCategories });
+    return NextResponse.json({ success: true, categories: defaultCategories || [] });
   }
 }
 

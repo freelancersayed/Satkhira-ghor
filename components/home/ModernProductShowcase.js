@@ -32,7 +32,7 @@ export default function ModernProductShowcase({ initialProducts = [] }) {
     if (Array.isArray(content?.categories) && content.categories.length > 0) {
       return content.categories;
     }
-    return fallbackCategories;
+    return Array.isArray(fallbackCategories) ? fallbackCategories : [];
   }, [content?.categories]);
 
   // Flash Sale Countdown Timer
@@ -314,24 +314,38 @@ export default function ModernProductShowcase({ initialProducts = [] }) {
 
         {/* Dynamic Category Segment Tabs (Pills Bar) */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {activeCategories.map((cat) => {
-            const isActive = activeTab === cat.slug || activeTab === cat.id;
-            return (
-              <button
-                key={cat.id || cat.slug}
-                type="button"
-                onClick={() => setActiveTab(cat.slug || cat.id)}
-                className={`flex-shrink-0 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 border ${
-                  isActive
-                    ? 'bg-[#016831] text-white border-[#016831] shadow-md scale-102'
-                    : 'bg-white text-[#4B5563] border-[#E8E2D5] hover:bg-[#FDFBF7] hover:border-[#016831]/30'
-                }`}
-              >
-                {cat.icon && <span>{cat.icon}</span>}
-                <span>{cat.name.split(' (')[0]}</span>
-              </button>
-            );
-          })}
+          <button
+            type="button"
+            onClick={() => setActiveTab('all')}
+            className={`flex-shrink-0 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 border ${
+              activeTab === 'all'
+                ? 'bg-[#016831] text-white border-[#016831] shadow-md scale-102'
+                : 'bg-white text-[#4B5563] border-[#E8E2D5] hover:bg-[#FDFBF7] hover:border-[#016831]/30'
+            }`}
+          >
+            <span>🌾</span>
+            <span>সব পণ্য</span>
+          </button>
+          {activeCategories
+            .filter((c) => c.slug !== 'all' && c.id !== 'all')
+            .map((cat) => {
+              const isActive = activeTab === cat.slug || activeTab === cat.id;
+              return (
+                <button
+                  key={cat.id || cat.slug}
+                  type="button"
+                  onClick={() => setActiveTab(cat.slug || cat.id)}
+                  className={`flex-shrink-0 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 border ${
+                    isActive
+                      ? 'bg-[#016831] text-white border-[#016831] shadow-md scale-102'
+                      : 'bg-white text-[#4B5563] border-[#E8E2D5] hover:bg-[#FDFBF7] hover:border-[#016831]/30'
+                  }`}
+                >
+                  {cat.icon && <span>{cat.icon}</span>}
+                  <span>{cat.name.split(' (')[0]}</span>
+                </button>
+              );
+            })}
         </div>
 
         {/* Dynamic Products Grid */}
