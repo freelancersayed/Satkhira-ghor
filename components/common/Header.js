@@ -109,9 +109,12 @@ export default function Header() {
     { name: 'helpline', label: 'হেল্পলাইন মোবাইল নম্বর', placeholder: '০১৭১২-৩৪৫৬৭৮' },
   ];
 
-  const allCategories = Array.isArray(content?.categories) && content.categories.length > 0
-    ? content.categories
-    : (Array.isArray(categories) ? categories : []);
+  const rawCategories = content?.categories;
+  const allCategories = Array.isArray(rawCategories) && rawCategories.length > 0
+    ? rawCategories
+    : (rawCategories && typeof rawCategories === 'object' && Object.values(rawCategories).length > 0)
+      ? Object.values(rawCategories)
+      : (Array.isArray(categories) ? categories : []);
   const displayCategories = allCategories.filter((c) => c.id !== 'all' && c.slug !== 'all').slice(0, 7);
 
   return (

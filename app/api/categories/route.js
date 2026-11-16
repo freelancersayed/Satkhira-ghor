@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { connectToDatabase } from '@/lib/mongodb';
 import SiteContent from '@/models/SiteContent';
 import { requireAdmin } from '@/lib/auth';
@@ -77,6 +78,11 @@ export async function POST(request) {
       { upsert: true, new: true }
     );
 
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/shop');
+    } catch (e) {}
+
     return NextResponse.json({
       success: true,
       message: 'নতুন ক্যাটাগরি সফলভাবে যুক্ত হয়েছে',
@@ -106,6 +112,10 @@ export async function PUT(request) {
         { key: 'categories', data: body.categories, updatedBy: adminCheck.user.phone || 'admin' },
         { upsert: true, new: true }
       );
+      try {
+        revalidatePath('/', 'layout');
+        revalidatePath('/shop');
+      } catch (e) {}
       return NextResponse.json({
         success: true,
         message: 'ক্যাটাগরি তালিকা সফলভাবে সংরক্ষিত হয়েছে',
@@ -142,6 +152,11 @@ export async function PUT(request) {
       { upsert: true, new: true }
     );
 
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/shop');
+    } catch (e) {}
+
     return NextResponse.json({
       success: true,
       message: 'ক্যাটাগরি ও ছবি সফলভাবে আপডেট করা হয়েছে',
@@ -177,6 +192,11 @@ export async function DELETE(request) {
       { key: 'categories', data: filtered, updatedBy: adminCheck.user.phone || 'admin' },
       { upsert: true, new: true }
     );
+
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/shop');
+    } catch (e) {}
 
     return NextResponse.json({
       success: true,

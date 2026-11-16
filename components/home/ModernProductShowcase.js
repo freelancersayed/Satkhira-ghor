@@ -19,21 +19,41 @@ import { categories as fallbackCategories } from '@/data/products';
 import { useSiteContentStore } from '@/store/siteContentStore';
 import FlashSaleEditModal from '@/components/home/FlashSaleEditModal';
 
-export default function ModernProductShowcase({ initialProducts = [] }) {
+export default function ModernProductShowcase({ initialProducts = [], initialCategories = [] }) {
   const { content } = useSiteContentStore();
   const flashSale = content?.flashSale || {};
   const isFlashSaleEnabled = flashSale.enabled !== false;
 
   // Active Category Tab
   const [activeTab, setActiveTab] = useState('all');
+  const [liveCategories, setLiveCategories] = useState(initialCategories);
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.categories) && data.categories.length > 0) {
+          setLiveCategories(data.categories);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Dynamic Categories from database
   const activeCategories = useMemo(() => {
-    if (Array.isArray(content?.categories) && content.categories.length > 0) {
-      return content.categories;
+    const rawCategories = content?.categories;
+    if (Array.isArray(rawCategories) && rawCategories.length > 0) {
+      return rawCategories;
+    }
+    if (rawCategories && typeof rawCategories === 'object') {
+      const values = Object.values(rawCategories);
+      if (values.length > 0) return values;
+    }
+    if (liveCategories.length > 0) {
+      return liveCategories;
     }
     return Array.isArray(fallbackCategories) ? fallbackCategories : [];
-  }, [content?.categories]);
+  }, [content?.categories, liveCategories]);
 
   // Flash Sale Countdown Timer
   const [timeLeft, setTimeLeft] = useState({

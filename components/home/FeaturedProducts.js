@@ -2,7 +2,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import ModernProductShowcase from '@/components/home/ModernProductShowcase';
 
-export default async function FeaturedProducts() {
+export default async function FeaturedProducts({ initialCategories = [] }) {
   let displayProducts = [];
 
   try {
@@ -28,7 +28,10 @@ export default async function FeaturedProducts() {
   return (
     <section className="py-12 sm:py-20 bg-[#FDFBF7]/50 border-b border-[#E8E2D5]/50">
       <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
-        <ModernProductShowcase initialProducts={displayProducts} />
+        <ModernProductShowcase
+          initialProducts={displayProducts}
+          initialCategories={initialCategories}
+        />
       </div>
     </section>
   );

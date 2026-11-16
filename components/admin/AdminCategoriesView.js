@@ -400,6 +400,7 @@ export default function AdminCategoriesView() {
                         src={cat.image}
                         alt={cat.name}
                         fill
+                        unoptimized={Boolean(cat.image?.startsWith('data:'))}
                         className="object-cover"
                         sizes="80px"
                       />

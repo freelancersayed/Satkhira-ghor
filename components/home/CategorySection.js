@@ -9,10 +9,11 @@ import { useSiteContentStore } from '@/store/siteContentStore';
 import AdminSectionEditModal from '@/components/common/AdminSectionEditModal';
 import CategoryEditModal from '@/components/home/CategoryEditModal';
 
-export default function CategorySection() {
+export default function CategorySection({ initialCategories = [] }) {
   const { content } = useSiteContentStore();
   const catContent = content?.categorySection || {};
   const [liveProducts, setLiveProducts] = useState([]);
+  const [liveCategories, setLiveCategories] = useState(initialCategories);
 
   useEffect(() => {
     fetch('/api/products')
@@ -23,15 +24,32 @@ export default function CategorySection() {
         }
       })
       .catch(() => {});
+
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.categories) && data.categories.length > 0) {
+          setLiveCategories(data.categories);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Extract dynamic categories from database, fallback to initial categories
   const categoriesList = useMemo(() => {
-    if (Array.isArray(content?.categories) && content.categories.length > 0) {
-      return content.categories;
+    const rawCategories = content?.categories;
+    if (Array.isArray(rawCategories) && rawCategories.length > 0) {
+      return rawCategories;
+    }
+    if (rawCategories && typeof rawCategories === 'object') {
+      const values = Object.values(rawCategories);
+      if (values.length > 0) return values;
+    }
+    if (liveCategories.length > 0) {
+      return liveCategories;
     }
     return Array.isArray(fallbackCategories) ? fallbackCategories : [];
-  }, [content?.categories]);
+  }, [content?.categories, liveCategories]);
 
   const displayCategories = categoriesList.filter((c) => c.id !== 'all' && c.slug !== 'all');
 
@@ -71,7 +89,7 @@ export default function CategorySection() {
               />
 
               {/* Admin Dynamic Category Manager & Logo/Image Uploader */}
-              <CategoryEditModal />
+              <CategoryEditModal onCategoriesUpdated={(newCats) => setLiveCategories(newCats)} />
             </div>
 
             <h2 className="text-xl sm:text-3xl font-black text-[#016831] tracking-tight">
@@ -110,6 +128,7 @@ export default function CategorySection() {
                         src={cat.image}
                         alt={cat.name}
                         fill
+                        unoptimized={Boolean(cat.image?.startsWith('data:'))}
                         className="object-cover"
                         sizes="(max-width: 640px) 120px, 150px"
                       />

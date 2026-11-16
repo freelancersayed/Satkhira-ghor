@@ -116,11 +116,17 @@ export async function GET(request) {
       });
     }
 
-    const allItems = await SiteContent.find();
+    const allItems = await SiteContent.find().lean();
     const result = { ...defaultSiteContent };
 
     allItems.forEach((doc) => {
-      result[doc.key] = { ...result[doc.key], ...doc.data };
+      if (Array.isArray(doc.data)) {
+        result[doc.key] = doc.data;
+      } else if (typeof doc.data === 'object' && doc.data !== null && !Array.isArray(result[doc.key])) {
+        result[doc.key] = { ...(result[doc.key] || {}), ...doc.data };
+      } else {
+        result[doc.key] = doc.data;
+      }
     });
 
     return NextResponse.json({ content: result });
@@ -159,11 +165,13 @@ export async function PUT(request) {
 
     if (key === 'theme') {
       saveThemeToFile(data);
-      try {
-        revalidatePath('/', 'layout');
-      } catch (e) {
-        // ignore
-      }
+    }
+
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/shop');
+    } catch (e) {
+      // ignore
     }
 
     return NextResponse.json({

@@ -59,9 +59,14 @@ export default function MobileBottomNav() {
 
   const { user, logout, checkAuth } = useAuthStore();
   const { content } = useSiteContentStore();
-  const navCategories = (Array.isArray(content?.categories) ? content.categories : [])
-    .filter((c) => c.id !== 'all' && c.slug !== 'all')
-    .slice(0, 6);
+  const rawCategories = content?.categories;
+  const navCategories = (
+    Array.isArray(rawCategories)
+      ? rawCategories
+      : (rawCategories && typeof rawCategories === 'object')
+        ? Object.values(rawCategories)
+        : []
+  ).filter((c) => c.id !== 'all' && c.slug !== 'all').slice(0, 6);
 
   const helpline = content?.hero?.helpline || '০১৭১২-৩৪৫৬৭৮';
   // Clean phone number for tel: and wa.me:

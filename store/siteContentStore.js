@@ -119,6 +119,10 @@ export const useSiteContentStore = create((set, get) => ({
       if (res.ok) {
         const data = await res.json();
         if (data.content) {
+          // Normalize categories if received as object
+          if (data.content.categories && !Array.isArray(data.content.categories) && typeof data.content.categories === 'object') {
+            data.content.categories = Object.values(data.content.categories);
+          }
           if (data.content.theme && typeof window !== 'undefined') {
             try {
               localStorage.setItem('satkhira_theme', JSON.stringify(data.content.theme));
@@ -137,13 +141,16 @@ export const useSiteContentStore = create((set, get) => ({
     try {
       // Optimistic update
       const current = get().content;
+      const updatedValue = Array.isArray(sectionData)
+        ? sectionData
+        : (typeof sectionData === 'object' && sectionData !== null && !Array.isArray(current[sectionKey]))
+          ? { ...current[sectionKey], ...sectionData }
+          : sectionData;
+
       set({
         content: {
           ...current,
-          [sectionKey]: {
-            ...current[sectionKey],
-            ...sectionData,
-          },
+          [sectionKey]: updatedValue,
         },
       });
 
