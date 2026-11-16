@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/auth';
@@ -119,11 +120,19 @@ export async function POST(request) {
       badge: badge || '',
       badgeType: badgeType || 'forest',
       image,
-      images: images && images.length > 0 ? images : [image],
+      images: images && images.length > 0 ? [image, ...images.filter((i) => i !== image)] : [image],
       shortDescription: shortDescription || '',
       description: description || '',
       origin: origin || 'সাতক্ষীরা',
     });
+
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/shop');
+      if (newProduct.slug) {
+        revalidatePath(`/products/${newProduct.slug}`);
+      }
+    } catch (e) {}
 
     return NextResponse.json(
       { message: 'পণ্য সফলভাবে যুক্ত হয়েছে', product: newProduct },

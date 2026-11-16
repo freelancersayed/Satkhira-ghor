@@ -158,7 +158,7 @@ export default function Header() {
       {/* ── Main Navigation Bar ── */}
       <nav className="bg-[#FAF9F5]/98 backdrop-blur-md border-b border-[#E8E2D5]">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          
+
           {/* ═════════════════════════════════════════════════════════════════
               ১. মোবাইল হেডার বার (< md): বামে মেনু | মাঝে লোগো ও নাম | ডানে কার্ট
               ═════════════════════════════════════════════════════════════════ */}
@@ -211,15 +211,13 @@ export default function Header() {
                 className="relative p-2 -mr-1 rounded-xl bg-[#016831] text-white hover:bg-[#014D24] active:scale-95 transition-all shadow-xs flex items-center justify-center group"
               >
                 <ShoppingBag
-                  className={`w-5 h-5 text-[#FEF9E7] transition-transform ${
-                    badgeBounce ? 'scale-115 text-[#FAB116]' : 'group-hover:scale-110'
-                  }`}
+                  className={`w-5 h-5 text-[#FEF9E7] transition-transform ${badgeBounce ? 'scale-115 text-[#FAB116]' : 'group-hover:scale-110'
+                    }`}
                 />
                 {totalItems > 0 && (
                   <span
-                    className={`absolute -top-1.5 -right-1.5 bg-[#FAB116] text-slate-950 font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all ${
-                      badgeBounce ? 'scale-125 ring-2 ring-white animate-bounce' : 'animate-pulse'
-                    }`}
+                    className={`absolute -top-1.5 -right-1.5 bg-[#FAB116] text-slate-950 font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all ${badgeBounce ? 'scale-125 ring-2 ring-white animate-bounce' : 'animate-pulse'
+                      }`}
                   >
                     {totalItems}
                   </span>
@@ -344,15 +342,13 @@ export default function Header() {
                 className="relative p-2.5 rounded-xl bg-[#016831] text-white hover:bg-[#014D24] transition-colors shadow-sm flex items-center justify-center group"
               >
                 <ShoppingBag
-                  className={`w-5 h-5 text-[#FEF9E7] transition-transform ${
-                    badgeBounce ? 'scale-115 text-[#FAB116]' : 'group-hover:scale-110'
-                  }`}
+                  className={`w-5 h-5 text-[#FEF9E7] transition-transform ${badgeBounce ? 'scale-115 text-[#FAB116]' : 'group-hover:scale-110'
+                    }`}
                 />
                 {totalItems > 0 && (
                   <span
-                    className={`absolute -top-1.5 -right-1.5 bg-[#FAB116] text-slate-950 font-black text-[11px] w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all ${
-                      badgeBounce ? 'scale-125 ring-2 ring-white animate-bounce' : 'animate-pulse'
-                    }`}
+                    className={`absolute -top-1.5 -right-1.5 bg-[#FAB116] text-slate-950 font-black text-[11px] w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all ${badgeBounce ? 'scale-125 ring-2 ring-white animate-bounce' : 'animate-pulse'
+                      }`}
                   >
                     {totalItems}
                   </span>
@@ -519,11 +515,10 @@ export default function Header() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors ${
-                        pathname === link.href
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors ${pathname === link.href
                           ? 'bg-[#016831] text-white shadow-xs'
                           : 'text-[#122118] hover:bg-[#FAF9F5] hover:text-[#016831]'
-                      }`}
+                        }`}
                     >
                       <span>{link.name}</span>
                     </Link>

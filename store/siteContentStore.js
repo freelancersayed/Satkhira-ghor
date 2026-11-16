@@ -30,6 +30,12 @@ const defaultContent = {
         label: 'খাঁটি দেশি খাদ্য সম্ভার',
       },
     ],
+    sideBanner: {
+      url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=90&w=1200',
+      link: '/products/satkhira-sundarbans-mega-family-combo',
+      label: 'মধু স্পেশাল কম্বোপ্যাক অফার',
+      showOnMobile: true,
+    },
     primaryBtnText: 'পণ্য কিনুন',
     primaryBtnLink: '/shop',
     secondaryBtnText: 'আমাদের গল্প শুনুন',
@@ -102,7 +108,7 @@ if (typeof window !== 'undefined') {
     if (cachedTheme) {
       initialContent.theme = { ...defaultContent.theme, ...JSON.parse(cachedTheme) };
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export const useSiteContentStore = create((set, get) => ({
@@ -126,7 +132,7 @@ export const useSiteContentStore = create((set, get) => ({
           if (data.content.theme && typeof window !== 'undefined') {
             try {
               localStorage.setItem('satkhira_theme', JSON.stringify(data.content.theme));
-            } catch (e) {}
+            } catch (e) { }
           }
           set({ content: data.content, loaded: true, loading: false });
         }
@@ -157,7 +163,7 @@ export const useSiteContentStore = create((set, get) => ({
       if (sectionKey === 'theme' && typeof window !== 'undefined') {
         try {
           localStorage.setItem('satkhira_theme', JSON.stringify(sectionData));
-        } catch (e) {}
+        } catch (e) { }
       }
 
       const res = await fetch('/api/site-content', {

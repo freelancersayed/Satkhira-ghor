@@ -38,6 +38,12 @@ export const defaultSiteContent = {
         label: 'খাঁটি দেশি খাদ্য সম্ভার',
       },
     ],
+    sideBanner: {
+      url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=90&w=1200',
+      link: '/products/satkhira-sundarbans-mega-family-combo',
+      label: 'মধু স্পেশাল কম্বোপ্যাক অফার',
+      showOnMobile: true,
+    },
     primaryBtnText: 'পণ্য কিনুন',
     primaryBtnLink: '/shop',
     secondaryBtnText: 'আমাদের গল্প শুনুন',

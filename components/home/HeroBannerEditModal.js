@@ -21,26 +21,41 @@ import {
   BarChart2,
   Type,
   Layers,
+  RefreshCw,
+  ExternalLink,
+  Eye,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useSiteContentStore } from '@/store/siteContentStore';
+import { DEFAULT_SIDE_BANNER } from '@/components/home/HeroBanner';
 
-export default function HeroBannerEditModal() {
+export default function HeroBannerEditModal({
+  defaultTab = 'slides',
+  triggerText = 'ব্যানার এডিট করুন',
+}) {
   const { user } = useAuthStore();
   const { content, updateSection } = useSiteContentStore();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('slides'); // 'slides' | 'text' | 'badges'
+  const [activeTab, setActiveTab] = useState(defaultTab); // 'slides' | 'sideBanner' | 'text' | 'badges'
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgressText, setUploadProgressText] = useState('');
   const [notification, setNotification] = useState('');
+
+  // 1st Banner URL modal state
   const [urlInput, setUrlInput] = useState('');
   const [showUrlAdd, setShowUrlAdd] = useState(false);
 
+  // 2nd Banner URL input state
+  const [sideBannerUrlInput, setSideBannerUrlInput] = useState('');
+  const [showSideBannerUrlInput, setShowSideBannerUrlInput] = useState(false);
+
+  // File input refs
   const fileInputRef = useRef(null);
   const replaceFileInputRef = useRef(null);
   const replaceIndexRef = useRef(null);
+  const sideBannerFileInputRef = useRef(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -62,6 +77,12 @@ export default function HeroBannerEditModal() {
     floatingBadge2Title: '',
     floatingBadge2Sub: '',
     slides: [],
+    sideBanner: {
+      url: DEFAULT_SIDE_BANNER?.url || '',
+      link: DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
+      label: DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+      showOnMobile: true,
+    },
   });
 
   // Only admins can see and edit
@@ -73,11 +94,37 @@ export default function HeroBannerEditModal() {
     // Normalize slides array to [{ url, label }]
     let initialSlides = [];
     if (Array.isArray(hero.slides) && hero.slides.length > 0) {
-      initialSlides = hero.slides.map((s) => {
-        if (typeof s === 'string') return { url: s, label: '' };
-        if (s && typeof s === 'object') return { url: s.url || '', label: s.label || '' };
-        return { url: '', label: '' };
-      }).filter((s) => s.url);
+      initialSlides = hero.slides
+        .map((s) => {
+          if (typeof s === 'string') return { url: s, label: '' };
+          if (s && typeof s === 'object') return { url: s.url || '', label: s.label || '' };
+          return { url: '', label: '' };
+        })
+        .filter((s) => s.url);
+    }
+
+    // Normalize side banner
+    let initialSideBanner = {
+      url: DEFAULT_SIDE_BANNER?.url || '',
+      link: DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
+      label: DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+      showOnMobile: true,
+    };
+
+    if (hero.sideBanner && typeof hero.sideBanner === 'object') {
+      initialSideBanner = {
+        url: hero.sideBanner.url || DEFAULT_SIDE_BANNER?.url || '',
+        link: hero.sideBanner.link || DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
+        label: hero.sideBanner.label || DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+        showOnMobile: hero.sideBanner.showOnMobile !== false,
+      };
+    } else if (typeof hero.sideBanner === 'string' && hero.sideBanner.trim()) {
+      initialSideBanner = {
+        url: hero.sideBanner.trim(),
+        link: DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
+        label: DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+        showOnMobile: true,
+      };
     }
 
     setFormData({
@@ -101,16 +148,19 @@ export default function HeroBannerEditModal() {
       floatingBadge2Title: hero.floatingBadge2Title || 'খাঁটি গাওয়া ঘি',
       floatingBadge2Sub: hero.floatingBadge2Sub || 'দেশি গরুর দুধের ননী',
       slides: initialSlides,
+      sideBanner: initialSideBanner,
     });
 
-    setActiveTab('slides');
+    setActiveTab(defaultTab || 'slides');
     setNotification('');
     setShowUrlAdd(false);
     setUrlInput('');
+    setShowSideBannerUrlInput(false);
+    setSideBannerUrlInput('');
     setIsOpen(true);
   };
 
-  // Upload single file helper
+  // Upload single file helper (Gallery / Camera / PC)
   const uploadSingleFile = async (file) => {
     const fd = new FormData();
     fd.append('file', file);
@@ -120,7 +170,9 @@ export default function HeroBannerEditModal() {
     return data.url;
   };
 
-  // Direct Gallery Upload (multiple files supported)
+  // ─────────────────────────────────────────────────────────────
+  // 1st BANNER (SLIDER) ACTIONS
+  // ─────────────────────────────────────────────────────────────
   const handleGalleryUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -130,7 +182,7 @@ export default function HeroBannerEditModal() {
       const newUploadedSlides = [];
 
       for (let i = 0; i < files.length; i++) {
-        setUploadProgressText(`ছবি (${i + 1}/${files.length}) আপলোড হচ্ছে...`);
+        setUploadProgressText(`স্লাইড ছবি (${i + 1}/${files.length}) আপলোড হচ্ছে...`);
         const url = await uploadSingleFile(files[i]);
         if (url) {
           const rawName = files[i].name ? files[i].name.replace(/\.[^/.]+$/, '') : '';
@@ -145,7 +197,7 @@ export default function HeroBannerEditModal() {
         ...prev,
         slides: [...prev.slides, ...newUploadedSlides],
       }));
-      setNotification(`সফলভাবে ${newUploadedSlides.length}টি ছবি যুক্ত হয়েছে!`);
+      setNotification(`সফলভাবে ${newUploadedSlides.length}টি স্লাইড যুক্ত হয়েছে!`);
       setTimeout(() => setNotification(''), 3000);
     } catch (err) {
       alert('ছবি আপলোড করতে সমস্যা হয়েছে: ' + err.message);
@@ -156,7 +208,6 @@ export default function HeroBannerEditModal() {
     }
   };
 
-  // Replace a specific slide image from gallery
   const handleReplaceUpload = async (e) => {
     const file = e.target.files?.[0];
     const index = replaceIndexRef.current;
@@ -185,7 +236,6 @@ export default function HeroBannerEditModal() {
     }
   };
 
-  // Add slide via direct URL
   const handleAddUrl = (e) => {
     e.preventDefault();
     if (!urlInput.trim()) return;
@@ -199,7 +249,6 @@ export default function HeroBannerEditModal() {
     setTimeout(() => setNotification(''), 2500);
   };
 
-  // Remove slide
   const handleRemoveSlide = (index) => {
     setFormData((prev) => ({
       ...prev,
@@ -207,7 +256,6 @@ export default function HeroBannerEditModal() {
     }));
   };
 
-  // Move slide up
   const handleMoveUp = (index) => {
     if (index === 0) return;
     setFormData((prev) => {
@@ -219,7 +267,6 @@ export default function HeroBannerEditModal() {
     });
   };
 
-  // Move slide down
   const handleMoveDown = (index) => {
     if (index === formData.slides.length - 1) return;
     setFormData((prev) => {
@@ -231,7 +278,6 @@ export default function HeroBannerEditModal() {
     });
   };
 
-  // Update slide label
   const handleSlideLabelChange = (index, label) => {
     setFormData((prev) => {
       const updated = [...prev.slides];
@@ -240,9 +286,75 @@ export default function HeroBannerEditModal() {
     });
   };
 
-  // Save changes to database
+  // ─────────────────────────────────────────────────────────────
+  // 2nd BANNER (SIDE BANNER) DIRECT GALLERY UPLOAD & ACTIONS
+  // ─────────────────────────────────────────────────────────────
+  const handleSideBannerUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      setUploadProgressText('২নং ব্যানার ছবি আপলোড হচ্ছে...');
+      const url = await uploadSingleFile(file);
+      if (url) {
+        const rawName = file.name ? file.name.replace(/\.[^/.]+$/, '') : '';
+        setFormData((prev) => ({
+          ...prev,
+          sideBanner: {
+            ...prev.sideBanner,
+            url,
+            label: prev.sideBanner?.label || (rawName.length <= 30 ? rawName : '২নং স্পেশাল ব্যানার'),
+          },
+        }));
+        setNotification('২নং ব্যানার সফলভাবে গ্যালারি থেকে আপলোড হয়েছে! পরিবর্তন স্থায়ী করতে সেভ করুন।');
+        setTimeout(() => setNotification(''), 3500);
+      }
+    } catch (err) {
+      alert('২নং ব্যানার ছবি আপলোড ব্যর্থ হয়েছে: ' + err.message);
+    } finally {
+      setUploading(false);
+      setUploadProgressText('');
+      if (sideBannerFileInputRef.current) sideBannerFileInputRef.current.value = '';
+    }
+  };
+
+  const handleApplySideBannerUrl = (e) => {
+    if (e) e.preventDefault();
+    if (!sideBannerUrlInput.trim()) return;
+    setFormData((prev) => ({
+      ...prev,
+      sideBanner: {
+        ...prev.sideBanner,
+        url: sideBannerUrlInput.trim(),
+      },
+    }));
+    setSideBannerUrlInput('');
+    setShowSideBannerUrlInput(false);
+    setNotification('২নং ব্যানার ছবির ওয়েব লিংক সফলভাবে যুক্ত হয়েছে!');
+    setTimeout(() => setNotification(''), 2500);
+  };
+
+  const handleResetSideBanner = () => {
+    if (!confirm('আপনি কি ২নং ব্যানার ডিফল্ট ছবিতে রিসেট করতে চান?')) return;
+    setFormData((prev) => ({
+      ...prev,
+      sideBanner: {
+        url: DEFAULT_SIDE_BANNER?.url || '',
+        link: DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
+        label: DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+        showOnMobile: true,
+      },
+    }));
+    setNotification('২নং ব্যানার ডিফল্টে রিসেট করা হয়েছে!');
+    setTimeout(() => setNotification(''), 2500);
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // SAVE TO DATABASE
+  // ─────────────────────────────────────────────────────────────
   const handleSave = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     try {
       setSaving(true);
       await updateSection('hero', formData);
@@ -260,16 +372,20 @@ export default function HeroBannerEditModal() {
 
   return (
     <>
-      {/* ── Trigger Button ── */}
+      {/* ── Trigger Button (Admin Only) ── */}
       <button
-        onClick={handleOpen}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleOpen();
+        }}
         type="button"
         title="ব্যানারের ছবি ও লেখা পরিবর্তন করুন"
-        className="inline-flex items-center gap-2 px-3.5 py-2 bg-black/60 hover:bg-black/80 text-white rounded-2xl text-xs font-black shadow-2xl border border-white/30 backdrop-blur-md transition-all duration-200 hover:scale-105 group"
+        className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-black/70 hover:bg-black/90 text-white rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-black shadow-2xl border border-white/30 backdrop-blur-md transition-all duration-200 hover:scale-105 group"
       >
-        <Edit3 className="w-4 h-4 text-[#F59E0B] group-hover:rotate-12 transition-transform" />
-        <span>ব্যানার এডিট করুন</span>
-        <span className="bg-[#F59E0B] text-slate-950 text-[10px] px-2 py-0.5 rounded-full font-black">
+        <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F59E0B] group-hover:rotate-12 transition-transform" />
+        <span>{triggerText}</span>
+        <span className="bg-[#F59E0B] text-slate-950 text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-black">
           Admin
         </span>
       </button>
@@ -290,14 +406,21 @@ export default function HeroBannerEditModal() {
         className="hidden"
         onChange={handleReplaceUpload}
       />
+      <input
+        ref={sideBannerFileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleSideBannerUpload}
+      />
 
       {/* ── Modal ── */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-          <div className="bg-[#FCFAF7] rounded-[2rem] p-5 sm:p-8 max-w-3xl w-full border border-[#E8E2D5] shadow-2xl my-6 space-y-5 max-h-[92vh] flex flex-col">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto">
+          <div className="bg-[#FCFAF7] rounded-[2rem] p-4 sm:p-7 max-w-3xl w-full border border-[#E8E2D5] shadow-2xl my-4 sm:my-6 space-y-4 max-h-[92vh] flex flex-col">
 
             {/* Header */}
-            <div className="flex justify-between items-center pb-4 border-b border-[#E8E2D5] flex-shrink-0">
+            <div className="flex justify-between items-center pb-3 border-b border-[#E8E2D5] flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-[#016831] text-[#F59E0B] flex items-center justify-center shadow-md">
                   <Layers className="w-5 h-5" />
@@ -307,7 +430,7 @@ export default function HeroBannerEditModal() {
                     হিরো ব্যানার ম্যানেজার
                   </h3>
                   <p className="text-[11px] sm:text-xs text-slate-500">
-                    গ্যালারি থেকে সরাসরি ছবি আপলোড এবং সকল টেক্সট ডাইনামিক ভাবে পরিবর্তন করুন
+                    ১ম ও ২নং উভয় ব্যানার গ্যালারি থেকে সরাসরি আপলোড ও পরিবর্তন করুন
                   </p>
                 </div>
               </div>
@@ -328,24 +451,41 @@ export default function HeroBannerEditModal() {
               </div>
             )}
 
-            {/* Tab Navigation */}
-            <div className="flex items-center gap-2 bg-[#EFE9DF] p-1.5 rounded-2xl flex-shrink-0">
+            {/* Tab Navigation (4 Tabs) */}
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-[#EFE9DF] p-1.5 rounded-2xl flex-shrink-0 overflow-x-auto scrollbar-none">
               <button
                 type="button"
                 onClick={() => setActiveTab('slides')}
-                className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                className={`py-2 px-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all whitespace-nowrap flex-1 ${
                   activeTab === 'slides'
                     ? 'bg-[#016831] text-white shadow-md'
                     : 'text-[#016831] hover:bg-white/60'
                 }`}
               >
                 <ImageIcon className="w-4 h-4 text-[#F59E0B]" />
-                <span>ছবি ও স্লাইডার ({formData.slides?.length || 0})</span>
+                <span>১ম স্লাইডার ({formData.slides?.length || 0})</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('sideBanner')}
+                className={`py-2 px-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all whitespace-nowrap flex-1 ${
+                  activeTab === 'sideBanner'
+                    ? 'bg-[#016831] text-white shadow-md'
+                    : 'text-[#016831] hover:bg-white/60'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 text-[#F59E0B]" />
+                <span>২নং ব্যানার</span>
+                <span className="hidden sm:inline-block text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.2 rounded-full">
+                  গ্যালারি
+                </span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setActiveTab('text')}
-                className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                className={`py-2 px-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all whitespace-nowrap flex-1 ${
                   activeTab === 'text'
                     ? 'bg-[#016831] text-white shadow-md'
                     : 'text-[#016831] hover:bg-white/60'
@@ -354,24 +494,25 @@ export default function HeroBannerEditModal() {
                 <Type className="w-4 h-4 text-[#F59E0B]" />
                 <span>শিরোনাম ও বাটন</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setActiveTab('badges')}
-                className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                className={`py-2 px-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all whitespace-nowrap flex-1 ${
                   activeTab === 'badges'
                     ? 'bg-[#016831] text-white shadow-md'
                     : 'text-[#016831] hover:bg-white/60'
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 text-[#F59E0B]" />
-                <span>ব্যাজ ও স্ট্যাটাস</span>
+                <span>ব্যাজ ও ট্রাস্ট</span>
               </button>
             </div>
 
             {/* Modal Body / Scrollable Content */}
             <div className="overflow-y-auto pr-1 flex-1 space-y-4">
 
-              {/* ─── TAB 1: SLIDES & GALLERY UPLOAD ─────────────────────── */}
+              {/* ─── TAB 1: 1ST BANNER SLIDES & GALLERY UPLOAD ─────────── */}
               {activeTab === 'slides' && (
                 <div className="space-y-4">
                   {/* Action Bar: Upload from phone/PC gallery */}
@@ -379,10 +520,10 @@ export default function HeroBannerEditModal() {
                     <div>
                       <div className="text-xs sm:text-sm font-bold text-[#016831] flex items-center gap-1.5">
                         <Smartphone className="w-4 h-4 text-[#D97706]" />
-                        <span>ডিভাইস গ্যালারি / ফোল্ডার থেকে ছবি আপলোড</span>
+                        <span>১ম ব্যানার স্লাইডার - ডিভাইস গ্যালারি থেকে ছবি যোগ</span>
                       </div>
                       <p className="text-[11px] text-slate-500 mt-0.5">
-                        একসাথে এক বা একাধিক ছবি নির্বাচন করতে পারবেন
+                        একসাথে এক বা একাধিক স্লাইড ছবি নির্বাচন করতে পারবেন
                       </p>
                     </div>
 
@@ -442,7 +583,7 @@ export default function HeroBannerEditModal() {
                     <div className="text-center py-10 bg-white rounded-2xl border-2 border-dashed border-[#E8E2D5] p-6 space-y-2">
                       <ImageIcon className="w-12 h-12 text-slate-300 mx-auto" />
                       <p className="text-xs sm:text-sm font-bold text-slate-600">
-                        এখনও কোনো কাস্টম ব্যানার ছবি আপলোড করা হয়নি
+                        এখনও কোনো কাস্টম স্লাইড ছবি আপলোড করা হয়নি
                       </p>
                       <p className="text-[11px] text-slate-400">
                         উপরে &quot;+ গ্যালারি থেকে ছবি যোগ করুন&quot; বাটনে ক্লিক করে ব্যানার ছবি নির্বাচন করুন
@@ -541,7 +682,257 @@ export default function HeroBannerEditModal() {
                 </div>
               )}
 
-              {/* ─── TAB 2: TEXT & BUTTONS ─────────────────────────────── */}
+              {/* ─── TAB 2: 2ND BANNER (SIDE BANNER) DIRECT GALLERY UPLOAD ── */}
+              {activeTab === 'sideBanner' && (
+                <div className="space-y-4">
+                  {/* Action Bar: Direct Device Gallery Upload */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-[#E8E2D5] shadow-xs">
+                    <div>
+                      <div className="text-xs sm:text-sm font-bold text-[#016831] flex items-center gap-1.5">
+                        <Smartphone className="w-4 h-4 text-[#D97706]" />
+                        <span>২নং ব্যানার - ডিভাইস গ্যালারি থেকে সরাসরি আপলোড</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        মোবাইল গ্যালারি বা কম্পিউটার ফোল্ডার থেকে ছবি নির্বাচন করে সরাসরি পরিবর্তন করুন
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => sideBannerFileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs shadow-md hover:scale-[1.02] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {uploading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>{uploadProgressText || 'আপলোড হচ্ছে...'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            <span>+ গ্যালারি থেকে নতুন ছবি আপলোড</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowSideBannerUrlInput(!showSideBannerUrlInput)}
+                        className="px-3 py-2.5 bg-[#FEF3C7] text-[#016831] hover:bg-amber-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                      >
+                        <LinkIcon className="w-3.5 h-3.5" />
+                        <span>URL লিংক</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Add via URL mode */}
+                  {showSideBannerUrlInput && (
+                    <div className="p-3 bg-white rounded-2xl border border-amber-300 flex items-center gap-2 animate-fadeIn">
+                      <input
+                        type="url"
+                        value={sideBannerUrlInput}
+                        onChange={(e) => setSideBannerUrlInput(e.target.value)}
+                        placeholder="https://... ছবির সরাসরি ওয়েব লিংক পেস্ট করুন"
+                        className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplySideBannerUrl}
+                        className="px-4 py-2 bg-[#016831] text-white rounded-xl text-xs font-bold hover:bg-[#0D3528]"
+                      >
+                        প্রয়োগ করুন
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Live Visual Preview Card */}
+                  <div className="bg-white rounded-2xl p-4 border border-[#E8E2D5] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <h4 className="text-xs sm:text-sm font-bold text-[#016831]">
+                          ২নং ব্যানারের লাইভ প্রিভিউ (বর্তমান রূপ)
+                        </h4>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-200">
+                        সাইড ব্যানার (Col 4)
+                      </span>
+                    </div>
+
+                    <div className="relative w-full max-w-xs sm:max-w-sm mx-auto h-[240px] sm:h-[300px] rounded-2xl overflow-hidden bg-slate-100 border-2 border-dashed border-[#E8E2D5] group/preview">
+                      {formData.sideBanner?.url ? (
+                        <>
+                          <img
+                            src={formData.sideBanner.url}
+                            alt={formData.sideBanner.label || '২নং ব্যানার'}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-105"
+                          />
+                          {/* Hover Overlay with Action Buttons */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/40 opacity-0 group-hover/preview:opacity-100 transition-opacity flex flex-col justify-between p-3.5">
+                            <div className="flex justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => sideBannerFileInputRef.current?.click()}
+                                className="px-3 py-1.5 bg-white/95 text-slate-900 hover:bg-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-transform"
+                              >
+                                <Upload className="w-3.5 h-3.5 text-[#016831]" />
+                                <span>ছবি পরিবর্তন</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleResetSideBanner}
+                                className="p-1.5 bg-red-600/90 hover:bg-red-600 text-white rounded-xl shadow-md hover:scale-105 transition-transform"
+                                title="ডিফল্ট ব্যানারে ফেরত যান"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <div className="text-white text-xs space-y-0.5">
+                              <p className="font-bold truncate">
+                                {formData.sideBanner.label || 'সাতক্ষীরা ঘর স্পেশাল অফার'}
+                              </p>
+                              <p className="text-[10px] text-amber-300 truncate font-mono">
+                                {formData.sideBanner.link || '/shop?cat=combos'}
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center space-y-2">
+                          <ImageIcon className="w-12 h-12 text-slate-300" />
+                          <p className="text-xs font-bold text-slate-600">কোনো ব্যানার ছবি নেই</p>
+                          <button
+                            type="button"
+                            onClick={() => sideBannerFileInputRef.current?.click()}
+                            className="px-3 py-1.5 bg-[#016831] text-white rounded-xl text-xs font-bold"
+                          >
+                            গ্যালারি থেকে যোগ করুন
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Image URL info */}
+                    {formData.sideBanner?.url && (
+                      <p className="text-[10px] text-slate-400 font-mono text-center truncate px-2">
+                        {formData.sideBanner.url}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Banner Configuration Fields */}
+                  <div className="p-4 bg-white rounded-2xl border border-[#E8E2D5] space-y-3.5">
+                    {/* Banner Label / Alt Text */}
+                    <div>
+                      <label className="block text-xs font-bold text-[#016831] mb-1">
+                        ২নং ব্যানার ক্যাপশন / নাম (ALT Text)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.sideBanner?.label || ''}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            sideBanner: { ...prev.sideBanner, label: e.target.value },
+                          }))
+                        }
+                        placeholder="যেমন: মধু স্পেশাল কম্বোপ্যাক অফার"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] text-xs text-slate-900 focus:outline-none focus:border-[#016831]"
+                      />
+                    </div>
+
+                    {/* Redirect Link */}
+                    <div>
+                      <label className="block text-xs font-bold text-[#016831] mb-1">
+                        ব্যানার ক্লিক লিংক (ভিজিটর ক্লিক করলে যে পেজে যাবে)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.sideBanner?.link || ''}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            sideBanner: { ...prev.sideBanner, link: e.target.value },
+                          }))
+                        }
+                        placeholder="/shop?cat=combos অথবা /products/product-name"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] text-xs text-slate-900 font-mono focus:outline-none focus:border-[#016831]"
+                      />
+
+                      {/* Quick Link Pills */}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span className="text-[11px] text-slate-500 flex items-center gap-1 font-semibold">
+                          <Sparkles className="w-3 h-3 text-amber-500" /> দ্রুত লিংক বসান:
+                        </span>
+                        {[
+                          { label: 'কম্বো অফার', link: '/shop?cat=combos' },
+                          { label: 'সকল পণ্য', link: '/shop' },
+                          { label: 'সুন্দরবনের মধু', link: '/products/sundarbans-pure-khalsi-honey' },
+                          { label: 'দেশি গাওয়া ঘি', link: '/products/traditional-bilona-pure-cow-ghee' },
+                          { label: 'সরিষার তেল', link: '/products/cold-pressed-mustard-oil-ghani' },
+                        ].map((item) => (
+                          <button
+                            key={item.link}
+                            type="button"
+                            onClick={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                sideBanner: { ...prev.sideBanner, link: item.link },
+                              }))
+                            }
+                            className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
+                              formData.sideBanner?.link === item.link
+                                ? 'bg-[#016831] text-white border-[#016831] font-bold shadow-xs'
+                                : 'bg-[#FCFAF7] text-slate-700 border-slate-200 hover:border-[#016831] hover:text-[#016831]'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Mobile Visibility Option */}
+                    <label className="flex items-center gap-3 p-3 bg-[#FCFAF7] rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.sideBanner?.showOnMobile !== false}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            sideBanner: { ...prev.sideBanner, showOnMobile: e.target.checked },
+                          }))
+                        }
+                        className="w-4 h-4 accent-[#016831] rounded cursor-pointer"
+                      />
+                      <div>
+                        <span className="text-xs font-bold text-[#016831] block">
+                          মোবাইল ফোনেও ২নং ব্যানার প্রদর্শন করুন
+                        </span>
+                        <span className="text-[10px] text-slate-500">
+                          চালু থাকলে কম্পিউটার এবং মোবাইল উভয় ডিভাইসেই ১ম স্লাইডারের নিচে ২নং ব্যানার সুন্দরভাবে দৃশ্যমান থাকবে
+                        </span>
+                      </div>
+                    </label>
+
+                    {/* Pro Tip */}
+                    <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block">টিপস / সাইজ পরামর্শ:</span>
+                        <span>
+                          ২নং সাইড ব্যানারের জন্য পোর্ট্রেট বা খাড়া সাইজের ছবি সবচেয়ে ভালো দেখায় (অনুমোদিত সাইজ: ৮০০ x ১০৫০ পিক্সেল অথবা ৩:৪ অনুপাত)।
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ─── TAB 3: TEXT & BUTTONS ─────────────────────────────── */}
               {activeTab === 'text' && (
                 <div className="space-y-4">
                   {/* Top Badge */}
@@ -644,7 +1035,7 @@ export default function HeroBannerEditModal() {
                 </div>
               )}
 
-              {/* ─── TAB 3: TRUST BADGES & STATS ───────────────────────── */}
+              {/* ─── TAB 4: TRUST BADGES & STATS ───────────────────────── */}
               {activeTab === 'badges' && (
                 <div className="space-y-4">
                   {/* Floating Trust Badges */}

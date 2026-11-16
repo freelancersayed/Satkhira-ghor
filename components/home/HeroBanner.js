@@ -17,7 +17,7 @@ import HeroBannerEditModal from '@/components/home/HeroBannerEditModal';
 // ─────────────────────────────────────────────────────────────
 // Default fallback slides (used only if database slides are empty)
 // ─────────────────────────────────────────────────────────────
-const DEFAULT_SLIDES = [
+export const DEFAULT_SLIDES = [
   {
     url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=90&w=1920',
     link: '/products/sundarbans-pure-khalsi-honey',
@@ -35,10 +35,11 @@ const DEFAULT_SLIDES = [
   },
 ];
 
-const DEFAULT_SIDE_BANNER = {
+export const DEFAULT_SIDE_BANNER = {
   url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=90&w=1200',
   link: '/products/satkhira-sundarbans-mega-family-combo',
   label: 'মধু স্পেশাল কম্বোপ্যাক অফার',
+  showOnMobile: true,
 };
 
 const SLIDE_INTERVAL_MS = 4500;
@@ -89,6 +90,7 @@ export default function HeroBanner() {
         url: hero.sideBanner.url,
         link: hero.sideBanner.link || '/shop?cat=combos',
         label: hero.sideBanner.label || 'স্পেশাল অফার',
+        showOnMobile: hero.sideBanner.showOnMobile !== false,
       };
     }
     if (typeof hero.sideBanner === 'string' && hero.sideBanner.trim()) {
@@ -96,11 +98,15 @@ export default function HeroBanner() {
         url: hero.sideBanner.trim(),
         link: '/shop?cat=combos',
         label: 'স্পেশাল অফার',
+        showOnMobile: true,
       };
     }
     // If database slides has extra slide, use the last one for side banner
     if (slides.length > 3) {
-      return slides[slides.length - 1];
+      return {
+        ...slides[slides.length - 1],
+        showOnMobile: true,
+      };
     }
     return DEFAULT_SIDE_BANNER;
   }, [hero.sideBanner, slides]);
@@ -168,7 +174,7 @@ export default function HeroBanner() {
           >
             {/* Admin Edit Modal Trigger (visible only to admin) */}
             <div className="absolute top-3 right-3 z-30">
-              <HeroBannerEditModal />
+              <HeroBannerEditModal defaultTab="slides" triggerText="১ম ব্যানার স্লাইডার এডিট" />
             </div>
 
             {/* Slides (Pure Dynamic Graphics, Zero Text Overlay) */}
@@ -260,13 +266,24 @@ export default function HeroBanner() {
           </div>
 
           {/* ═════════════════════════════════════════════════════════════════
-              ২য় ব্যানার (ছোট সাইড ব্যানার - শুধু ডেস্কটপ/বড় স্ক্রিনে দৃশ্যমান)
+              ২য় ব্যানার (ছোট সাইড ব্যানার - Polli Bazar স্টাইল)
               ═════════════════════════════════════════════════════════════════ */}
-          <div className="hidden lg:block lg:col-span-4 xl:col-span-4 lg:h-[440px] xl:h-[480px]">
+          <div
+            className={`relative group/side overflow-hidden rounded-2xl sm:rounded-3xl bg-[#FAF8F5] border border-[#E8E2D5] shadow-xs hover:shadow-md transition-shadow ${
+              sideBanner.showOnMobile !== false
+                ? 'block h-[170px] xs:h-[210px] sm:h-[260px] md:h-[300px]'
+                : 'hidden'
+            } lg:block lg:col-span-4 xl:col-span-4 lg:h-[440px] xl:h-[480px]`}
+          >
+            {/* Admin Edit Modal Trigger for 2nd Banner (visible only to admin) */}
+            <div className="absolute top-3 right-3 z-30">
+              <HeroBannerEditModal defaultTab="sideBanner" triggerText="২নং ব্যানার এডিট" />
+            </div>
+
             <Link
               href={sideBanner.link || '/shop?cat=combos'}
               aria-label={sideBanner.label || 'সাইড ব্যানার'}
-              className="group/side relative block w-full h-full overflow-hidden rounded-2xl sm:rounded-3xl bg-[#FAF8F5] border border-[#E8E2D5] shadow-xs hover:shadow-md transition-shadow"
+              className="block w-full h-full relative"
             >
               <Image
                 src={sideBanner.url}

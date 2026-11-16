@@ -125,7 +125,7 @@ export default function MobileBottomNav() {
           setProductList(data.products);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const totalPrice = mounted

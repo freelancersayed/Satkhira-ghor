@@ -18,9 +18,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
-// Enable ISR (Incremental Static Regeneration) for instant product detail loading
-export const revalidate = 60;
 
 async function getProductBySlug(slug) {
   try {
@@ -161,7 +160,14 @@ export default async function ProductDetailPage({ params }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 bg-white p-6 sm:p-10 rounded-3xl border border-[#E8E2D5] shadow-sm">
           {/* Gallery Column */}
           <div className="lg:col-span-6">
-            <ProductGallery images={product.images} name={product.name} />
+            <ProductGallery
+              images={[
+                ...(product.image ? [product.image] : []),
+                ...(Array.isArray(product.images) ? product.images : []),
+              ].filter((img, idx, arr) => img && typeof img === 'string' && arr.indexOf(img) === idx)}
+              mainImage={product.image}
+              name={product.name}
+            />
           </div>
 
           {/* Details & Purchase Column */}

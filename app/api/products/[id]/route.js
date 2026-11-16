@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import mongoose from 'mongoose';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
@@ -41,10 +42,23 @@ export async function PUT(request, { params }) {
 
     await connectToDatabase();
 
+    // If primary image was updated, ensure images array keeps the primary image at index 0
+    let imagesUpdate = body.images;
+    if (body.image) {
+      if (Array.isArray(imagesUpdate) && imagesUpdate.length > 0) {
+        imagesUpdate = [body.image, ...imagesUpdate.filter((img) => img !== body.image)];
+      } else {
+        const existing = await Product.findById(id).select('images').lean();
+        const prevImages = Array.isArray(existing?.images) ? existing.images : [];
+        imagesUpdate = [body.image, ...prevImages.filter((img) => img !== body.image)];
+      }
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       {
         ...body,
+        ...(imagesUpdate ? { images: imagesUpdate } : {}),
         price: body.price !== undefined ? Number(body.price) : undefined,
         originalPrice: body.originalPrice !== undefined ? Number(body.originalPrice) : undefined,
         stock: body.stock !== undefined ? Number(body.stock) : undefined,
@@ -55,6 +69,14 @@ export async function PUT(request, { params }) {
     if (!updatedProduct) {
       return NextResponse.json({ message: 'পণ্যটি খুঁজে পাওয়া যায়নি' }, { status: 404 });
     }
+
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/shop');
+      if (updatedProduct.slug) {
+        revalidatePath(`/products/${updatedProduct.slug}`);
+      }
+    } catch (e) {}
 
     return NextResponse.json({
       message: 'পণ্য সফলভাবে আপডেট করা হয়েছে',
@@ -121,6 +143,11 @@ export async function DELETE(request, { params }) {
     if (!deleted) {
       return NextResponse.json({ message: 'পণ্যটি খুঁজে পাওয়া যায়নি' }, { status: 404 });
     }
+
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/shop');
+    } catch (e) {}
 
     return NextResponse.json({ message: 'পণ্য সফলভাবে মুছে ফেলা হয়েছে' });
   } catch (error) {

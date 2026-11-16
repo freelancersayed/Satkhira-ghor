@@ -104,6 +104,7 @@ export default function AdminDashboardPage() {
     badge: '',
     badgeType: 'forest',
     image: '',
+    images: [],
     shortDescription: '',
     description: '',
     hasVariations: false,
@@ -372,6 +373,7 @@ export default function AdminDashboardPage() {
       badge: prod.badge || '',
       badgeType: prod.badgeType || 'forest',
       image: prod.image || '',
+      images: Array.isArray(prod.images) && prod.images.length > 0 ? prod.images : (prod.image ? [prod.image] : []),
       shortDescription: prod.shortDescription || '',
       description: prod.description || '',
       hasVariations: !!prod.hasVariations,
@@ -813,6 +815,7 @@ export default function AdminDashboardPage() {
                       badge: '',
                       badgeType: 'forest',
                       image: '',
+                      images: [],
                       shortDescription: '',
                       description: '',
                       hasVariations: false,
@@ -1632,7 +1635,11 @@ export default function AdminDashboardPage() {
                 <ImageUploadInput
                   value={productFormData.image}
                   onChange={(url) =>
-                    setProductFormData({ ...productFormData, image: url })
+                    setProductFormData({
+                      ...productFormData,
+                      image: url,
+                      images: [url, ...(productFormData.images || []).filter((i) => i !== url)],
+                    })
                   }
                   label="পণ্যের ছবি"
                   required={true}

@@ -23,7 +23,7 @@ export default function CategorySection({ initialCategories = [] }) {
           setLiveProducts(data.products);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     fetch('/api/categories')
       .then((res) => res.json())
@@ -32,7 +32,7 @@ export default function CategorySection({ initialCategories = [] }) {
           setLiveCategories(data.categories);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Extract dynamic categories from database, fallback to initial categories
