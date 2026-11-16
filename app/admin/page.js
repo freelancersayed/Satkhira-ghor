@@ -56,6 +56,7 @@ import CustomerCRMView from '@/components/admin/CustomerCRMView';
 import CouponsAndCartView from '@/components/admin/CouponsAndCartView';
 import BulkProductUploadModal from '@/components/admin/BulkProductUploadModal';
 import ProductVariationEditor from '@/components/admin/ProductVariationEditor';
+import ProductImageGalleryManager from '@/components/admin/ProductImageGalleryManager';
 import AdminCategoriesView from '@/components/admin/AdminCategoriesView';
 import AdminFlashSaleView from '@/components/admin/AdminFlashSaleView';
 import AdminThemeView from '@/components/admin/AdminThemeView';
@@ -1631,20 +1632,17 @@ export default function AdminDashboardPage() {
                   }
                 />
 
-                {/* Product Image */}
-                <ImageUploadInput
-                  value={productFormData.image}
-                  onChange={(url) =>
+                {/* Product Image & Multi-Image Side-by-Side Gallery */}
+                <ProductImageGalleryManager
+                  primaryImage={productFormData.image}
+                  galleryImages={productFormData.images}
+                  onChange={({ primaryImage, galleryImages }) =>
                     setProductFormData({
                       ...productFormData,
-                      image: url,
-                      images: [url, ...(productFormData.images || []).filter((i) => i !== url)],
+                      image: primaryImage,
+                      images: galleryImages,
                     })
                   }
-                  label="পণ্যের ছবি"
-                  required={true}
-                  helpText="কম্পিউটার ফোল্ডার বা ফোনের গ্যালারি থেকে যেকোনো ছবি সরাসরি আপলোড করুন"
-                  allowUrlPaste={true}
                 />
 
                 <div>
