@@ -64,21 +64,21 @@ export default function ProductDetailsCard({ product }) {
     },
     {
       label: 'মান ও বিশুদ্ধতা',
-      value: '১০০% প্রাকৃতিক ও খাঁটি',
+      value: product.purityGuarantee || '১০০% প্রাকৃতিক ও খাঁটি',
       icon: ShieldCheck,
       color: 'text-[#016831]',
       bg: 'bg-emerald-50',
     },
     {
       label: 'প্যাকেজিং',
-      value: 'ফুড-গ্রেড এয়ারটাইট জার',
+      value: product.packaging || 'ফুড-গ্রেড এয়ারটাইট জার',
       icon: Package,
       color: 'text-stone-700',
       bg: 'bg-stone-50',
     },
     {
       label: 'পেমেন্ট সুবিধা',
-      value: 'ক্যাশ অন ডেলিভারি',
+      value: product.paymentTerms || 'ক্যাশ অন ডেলিভারি',
       icon: Truck,
       color: 'text-[#016831]',
       bg: 'bg-emerald-50',
@@ -286,7 +286,7 @@ export default function ProductDetailsCard({ product }) {
             <div className="p-3 rounded-xl bg-[#FEF3C7] text-[#92400E] text-xs leading-relaxed border border-[#FDE68A] flex items-start gap-2">
               <span className="text-base flex-shrink-0 leading-none">💡</span>
               <div>
-                <strong>সংরক্ষণ পদ্ধতি:</strong> আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।
+                <strong>সংরক্ষণ পদ্ধতি:</strong> {product.storageTips || 'আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।'}
               </div>
             </div>
 
@@ -297,9 +297,8 @@ export default function ProductDetailsCard({ product }) {
                   <Truck className="w-3.5 h-3.5 text-[#016831]" />
                   <span>ডেলিভারি সময়সীমা</span>
                 </div>
-                <p className="text-[11px] text-stone-600 leading-relaxed">
-                  • ঢাকা সিটির ভেতর: ২৪-৪৮ ঘণ্টার মধ্যে হোম ডেলিভারি।<br />
-                  • সমগ্র বাংলাদেশ: ২-৩ কার্যদিবসের মধ্যে কুরিয়ার ডেলিভারি।
+                <p className="text-[11px] text-stone-600 leading-relaxed whitespace-pre-line">
+                  {product.deliveryTimeline || '• ঢাকা সিটির ভেতর: ২৪-৪৮ ঘণ্টার মধ্যে হোম ডেলিভারি।\n• সমগ্র বাংলাদেশ: ২-৩ কার্যদিবসের মধ্যে কুরিয়ার ডেলিভারি।'}
                 </p>
               </div>
 
@@ -308,8 +307,8 @@ export default function ProductDetailsCard({ product }) {
                   <RotateCcw className="w-3.5 h-3.5 text-amber-600" />
                   <span>সহজ রিটার্ন ও চেক সুবিধা</span>
                 </div>
-                <p className="text-[11px] text-stone-600 leading-relaxed">
-                  পার্সেল রিসিভ করার সময় চেক করে মূল্য পরিশোধ করতে পারবেন। কোনো অসঙ্গতি থাকলে তাত্ক্ষণিক রিটার্ন করতে পারবেন।
+                <p className="text-[11px] text-stone-600 leading-relaxed whitespace-pre-line">
+                  {product.returnPolicy || 'পার্সেল রিসিভ করার সময় চেক করে মূল্য পরিশোধ করতে পারবেন। কোনো অসঙ্গতি থাকলে তাত্ক্ষণিক রিটার্ন করতে পারবেন।'}
                 </p>
               </div>
             </div>

@@ -282,11 +282,11 @@ export default async function ProductDetailPage({ params }) {
             <div className="grid grid-cols-3 gap-2 pt-4 border-t border-[#E8E2D5] text-[11px] text-[#4B5563] text-center">
               <div className="flex flex-col items-center gap-1">
                 <Truck className="w-4 h-4 text-[#016831]" />
-                <span>সারাদেশে ক্যাশ অন ডেলিভারি</span>
+                <span>{product.paymentTerms || 'সারাদেশে ক্যাশ অন ডেলিভারি'}</span>
               </div>
               <div className="flex flex-col items-center gap-1">
                 <ShieldCheck className="w-4 h-4 text-[#F59E0B]" />
-                <span>১০০% খাঁটি ও বিশুদ্ধ নিশ্চয়তা</span>
+                <span>{product.purityGuarantee || '১০০% খাঁটি ও বিশুদ্ধ নিশ্চয়তা'}</span>
               </div>
               <div className="flex flex-col items-center gap-1">
                 <RotateCcw className="w-4 h-4 text-[#D97706]" />
@@ -310,18 +310,29 @@ export default async function ProductDetailPage({ params }) {
                 <span>সাতক্ষীরা ঘর স্পেশাল কেয়ার</span>
               </h3>
               <ul className="space-y-2 text-xs text-stone-600">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
-                  <span>সরাসরি সুন্দরবনের প্রান্তিক মৌয়াল ও চাষীদের থেকে সংগৃহীত</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
-                  <span>কোনো প্রকার রাসায়নিক, সুগার বা কৃত্রিম প্রিজারভেটিভ নেই</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
-                  <span>ডেলিভারি ম্যানের সামনে পণ্য দেখে মূল্য পরিশোধের সুবিধা</span>
-                </li>
+                {Array.isArray(product.specialFeatures) && product.specialFeatures.length > 0 ? (
+                  product.specialFeatures.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))
+                ) : (
+                  <>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
+                      <span>সরাসরি সুন্দরবনের প্রান্তিক মৌয়াল ও চাষীদের থেকে সংগৃহীত</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
+                      <span>কোনো প্রকার রাসায়নিক, সুগার বা কৃত্রিম প্রিজারভেটিভ নেই</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
+                      <span>ডেলিভারি ম্যানের সামনে পণ্য দেখে মূল্য পরিশোধের সুবিধা</span>
+                    </li>
+                  </>
+                )}
               </ul>
 
               <div className="pt-2 border-t border-[#E8E2D5] flex items-center justify-between text-[11px] text-[#016831] font-semibold bg-[#FAF8F5] p-2.5 rounded-xl">
@@ -335,7 +346,7 @@ export default async function ProductDetailPage({ params }) {
             <div className="p-3.5 rounded-2xl bg-[#FEF3C7] text-[#92400E] text-xs leading-relaxed border border-[#FDE68A] flex items-start gap-2">
               <span className="text-base flex-shrink-0 leading-none">💡</span>
               <div>
-                <strong>সংরক্ষণ টিপস:</strong> আর্দ্রতামুক্ত ও সাধারণ তাপমাত্রায় বায়ুরোধী পাত্রে রাখুন।
+                <strong>সংরক্ষণ টিপস:</strong> {product.storageTips || 'আর্দ্রতামুক্ত ও সাধারণ তাপমাত্রায় বায়ুরোধী পাত্রে রাখুন।'}
               </div>
             </div>
           </div>

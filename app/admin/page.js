@@ -43,6 +43,11 @@ import {
   FolderPlus,
   Flame,
   Palette,
+  FileText,
+  Sparkles,
+  MapPin,
+  Calendar,
+  Info,
 } from 'lucide-react';
 
 import { useAuthStore } from '@/store/authStore';
@@ -92,8 +97,8 @@ export default function AdminDashboardPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
 
-  // Product Form state (with variation matrix)
-  const [productFormData, setProductFormData] = useState({
+  // Product Form state (with variation matrix & full dynamic specifications)
+  const initialProductFormState = {
     name: '',
     nameEn: '',
     category: 'honey',
@@ -108,9 +113,26 @@ export default function AdminDashboardPage() {
     images: [],
     shortDescription: '',
     description: '',
+    origin: 'সুন্দরবন ও সাতক্ষীরা',
+    harvestDate: '',
+    packaging: 'ফুড-গ্রেড এয়ারটাইট জার',
+    purityGuarantee: '১০০% প্রাকৃতিক ও খাঁটি',
+    paymentTerms: 'ক্যাশ অন ডেলিভারি',
+    storageTips: 'আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।',
+    benefits: [],
+    nutritionalInfo: {},
+    specialFeatures: [],
+    deliveryTimeline: 'ঢাকা সিটির ভেতর ২৪-৪৮ ঘণ্টা, সারাদেশে ২-৩ কার্যদিবস',
     hasVariations: false,
     variations: [],
-  });
+  };
+
+  const [productFormData, setProductFormData] = useState(initialProductFormState);
+  const [productModalTab, setProductModalTab] = useState('basic'); // 'basic' | 'details' | 'benefits'
+  const [newBenefitInput, setNewBenefitInput] = useState('');
+  const [newFeatureInput, setNewFeatureInput] = useState('');
+  const [newNutritionKey, setNewNutritionKey] = useState('');
+  const [newNutritionValue, setNewNutritionValue] = useState('');
 
   // Orders state
   const [orders, setOrders] = useState([]);
@@ -362,6 +384,11 @@ export default function AdminDashboardPage() {
   // Open Edit Product Modal
   const handleOpenEditProduct = (prod) => {
     setEditingProduct(prod);
+    setProductModalTab('basic');
+    setNewBenefitInput('');
+    setNewFeatureInput('');
+    setNewNutritionKey('');
+    setNewNutritionValue('');
     setProductFormData({
       name: prod.name || '',
       nameEn: prod.nameEn || '',
@@ -377,10 +404,93 @@ export default function AdminDashboardPage() {
       images: Array.isArray(prod.images) && prod.images.length > 0 ? prod.images : (prod.image ? [prod.image] : []),
       shortDescription: prod.shortDescription || '',
       description: prod.description || '',
+      origin: prod.origin || 'সুন্দরবন ও সাতক্ষীরা',
+      harvestDate: prod.harvestDate || '',
+      packaging: prod.packaging || 'ফুড-গ্রেড এয়ারটাইট জার',
+      purityGuarantee: prod.purityGuarantee || '১০০% প্রাকৃতিক ও খাঁটি',
+      paymentTerms: prod.paymentTerms || 'ক্যাশ অন ডেলিভারি',
+      storageTips: prod.storageTips || 'আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।',
+      benefits: Array.isArray(prod.benefits) ? [...prod.benefits] : [],
+      nutritionalInfo: prod.nutritionalInfo && typeof prod.nutritionalInfo === 'object' ? { ...prod.nutritionalInfo } : {},
+      specialFeatures: Array.isArray(prod.specialFeatures) ? [...prod.specialFeatures] : [],
+      deliveryTimeline: prod.deliveryTimeline || 'ঢাকা সিটির ভেতর ২৪-৪৮ ঘণ্টা, সারাদেশে ২-৩ কার্যদিবস',
       hasVariations: !!prod.hasVariations,
       variations: prod.variations || [],
     });
     setProductModalOpen(true);
+  };
+
+  // Product specification and nutrition helpers
+  const handleAddBenefit = (benefitText) => {
+    const text = (benefitText || newBenefitInput).trim();
+    if (!text) return;
+    if (productFormData.benefits.includes(text)) return;
+    setProductFormData((prev) => ({
+      ...prev,
+      benefits: [...prev.benefits, text],
+    }));
+    setNewBenefitInput('');
+  };
+
+  const handleRemoveBenefit = (index) => {
+    setProductFormData((prev) => ({
+      ...prev,
+      benefits: prev.benefits.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleAddFeature = (featureText) => {
+    const text = (featureText || newFeatureInput).trim();
+    if (!text) return;
+    if (productFormData.specialFeatures.includes(text)) return;
+    setProductFormData((prev) => ({
+      ...prev,
+      specialFeatures: [...prev.specialFeatures, text],
+    }));
+    setNewFeatureInput('');
+  };
+
+  const handleRemoveFeature = (index) => {
+    setProductFormData((prev) => ({
+      ...prev,
+      specialFeatures: prev.specialFeatures.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleAddNutrition = () => {
+    const key = newNutritionKey.trim();
+    const val = newNutritionValue.trim();
+    if (!key || !val) return;
+    setProductFormData((prev) => ({
+      ...prev,
+      nutritionalInfo: {
+        ...(prev.nutritionalInfo || {}),
+        [key]: val,
+      },
+    }));
+    setNewNutritionKey('');
+    setNewNutritionValue('');
+  };
+
+  const handleRemoveNutrition = (key) => {
+    setProductFormData((prev) => {
+      const updated = { ...(prev.nutritionalInfo || {}) };
+      delete updated[key];
+      return { ...prev, nutritionalInfo: updated };
+    });
+  };
+
+  const handleLoadSampleNutrition = () => {
+    setProductFormData((prev) => ({
+      ...prev,
+      nutritionalInfo: {
+        'এনার্জি / শক্তি': '৩২০ kcal',
+        'প্রাকৃতিক শর্করা': '৮০ গ্রাম',
+        'প্রোটিন': '০.৩ গ্রাম',
+        'ফ্যাট / চর্বি': '০ গ্রাম',
+        'ভিটামিন ও খনিজ': 'প্রাকৃতিক অ্যান্টিঅক্সিডেন্ট ও এনজাইম',
+      },
+    }));
   };
 
   // Delete Product
@@ -804,24 +914,12 @@ export default function AdminDashboardPage() {
                 <button
                   onClick={() => {
                     setEditingProduct(null);
-                    setProductFormData({
-                      name: '',
-                      nameEn: '',
-                      category: 'honey',
-                      categoryName: 'সুন্দরবনের মধু',
-                      price: '',
-                      originalPrice: '',
-                      unit: '১ কেজি (1 kg)',
-                      stock: 20,
-                      badge: '',
-                      badgeType: 'forest',
-                      image: '',
-                      images: [],
-                      shortDescription: '',
-                      description: '',
-                      hasVariations: false,
-                      variations: [],
-                    });
+                    setProductModalTab('basic');
+                    setNewBenefitInput('');
+                    setNewFeatureInput('');
+                    setNewNutritionKey('');
+                    setNewNutritionValue('');
+                    setProductFormData(initialProductFormState);
                     setProductModalOpen(true);
                   }}
                   className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition-all shadow-sm hover:scale-[1.02]"
@@ -1472,211 +1570,691 @@ export default function AdminDashboardPage() {
 
         {/* ===================== PRODUCT CREATE / EDIT MODAL ===================== */}
         {productModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-[#E8E2D5] shadow-2xl my-8 space-y-4">
-              <div className="flex justify-between items-center pb-3 border-b border-[#E8E2D5]">
-                <h3 className="text-base font-bold text-[#016831]">
-                  {editingProduct ? 'পণ্য সম্পাদনা করুন' : 'নতুন পণ্য যুক্ত করুন'}
-                </h3>
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+            <div className="bg-[#FCFAF7] rounded-3xl p-5 sm:p-7 max-w-3xl w-full border border-[#E8E2D5] shadow-2xl my-6 space-y-4 max-h-[92vh] flex flex-col">
+              {/* Header */}
+              <div className="flex justify-between items-center pb-3 border-b border-[#E8E2D5] flex-shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#016831] text-[#F59E0B] flex items-center justify-center font-bold shadow-xs">
+                    <Package className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-[#016831]">
+                      {editingProduct ? 'পণ্য ও বিস্তারিত বিবরণ সম্পাদনা' : 'নতুন পণ্য ও বিস্তারিত তথ্য যুক্ত করুন'}
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      পণ্যের মূল্য, ছবি, পূর্ণাঙ্গ বিবরণ, স্পেক্স, পুষ্টি ও সুবিধা ডাইনামিক ভাবে নিয়ন্ত্রণ করুন
+                    </p>
+                  </div>
+                </div>
                 <button
+                  type="button"
                   onClick={() => setProductModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-900"
+                  className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-colors"
                 >
-                  ✕
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSaveProduct} className="space-y-4 text-xs">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-[#016831] mb-1">
-                      পণ্যের নাম (বাংলা) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={productFormData.name}
-                      onChange={(e) =>
-                        setProductFormData({ ...productFormData, name: e.target.value })
-                      }
-                      placeholder="যেমন: সুন্দরবনের খাঁটি মধু"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none focus:border-[#016831]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-[#016831] mb-1">
-                      পণ্যের নাম (ইংরেজি / URL Slug)
-                    </label>
-                    <input
-                      type="text"
-                      value={productFormData.nameEn}
-                      onChange={(e) =>
-                        setProductFormData({ ...productFormData, nameEn: e.target.value })
-                      }
-                      placeholder="যেমন: Sundarbans Raw Honey"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none focus:border-[#016831]"
-                    />
-                  </div>
-                </div>
+              {/* 3 Step Tabs */}
+              <div className="flex items-center gap-1.5 bg-[#EFE9DF] p-1.5 rounded-2xl flex-shrink-0 overflow-x-auto scrollbar-none">
+                <button
+                  type="button"
+                  onClick={() => setProductModalTab('basic')}
+                  className={`flex-1 min-w-[130px] py-2 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap ${
+                    productModalTab === 'basic' ? 'bg-[#016831] text-white shadow-xs' : 'text-[#016831] hover:bg-white/60'
+                  }`}
+                >
+                  <Package className="w-4 h-4 text-[#F59E0B]" />
+                  <span>১. মৌলিক তথ্য ও দাম</span>
+                </button>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-[#016831] mb-1">
-                      ক্যাটাগরি <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={productFormData.category}
-                      onChange={(e) => {
-                        const cat = e.target.value;
-                        const catNames = {
-                          honey: 'সুন্দরবনের মধু',
-                          ghee: 'খাঁটি গাওয়া ঘি',
-                          oil: 'সরিষার তেল',
-                          sweets: 'সাতক্ষীরার সন্দেশ',
-                          pickles: 'আচার ও মশলা',
-                        };
+                <button
+                  type="button"
+                  onClick={() => setProductModalTab('details')}
+                  className={`flex-1 min-w-[150px] py-2 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap ${
+                    productModalTab === 'details' ? 'bg-[#016831] text-white shadow-xs' : 'text-[#016831] hover:bg-white/60'
+                  }`}
+                >
+                  <FileText className="w-4 h-4 text-[#F59E0B]" />
+                  <span>২. পূর্ণাঙ্গ বিবরণ ও স্পেক্স</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setProductModalTab('benefits')}
+                  className={`flex-1 min-w-[140px] py-2 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap ${
+                    productModalTab === 'benefits' ? 'bg-[#016831] text-white shadow-xs' : 'text-[#016831] hover:bg-white/60'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-[#F59E0B]" />
+                  <span>৩. উপকারিতা ও পুষ্টি</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveProduct} className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+                {/* ─── TAB 1: BASIC INFO & PRICING ─── */}
+                {productModalTab === 'basic' && (
+                  <div className="space-y-4 animate-fadeIn">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-bold text-[#016831] mb-1">
+                          পণ্যের নাম (বাংলা) <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={productFormData.name}
+                          onChange={(e) =>
+                            setProductFormData({ ...productFormData, name: e.target.value })
+                          }
+                          placeholder="যেমন: সুন্দরবনের খাঁটি মধু"
+                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none focus:border-[#016831]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-bold text-[#016831] mb-1">
+                          পণ্যের নাম (ইংরেজি / URL Slug)
+                        </label>
+                        <input
+                          type="text"
+                          value={productFormData.nameEn}
+                          onChange={(e) =>
+                            setProductFormData({ ...productFormData, nameEn: e.target.value })
+                          }
+                          placeholder="যেমন: Sundarbans Raw Honey"
+                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none focus:border-[#016831]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-bold text-[#016831] mb-1">
+                          ক্যাটাগরি <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={productFormData.category}
+                          onChange={(e) => {
+                            const cat = e.target.value;
+                            const catNames = {
+                              honey: 'সুন্দরবনের মধু',
+                              ghee: 'খাঁটি গাওয়া ঘি',
+                              oil: 'সরিষার তেল',
+                              sweets: 'সাতক্ষীরার সন্দেশ',
+                              pickles: 'আচার ও মশলা',
+                            };
+                            setProductFormData({
+                              ...productFormData,
+                              category: cat,
+                              categoryName: catNames[cat] || 'সাধারণ পণ্য',
+                            });
+                          }}
+                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none"
+                        >
+                          <option value="honey">সুন্দরবনের মধু</option>
+                          <option value="ghee">খাঁটি গাওয়া ঘি</option>
+                          <option value="oil">সরিষার তেল</option>
+                          <option value="sweets">সাতক্ষীরার সন্দেশ</option>
+                          <option value="pickles">আচার ও মশলা</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-[#016831] mb-1">
+                          ডিফল্ট পরিমাপ ইউনিট
+                        </label>
+                        <input
+                          type="text"
+                          value={productFormData.unit}
+                          onChange={(e) =>
+                            setProductFormData({ ...productFormData, unit: e.target.value })
+                          }
+                          placeholder="১ কেজি (1 kg)"
+                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block font-bold text-[#016831] mb-1">
+                          বিক্রয় মূল্য (৳) <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={productFormData.price}
+                          onChange={(e) =>
+                            setProductFormData({ ...productFormData, price: e.target.value })
+                          }
+                          placeholder="1250"
+                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none font-bold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-[#016831] mb-1">
+                          মূল মূল্য (ছাড় থাকলে)
+                        </label>
+                        <input
+                          type="number"
+                          value={productFormData.originalPrice}
+                          onChange={(e) =>
+                            setProductFormData({
+                              ...productFormData,
+                              originalPrice: e.target.value,
+                            })
+                          }
+                          placeholder="1450"
+                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-[#016831] mb-1">
+                          মোট স্টক সংখ্যা <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={productFormData.stock}
+                          onChange={(e) =>
+                            setProductFormData({ ...productFormData, stock: e.target.value })
+                          }
+                          placeholder="20"
+                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Multi-attribute variation matrix editor */}
+                    <ProductVariationEditor
+                      hasVariations={productFormData.hasVariations}
+                      variations={productFormData.variations}
+                      onChange={(variationState) =>
                         setProductFormData({
                           ...productFormData,
-                          category: cat,
-                          categoryName: catNames[cat] || 'সাধারণ পণ্য',
-                        });
-                      }}
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none"
-                    >
-                      <option value="honey">সুন্দরবনের মধু</option>
-                      <option value="ghee">খাঁটি গাওয়া ঘি</option>
-                      <option value="oil">সরিষার তেল</option>
-                      <option value="sweets">সাতক্ষীরার সন্দেশ</option>
-                      <option value="pickles">আচার ও মশলা</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-[#016831] mb-1">
-                      ডিফল্ট পরিমাপ ইউনিট
-                    </label>
-                    <input
-                      type="text"
-                      value={productFormData.unit}
-                      onChange={(e) =>
-                        setProductFormData({ ...productFormData, unit: e.target.value })
-                      }
-                      placeholder="১ কেজি (1 kg)"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block font-bold text-[#016831] mb-1">
-                      বিক্রয় মূল্য (৳) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      value={productFormData.price}
-                      onChange={(e) =>
-                        setProductFormData({ ...productFormData, price: e.target.value })
-                      }
-                      placeholder="1250"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none font-bold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-[#016831] mb-1">
-                      মূল মূল্য (ছাড় থাকলে)
-                    </label>
-                    <input
-                      type="number"
-                      value={productFormData.originalPrice}
-                      onChange={(e) =>
-                        setProductFormData({
-                          ...productFormData,
-                          originalPrice: e.target.value,
+                          hasVariations: variationState.hasVariations,
+                          variations: variationState.variations,
                         })
                       }
-                      placeholder="1450"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none"
                     />
-                  </div>
 
-                  <div>
-                    <label className="block font-bold text-[#016831] mb-1">
-                      মোট স্টক সংখ্যা <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      value={productFormData.stock}
-                      onChange={(e) =>
-                        setProductFormData({ ...productFormData, stock: e.target.value })
+                    {/* Product Image & Multi-Image Gallery */}
+                    <ProductImageGalleryManager
+                      primaryImage={productFormData.image}
+                      galleryImages={productFormData.images}
+                      onChange={({ primaryImage, galleryImages }) =>
+                        setProductFormData({
+                          ...productFormData,
+                          image: primaryImage,
+                          images: galleryImages,
+                        })
                       }
-                      placeholder="20"
-                      className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none"
                     />
+
+                    {/* Short Description */}
+                    <div>
+                      <label className="block font-bold text-[#016831] mb-1">
+                        সংক্ষিপ্ত বিবরণ (কার্ড ও হেডার সামারি)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={productFormData.shortDescription}
+                        onChange={(e) =>
+                          setProductFormData({
+                            ...productFormData,
+                            shortDescription: e.target.value,
+                          })
+                        }
+                        placeholder="পণ্যের এক লাইনের আকর্ষণীয় সংক্ষিপ্ত বিবরণ..."
+                        className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Multi-attribute variation matrix editor (Requirement 5) */}
-                <ProductVariationEditor
-                  hasVariations={productFormData.hasVariations}
-                  variations={productFormData.variations}
-                  onChange={(variationState) =>
-                    setProductFormData({
-                      ...productFormData,
-                      hasVariations: variationState.hasVariations,
-                      variations: variationState.variations,
-                    })
-                  }
-                />
+                {/* ─── TAB 2: DETAILED DESCRIPTION & SPECS ─── */}
+                {productModalTab === 'details' && (
+                  <div className="space-y-4 animate-fadeIn">
+                    {/* Full Detailed Description */}
+                    <div className="p-4 bg-white rounded-2xl border border-[#E8E2D5] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="block font-bold text-[#016831] text-xs flex items-center gap-1.5">
+                          <FileText className="w-4 h-4 text-[#D97706]" />
+                          <span>পণ্যের পূর্ণাঙ্গ বিস্তারিত বিবরণ (Full Detailed Description)</span>
+                        </label>
+                        <span className="text-[11px] text-slate-400">
+                          {productFormData.description?.length || 0} অক্ষর
+                        </span>
+                      </div>
+                      <textarea
+                        rows={6}
+                        value={productFormData.description}
+                        onChange={(e) =>
+                          setProductFormData({ ...productFormData, description: e.target.value })
+                        }
+                        placeholder="সুন্দরবনের প্রাকৃতিক মৌচাক থেকে সরাসরি মৌয়ালদের মাধ্যমে সংগৃহীত খলসী ফুলের খাঁটি মধু। কোনো প্রকার চিনি বা কৃত্রিম উপাদান মেশানো হয়নি। কাঁচা মধুর সমস্ত এনজাইম ও প্রাকৃতিক পরাগরেণু অক্ষুণ্ণ রয়েছে..."
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-[#FCFAF7] text-xs text-slate-900 leading-relaxed outline-none focus:border-[#016831]"
+                      />
+                      <p className="text-[11px] text-slate-500">
+                        💡 ডিটেইলস পেজের <strong>&apos;পণ্যের বিবরণ&apos;</strong> ট্যাবে এই লেখাটি বিস্তারিতভাবে প্রদর্শিত হবে।
+                      </p>
+                    </div>
 
-                {/* Product Image & Multi-Image Side-by-Side Gallery */}
-                <ProductImageGalleryManager
-                  primaryImage={productFormData.image}
-                  galleryImages={productFormData.images}
-                  onChange={({ primaryImage, galleryImages }) =>
-                    setProductFormData({
-                      ...productFormData,
-                      image: primaryImage,
-                      images: galleryImages,
-                    })
-                  }
-                />
+                    {/* Quick Specs Grid */}
+                    <div className="p-4 bg-white rounded-2xl border border-[#E8E2D5] space-y-3.5">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#016831]">
+                        <Info className="w-4 h-4 text-[#D97706]" />
+                        <span>এক নজরে স্পেসিফিকেশন তথ্য (Quick Specifications)</span>
+                      </div>
 
-                <div>
-                  <label className="block font-bold text-[#016831] mb-1">
-                    সংক্ষিপ্ত বিবরণ
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={productFormData.shortDescription}
-                    onChange={(e) =>
-                      setProductFormData({
-                        ...productFormData,
-                        shortDescription: e.target.value,
-                      })
-                    }
-                    placeholder="পণ্যের গুণাগুণ ও বিশেষত্ব..."
-                    className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] outline-none"
-                  />
-                </div>
+                      {/* Origin & Harvest Date */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            উৎস স্থল (Origin / সংগ্রহ এলাকা)
+                          </label>
+                          <input
+                            type="text"
+                            value={productFormData.origin}
+                            onChange={(e) =>
+                              setProductFormData({ ...productFormData, origin: e.target.value })
+                            }
+                            placeholder="যেমন: শ্যামনগর, সাতক্ষীরা"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                          />
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {['সুন্দরবন ও সাতক্ষীরা', 'শ্যামনগর, সাতক্ষীরা', 'কালিগঞ্জ, সাতক্ষীরা', 'তালা, সাতক্ষীরা'].map((txt) => (
+                              <button
+                                key={txt}
+                                type="button"
+                                onClick={() => setProductFormData({ ...productFormData, origin: txt })}
+                                className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 hover:text-[#016831] border border-slate-200 transition-colors"
+                              >
+                                {txt}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
 
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setProductModalOpen(false)}
-                    className="px-4 py-2 rounded-xl border border-[#E8E2D5] text-slate-600 font-bold"
-                  >
-                    বাতিল
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl transition-all shadow-sm hover:scale-[1.02]"
-                  >
-                    {editingProduct ? 'আপডেট সংরক্ষণ করুন' : 'পণ্য যোগ করুন'}
-                  </button>
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            সংগ্রহ কাল / সিজন (Harvest Date)
+                          </label>
+                          <input
+                            type="text"
+                            value={productFormData.harvestDate}
+                            onChange={(e) =>
+                              setProductFormData({ ...productFormData, harvestDate: e.target.value })
+                            }
+                            placeholder="যেমন: তাজা সংগ্রহ (অক্টোবর ২০২৪)"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                          />
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {['তাজা সংগ্রহ', 'মৌসুমী সংগ্রহ', 'নতুন মৌসুম ২০২৪'].map((txt) => (
+                              <button
+                                key={txt}
+                                type="button"
+                                onClick={() => setProductFormData({ ...productFormData, harvestDate: txt })}
+                                className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 hover:text-[#016831] border border-slate-200 transition-colors"
+                              >
+                                {txt}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Packaging & Purity Guarantee */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            প্যাকেজিং ধরন (Packaging)
+                          </label>
+                          <input
+                            type="text"
+                            value={productFormData.packaging}
+                            onChange={(e) =>
+                              setProductFormData({ ...productFormData, packaging: e.target.value })
+                            }
+                            placeholder="যেমন: ফুড-গ্রেড এয়ারটাইট জার"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                          />
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {['ফুড-গ্রেড এয়ারটাইট জার', 'কাঁচের প্রিমিয়াম জার', 'ফুড-গ্রেড বোতল', 'বায়ুরোধী মেটাল ফয়েল প্যাক'].map((txt) => (
+                              <button
+                                key={txt}
+                                type="button"
+                                onClick={() => setProductFormData({ ...productFormData, packaging: txt })}
+                                className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 hover:text-[#016831] border border-slate-200 transition-colors"
+                              >
+                                {txt}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            মান ও বিশুদ্ধতা নিশ্চয়তা (Purity Guarantee)
+                          </label>
+                          <input
+                            type="text"
+                            value={productFormData.purityGuarantee}
+                            onChange={(e) =>
+                              setProductFormData({ ...productFormData, purityGuarantee: e.target.value })
+                            }
+                            placeholder="যেমন: ১০০% প্রাকৃতিক ও খাঁটি"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                          />
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {['১০০% প্রাকৃতিক ও খাঁটি', 'ল্যাব টেস্ট সার্টিফাইড', 'শূন্য ভেজাল গ্যারান্টি', 'অর্গানিক ও প্রিজারভেটিভমুক্ত'].map((txt) => (
+                              <button
+                                key={txt}
+                                type="button"
+                                onClick={() => setProductFormData({ ...productFormData, purityGuarantee: txt })}
+                                className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 hover:text-[#016831] border border-slate-200 transition-colors"
+                              >
+                                {txt}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Payment Terms & Delivery Timeline */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            পেমেন্ট সুবিধা (Payment Terms)
+                          </label>
+                          <input
+                            type="text"
+                            value={productFormData.paymentTerms}
+                            onChange={(e) =>
+                              setProductFormData({ ...productFormData, paymentTerms: e.target.value })
+                            }
+                            placeholder="যেমন: ক্যাশ অন ডেলিভারি"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            ডেলিভারি সময়সীমা (Delivery Timeline)
+                          </label>
+                          <input
+                            type="text"
+                            value={productFormData.deliveryTimeline}
+                            onChange={(e) =>
+                              setProductFormData({ ...productFormData, deliveryTimeline: e.target.value })
+                            }
+                            placeholder="যেমন: ঢাকা সিটির ভেতর ২৪-৪৮ ঘণ্টা, সারাদেশে ২-৩ কার্যদিবস"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Storage Advice */}
+                    <div className="p-4 bg-white rounded-2xl border border-[#E8E2D5] space-y-2">
+                      <label className="block font-bold text-[#016831] text-xs">
+                        সংরক্ষণ পদ্ধতি ও পরামর্শ (Storage Tips)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={productFormData.storageTips}
+                        onChange={(e) =>
+                          setProductFormData({ ...productFormData, storageTips: e.target.value })
+                        }
+                        placeholder="আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* ─── TAB 3: BENEFITS & NUTRITION ─── */}
+                {productModalTab === 'benefits' && (
+                  <div className="space-y-4 animate-fadeIn">
+                    {/* Benefits Section */}
+                    <div className="p-4 bg-white rounded-2xl border border-[#E8E2D5] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="block font-bold text-[#016831] text-xs flex items-center gap-1.5">
+                          <CheckCircle className="w-4 h-4 text-[#016831]" />
+                          <span>মূল স্বাস্থ্য উপকারিতা ও গুণাগুণ ({productFormData.benefits?.length || 0} টি)</span>
+                        </label>
+                      </div>
+
+                      {/* Add Benefit Input Bar */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newBenefitInput}
+                          onChange={(e) => setNewBenefitInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddBenefit();
+                            }
+                          }}
+                          placeholder="নতুন উপকারিতা লিখুন (যেমন: রোগ প্রতিরোধ ক্ষমতা বাড়ায়)"
+                          className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAddBenefit()}
+                          className="px-4 py-2 bg-[#016831] text-white rounded-xl font-bold hover:bg-[#0D3528] transition-colors"
+                        >
+                          + যোগ করুন
+                        </button>
+                      </div>
+
+                      {/* Quick Suggestions */}
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-amber-500" /> দ্রুত যোগ করুন:
+                        </span>
+                        {[
+                          'রোগ প্রতিরোধ ক্ষমতা বাড়ায়',
+                          'হজম শক্তি বৃদ্ধি করে',
+                          'প্রাকৃতিক শক্তি ও বল জোগায়',
+                          'অ্যান্টিঅক্সিডেন্ট ও এনজাইম সমৃদ্ধ',
+                          'হৃদযন্ত্র সুস্থ রাখতে সহায়ক',
+                          'ত্বক ও চুলের পুষ্টি জোগায়',
+                        ].map((txt) => (
+                          <button
+                            key={txt}
+                            type="button"
+                            onClick={() => handleAddBenefit(txt)}
+                            className="text-[10px] px-2 py-0.5 rounded-lg bg-emerald-50 text-[#016831] hover:bg-emerald-100 border border-emerald-200 transition-colors"
+                          >
+                            + {txt}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Benefits Badges */}
+                      {productFormData.benefits && productFormData.benefits.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                          {productFormData.benefits.map((b, idx) => (
+                            <div
+                              key={idx}
+                              className="p-2.5 rounded-xl bg-[#F0FDF4] border border-[#DCFCE7] flex items-center justify-between gap-2"
+                            >
+                              <span className="text-xs text-[#014D24] font-medium leading-snug">
+                                ✓ {b}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveBenefit(idx)}
+                                className="text-red-500 hover:text-red-700 p-0.5 rounded hover:bg-red-50 flex-shrink-0"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-slate-400 italic">
+                          এখনো কোনো নির্দিষ্ট উপকারিতা যুক্ত করা হয়নি। খালি রাখলে ডিফল্ট প্রাকৃতিক গুণাগুণের নোট দেখাবে।
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Nutrition Facts Section */}
+                    <div className="p-4 bg-white rounded-2xl border border-[#E8E2D5] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="block font-bold text-[#016831] text-xs flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-amber-500" />
+                          <span>পুষ্টি উপাদান চার্ট (Nutrition Facts)</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleLoadSampleNutrition}
+                          className="text-[11px] text-[#B45309] hover:underline font-bold"
+                        >
+                          + নমুনা পুষ্টি তালিকা লোড করুন
+                        </button>
+                      </div>
+
+                      {/* Add Nutrition Row */}
+                      <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                        <input
+                          type="text"
+                          value={newNutritionKey}
+                          onChange={(e) => setNewNutritionKey(e.target.value)}
+                          placeholder="পুষ্টির নাম (যেমন: ক্যালরি / শক্তি)"
+                          className="sm:col-span-2 px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                        />
+                        <input
+                          type="text"
+                          value={newNutritionValue}
+                          onChange={(e) => setNewNutritionValue(e.target.value)}
+                          placeholder="পরিমাণ (যেমন: ৩২০ kcal)"
+                          className="sm:col-span-2 px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddNutrition}
+                          className="sm:col-span-1 px-3 py-2 bg-[#016831] text-white rounded-xl font-bold hover:bg-[#0D3528] transition-colors"
+                        >
+                          + যুক্ত করুন
+                        </button>
+                      </div>
+
+                      {/* Added Nutrition Items */}
+                      {productFormData.nutritionalInfo && Object.keys(productFormData.nutritionalInfo).length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2">
+                          {Object.entries(productFormData.nutritionalInfo).map(([k, v]) => (
+                            <div
+                              key={k}
+                              className="p-2 rounded-xl bg-[#FAF8F5] border border-[#E8E2D5] flex items-center justify-between gap-1.5"
+                            >
+                              <div className="min-w-0">
+                                <span className="block text-[10px] text-stone-500 truncate">{k}</span>
+                                <span className="block text-xs font-bold text-[#016831] truncate">{v}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveNutrition(k)}
+                                className="text-red-400 hover:text-red-700 p-0.5"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-slate-400 italic">
+                          কোনো পুষ্টি উপাদান দেওয়া না থাকলে ডিটেইলস পেজে এই সেকশনটি লুকানো থাকবে।
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Special Care Features Section */}
+                    <div className="p-4 bg-white rounded-2xl border border-[#E8E2D5] space-y-3">
+                      <label className="block font-bold text-[#016831] text-xs flex items-center gap-1.5">
+                        <ShieldCheck className="w-4 h-4 text-[#F59E0B]" />
+                        <span>সাতক্ষীরা ঘর স্পেশাল কেয়ার পয়েন্ট (সাইডবার বুলেট পয়েন্ট)</span>
+                      </label>
+
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newFeatureInput}
+                          onChange={(e) => setNewFeatureInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddFeature();
+                            }
+                          }}
+                          placeholder="যেমন: কোনো প্রকার চিনি বা কৃত্রিম প্রিজারভেটিভ নেই"
+                          className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAddFeature()}
+                          className="px-4 py-2 bg-[#016831] text-white rounded-xl font-bold hover:bg-[#0D3528] transition-colors"
+                        >
+                          + যোগ করুন
+                        </button>
+                      </div>
+
+                      {productFormData.specialFeatures && productFormData.specialFeatures.length > 0 ? (
+                        <div className="space-y-1.5 pt-1">
+                          {productFormData.specialFeatures.map((f, idx) => (
+                            <div
+                              key={idx}
+                              className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2"
+                            >
+                              <span className="text-xs text-slate-800">
+                                ✓ {f}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveFeature(idx)}
+                                className="text-red-500 hover:text-red-700 p-0.5"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-slate-400 italic">
+                          খালি রাখলে ৩টি প্রিমিয়াম ডিফল্ট কেয়ার পয়েন্ট স্বয়ংক্রিয়ভাবে প্রদর্শিত হবে।
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer Buttons */}
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 pt-3 border-t border-[#E8E2D5] flex-shrink-0">
+                  <div className="text-[11px] text-slate-500">
+                    {productModalTab === 'basic' && 'পরবর্তী ধাপে স্পেক্স ও পুষ্টি তথ্য যুক্ত করতে উপরে ট্যাবে ক্লিক করুন →'}
+                    {productModalTab === 'details' && '← আগের ধাপ: বেসিক তথ্য | পরবর্তী ধাপ: উপকারিতা ও পুষ্টি →'}
+                    {productModalTab === 'benefits' && 'সব তথ্য পূরণ সম্পন্ন হলে সংরক্ষণ বাটনে ক্লিক করুন!'}
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setProductModalOpen(false)}
+                      className="px-4 py-2 rounded-xl border border-[#E8E2D5] text-slate-600 font-bold hover:bg-slate-100 transition-colors"
+                    >
+                      বাতিল
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl transition-all shadow-md hover:scale-[1.02]"
+                    >
+                      {editingProduct ? 'আপডেট সংরক্ষণ করুন' : 'পণ্য যোগ করুন'}
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>

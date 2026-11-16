@@ -1,8 +1,18 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShieldCheck, Truck, Sparkles, MapPin, Phone, Mail, Award } from 'lucide-react';
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hide footer on checkout, cart, and admin pages
+  if (pathname === '/cart' || pathname === '/checkout' || pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <footer className="bg-[#014D24] text-[#FDFBF7] pt-12 sm:pt-16 pb-24 md:pb-12 border-t border-[#016831]">
       {/* Organic Value Proposition Row */}

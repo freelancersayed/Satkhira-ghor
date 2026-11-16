@@ -95,9 +95,35 @@ const ProductSchema = new mongoose.Schema(
       default: [],
     },
     nutritionalInfo: {
-      type: Map,
-      of: String,
+      type: mongoose.Schema.Types.Mixed,
       default: {},
+    },
+    packaging: {
+      type: String,
+      default: 'ফুড-গ্রেড এয়ারটাইট জার',
+      trim: true,
+    },
+    purityGuarantee: {
+      type: String,
+      default: '১০০% প্রাকৃতিক ও খাঁটি',
+      trim: true,
+    },
+    paymentTerms: {
+      type: String,
+      default: 'ক্যাশ অন ডেলিভারি',
+      trim: true,
+    },
+    storageTips: {
+      type: String,
+      default: 'আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।',
+    },
+    specialFeatures: {
+      type: [String],
+      default: [],
+    },
+    deliveryTimeline: {
+      type: String,
+      default: 'ঢাকা সিটির ভেতর ২৪-৪৮ ঘণ্টা, সারাদেশে ২-৩ কার্যদিবস',
     },
     isFeatured: {
       type: Boolean,

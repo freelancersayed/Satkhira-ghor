@@ -85,6 +85,17 @@ export async function POST(request) {
       shortDescription,
       description,
       origin,
+      harvestDate,
+      benefits,
+      nutritionalInfo,
+      packaging,
+      purityGuarantee,
+      paymentTerms,
+      storageTips,
+      specialFeatures,
+      deliveryTimeline,
+      hasVariations,
+      variations,
     } = body;
 
     if (!name || !price || !category || !image) {
@@ -123,7 +134,18 @@ export async function POST(request) {
       images: images && images.length > 0 ? [image, ...images.filter((i) => i !== image)] : [image],
       shortDescription: shortDescription || '',
       description: description || '',
-      origin: origin || 'সাতক্ষীরা',
+      origin: origin || 'সুন্দরবন ও সাতক্ষীরা',
+      harvestDate: harvestDate || '',
+      benefits: Array.isArray(benefits) ? benefits.filter(Boolean) : [],
+      nutritionalInfo: nutritionalInfo && typeof nutritionalInfo === 'object' ? nutritionalInfo : {},
+      packaging: packaging || 'ফুড-গ্রেড এয়ারটাইট জার',
+      purityGuarantee: purityGuarantee || '১০০% প্রাকৃতিক ও খাঁটি',
+      paymentTerms: paymentTerms || 'ক্যাশ অন ডেলিভারি',
+      storageTips: storageTips || 'আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।',
+      specialFeatures: Array.isArray(specialFeatures) ? specialFeatures.filter(Boolean) : [],
+      deliveryTimeline: deliveryTimeline || 'ঢাকা সিটির ভেতর ২৪-৪৮ ঘণ্টা, সারাদেশে ২-৩ কার্যদিবস',
+      hasVariations: !!hasVariations,
+      variations: Array.isArray(variations) ? variations : [],
     });
 
     try {

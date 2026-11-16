@@ -185,6 +185,7 @@ export default function CartPage() {
       setOrderPlaced(true);
       clearCart();
       if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         window.dispatchEvent(new CustomEvent('halum:order-confirmed'));
       }
     } catch (err) {
@@ -194,11 +195,11 @@ export default function CartPage() {
     }
   };
 
-  // ── Success State Screen (Compact & Screen-Friendly) ──
+  // ── Success State Screen (Compact & Screen-Friendly Main Screen Section) ──
   if (orderPlaced && confirmedOrder) {
     return (
-      <div className="py-6 sm:py-10 bg-[#FDFBF7] min-h-[70vh]">
-        <div className="max-w-lg mx-auto px-3.5 text-center bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#E8E2D5] shadow-sm space-y-4">
+      <div className="py-6 sm:py-12 bg-[#FDFBF7] min-h-[85vh] flex flex-col justify-center items-center">
+        <div className="w-full max-w-lg mx-auto px-3.5 text-center bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#E8E2D5] shadow-xs space-y-4 animate-fadeIn">
           <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto shadow-xs">
             <CheckCircle className="w-8 h-8" />
           </div>
