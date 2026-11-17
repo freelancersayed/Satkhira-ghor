@@ -21,14 +21,14 @@ export default function ImageUploadInput({
   const handleFileUpload = async (file) => {
     if (!file) return;
 
-    // Check if image
-    if (!file.type.startsWith('image/') && !/\.(jpe?g|png|webp|gif|avif|heic|heif|jfif)$/i.test(file.name)) {
-      setError('দয়া করে একটি সঠিক ছবি (JPG, PNG, WEBP ইত্যাদি) নির্বাচন করুন');
+    // Check if image (support all formats from phone galleries and desktop)
+    if (!file.type.startsWith('image/') && !/\.(jpe?g|png|webp|gif|avif|heic|heif|jfif|bmp|svg)$/i.test(file.name)) {
+      setError('দয়া করে একটি সঠিক ছবি (JPG, PNG, WEBP, AVIF ইত্যাদি) নির্বাচন করুন');
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setError('ছবির আকার সর্বোচ্চ ১০ MB হতে পারবে');
+    if (file.size > 25 * 1024 * 1024) {
+      setError('ছবির আকার সর্বোচ্চ ২৫ MB হতে পারবে');
       return;
     }
 
@@ -106,11 +106,11 @@ export default function ImageUploadInput({
         )}
       </div>
 
-      {/* Hidden Native File Input (accepts camera & phone gallery) */}
+      {/* Hidden Native File Input (accepts camera & phone gallery all formats) */}
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*, .jpg, .jpeg, .png, .webp, .avif, .gif, .jfif, .svg, .bmp, .heic, .heif"
         className="hidden"
         onChange={(e) => {
           if (e.target.files?.[0]) {

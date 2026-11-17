@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
+import SiteContent from '@/models/SiteContent';
 import { requireManagerOrAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,12 @@ export async function POST(request) {
 
     await connectToDatabase();
 
+    let dynamicCats = [];
+    try {
+      const catDoc = await SiteContent.findOne({ key: 'categories' }).lean();
+      if (catDoc && Array.isArray(catDoc.data)) dynamicCats = catDoc.data;
+    } catch (e) {}
+
     const timestamp = Date.now();
     const preparedProducts = products.map((item, idx) => {
       const cleanName = (item.name || '').trim();
@@ -36,12 +43,23 @@ export async function POST(request) {
         : `prod-${timestamp}-${idx}`;
       const uniqueSlug = `${baseSlug}-${Math.floor(1000 + Math.random() * 9000)}`;
 
+      const matchedCat = dynamicCats.find(
+        (c) =>
+          c.slug === item.category ||
+          c.id === item.category ||
+          c.name === item.category ||
+          c.name === item.categoryName
+      );
+
+      const category = item.category || (matchedCat ? (matchedCat.slug || matchedCat.id) : 'honey');
+      const categoryName = item.categoryName || (matchedCat ? matchedCat.name : 'সুন্দরবনের মধু');
+
       return {
         name: cleanName || `পণ্য ${idx + 1}`,
         nameEn: cleanNameEn,
         slug: uniqueSlug,
-        category: item.category || 'honey',
-        categoryName: item.categoryName || 'সুন্দরবনের মধু',
+        category,
+        categoryName,
         price: Number(item.price) || 0,
         originalPrice: item.originalPrice ? Number(item.originalPrice) : null,
         unit: item.unit || '১ কেজি',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -96,11 +96,13 @@ export default function AdminDashboardPage() {
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [categoriesList, setCategoriesList] = useState([]);
 
   // Product Form state (with variation matrix & full dynamic specifications)
   const initialProductFormState = {
     name: '',
     nameEn: '',
+    slug: '',
     category: 'honey',
     categoryName: 'সুন্দরবনের মধু',
     price: '',
@@ -243,7 +245,13 @@ export default function AdminDashboardPage() {
   };
 
   const loadDashboardData = async () => {
-    await Promise.all([fetchStats(), fetchProducts(), fetchOrders(), fetchAdminReviews()]);
+    await Promise.all([
+      fetchStats(),
+      fetchProducts(),
+      fetchOrders(),
+      fetchAdminReviews(),
+      fetchCategories(),
+    ]);
   };
 
   const fetchStats = async () => {
@@ -303,6 +311,20 @@ export default function AdminDashboardPage() {
       console.error('Fetch reviews failed:', e);
     } finally {
       setLoadingAdminReviews(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/categories');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.categories && Array.isArray(data.categories)) {
+          setCategoriesList(data.categories);
+        }
+      }
+    } catch (e) {
+      console.error('Fetch categories failed:', e);
     }
   };
 
@@ -392,8 +414,9 @@ export default function AdminDashboardPage() {
     setProductFormData({
       name: prod.name || '',
       nameEn: prod.nameEn || '',
-      category: prod.category || 'honey',
-      categoryName: prod.categoryName || 'সুন্দরবনের মধু',
+      slug: prod.slug || '',
+      category: prod.category || (effectiveCategories[0]?.slug || 'honey'),
+      categoryName: prod.categoryName || (effectiveCategories.find((c) => (c.slug || c.id) === prod.category)?.name) || 'সুন্দরবনের মধু',
       price: prod.price || '',
       originalPrice: prod.originalPrice || '',
       unit: prod.unit || '১ কেজি (1 kg)',
@@ -543,12 +566,59 @@ export default function AdminDashboardPage() {
     );
   }
 
+  // Dynamic categories helper (fallback to defaults if empty)
+  const defaultCategories = useMemo(
+    () => [
+      { slug: 'honey', name: 'সুন্দরবনের মধু' },
+      { slug: 'ghee', name: 'খাঁটি গাওয়া ঘি' },
+      { slug: 'oil', name: 'সরিষার তেল' },
+      { slug: 'sweets', name: 'সাতক্ষীরার সন্দেশ' },
+      { slug: 'pickles', name: 'আচার ও মশলা' },
+    ],
+    []
+  );
+
+  const effectiveCategories = useMemo(() => {
+    const selectable = (categoriesList || []).filter(
+      (c) => c && c.slug !== 'all' && c.id !== 'all'
+    );
+    return selectable.length > 0 ? selectable : defaultCategories;
+  }, [categoriesList, defaultCategories]);
+
   // Filter products
   const filteredProducts = products.filter((p) => {
+    const q = (productSearch || '').trim().toLowerCase();
     const matchesSearch =
-      p.name?.toLowerCase().includes(productSearch.toLowerCase()) ||
-      p.slug?.toLowerCase().includes(productSearch.toLowerCase());
-    const matchesCat = productCategory === 'all' || p.category === productCategory;
+      !q ||
+      p.name?.toLowerCase().includes(q) ||
+      p.nameEn?.toLowerCase().includes(q) ||
+      p.slug?.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q) ||
+      p.categoryName?.toLowerCase().includes(q);
+
+    let matchesCat = productCategory === 'all';
+    if (!matchesCat) {
+      const selectedCat = categoriesList.find((c) => (c.slug || c.id) === productCategory);
+      const catSlug = selectedCat?.slug?.toLowerCase()?.trim() || '';
+      const catId = selectedCat?.id?.toLowerCase()?.trim() || '';
+      const catName = selectedCat?.name?.toLowerCase()?.trim() || '';
+      const norm = (s) => (s ? s.replace(/[^a-z0-9]/g, '') : '');
+      const pCat = p.category?.toLowerCase()?.trim() || '';
+      const pName = p.categoryName?.toLowerCase()?.trim() || '';
+      const target = productCategory.toLowerCase().trim();
+
+      matchesCat =
+        pCat === target ||
+        pName === target ||
+        pName.includes(target) ||
+        (selectedCat && (
+          (catSlug && pCat === catSlug) ||
+          (catId && pCat === catId) ||
+          (catSlug && norm(catSlug) && (norm(catSlug).includes(norm(pCat)) || norm(pCat).includes(norm(catSlug)))) ||
+          (catName && (pCat === catName || pName === catName || pName.includes(catName) || catName.includes(pName)))
+        ));
+    }
+
     const stockVal = p.stock !== undefined ? p.stock : 10;
     const matchesStock =
       productStockFilter === 'all'
@@ -913,13 +983,18 @@ export default function AdminDashboardPage() {
 
                 <button
                   onClick={() => {
+                    const firstValidCat = effectiveCategories[0];
                     setEditingProduct(null);
                     setProductModalTab('basic');
                     setNewBenefitInput('');
                     setNewFeatureInput('');
                     setNewNutritionKey('');
                     setNewNutritionValue('');
-                    setProductFormData(initialProductFormState);
+                    setProductFormData({
+                      ...initialProductFormState,
+                      category: firstValidCat ? (firstValidCat.slug || firstValidCat.id) : 'honey',
+                      categoryName: firstValidCat ? firstValidCat.name : 'সুন্দরবনের মধু',
+                    });
                     setProductModalOpen(true);
                   }}
                   className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition-all shadow-sm hover:scale-[1.02]"
@@ -1314,14 +1389,14 @@ export default function AdminDashboardPage() {
                 <select
                   value={productCategory}
                   onChange={(e) => setProductCategory(e.target.value)}
-                  className="py-2 px-3 rounded-xl border border-[#E8E2D5] text-xs bg-white text-slate-900 outline-none"
+                  className="py-2 px-3 rounded-xl border border-[#E8E2D5] text-xs bg-white text-slate-900 outline-none font-medium"
                 >
                   <option value="all">সকল ক্যাটাগরি</option>
-                  <option value="honey">সুন্দরবনের মধু</option>
-                  <option value="ghee">খাঁটি গাওয়া ঘি</option>
-                  <option value="oil">সরিষার তেল</option>
-                  <option value="sweets">সাতক্ষীরার সন্দেশ</option>
-                  <option value="pickles">আচার ও মশলা</option>
+                  {effectiveCategories.map((cat) => (
+                    <option key={cat.slug || cat.id} value={cat.slug || cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -1555,7 +1630,15 @@ export default function AdminDashboardPage() {
 
         {/* ===================== TAB 8: CATEGORIES MANAGEMENT ===================== */}
         {activeTab === 'categories' && isManagerOrAdmin && (
-          <AdminCategoriesView />
+          <AdminCategoriesView
+            onCategoriesUpdated={(newCats) => {
+              if (Array.isArray(newCats)) {
+                setCategoriesList(newCats);
+              } else {
+                fetchCategories();
+              }
+            }}
+          />
         )}
 
         {/* ===================== TAB 9: FLASH SALE & DHAMAKA OFFERS ===================== */}
@@ -1670,33 +1753,50 @@ export default function AdminDashboardPage() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-bold text-[#016831] mb-1">
-                          ক্যাটাগরি <span className="text-red-500">*</span>
-                        </label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block font-bold text-[#016831]">
+                            ক্যাটাগরি <span className="text-red-500">*</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setProductModalOpen(false);
+                              setActiveTab('categories');
+                            }}
+                            className="text-[11px] text-[#016831] hover:underline font-semibold"
+                            title="নতুন ক্যাটাগরি তৈরি করতে ক্যাটাগরি ট্যাবে যান"
+                          >
+                            + নতুন ক্যাটাগরি তৈরি
+                          </button>
+                        </div>
                         <select
                           value={productFormData.category}
                           onChange={(e) => {
-                            const cat = e.target.value;
-                            const catNames = {
-                              honey: 'সুন্দরবনের মধু',
-                              ghee: 'খাঁটি গাওয়া ঘি',
-                              oil: 'সরিষার তেল',
-                              sweets: 'সাতক্ষীরার সন্দেশ',
-                              pickles: 'আচার ও মশলা',
-                            };
+                            const catVal = e.target.value;
+                            const matched = effectiveCategories.find(
+                              (c) => (c.slug || c.id) === catVal
+                            );
                             setProductFormData({
                               ...productFormData,
-                              category: cat,
-                              categoryName: catNames[cat] || 'সাধারণ পণ্য',
+                              category: catVal,
+                              categoryName: matched ? (matched.name || matched.nameBn || catVal) : catVal,
                             });
                           }}
-                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none"
+                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none font-medium"
                         >
-                          <option value="honey">সুন্দরবনের মধু</option>
-                          <option value="ghee">খাঁটি গাওয়া ঘি</option>
-                          <option value="oil">সরিষার তেল</option>
-                          <option value="sweets">সাতক্ষীরার সন্দেশ</option>
-                          <option value="pickles">আচার ও মশলা</option>
+                          {productFormData.category &&
+                            !effectiveCategories.some(
+                              (c) => (c.slug || c.id) === productFormData.category
+                            ) && (
+                              <option value={productFormData.category}>
+                                {productFormData.categoryName || productFormData.category} (বর্তমান)
+                              </option>
+                            )}
+                          {effectiveCategories.map((cat) => (
+                            <option key={cat.slug || cat.id} value={cat.slug || cat.id}>
+                              {cat.name} {cat.nameEn ? `(${cat.nameEn})` : ''}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
@@ -2391,6 +2491,7 @@ export default function AdminDashboardPage() {
         <BulkProductUploadModal
           isOpen={bulkModalOpen}
           onClose={() => setBulkModalOpen(false)}
+          categoriesList={effectiveCategories}
           onUploadSuccess={(count) => {
             showNotification(`${count} টি পণ্য সফলভাবে বাল্ক আপলোড হয়েছে!`, 'success');
             fetchProducts();

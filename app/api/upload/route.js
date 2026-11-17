@@ -36,22 +36,22 @@ export async function POST(request) {
       return NextResponse.json({ message: 'কোনো ছবি বা ফাইল নির্বাচন করা হয়নি' }, { status: 400 });
     }
 
-    // Validate type (support standard images, camera shots, and phone gallery formats)
+    // Validate type (support standard images, camera shots, and phone gallery formats: jpg, png, webp, avif, jfif, svg, etc.)
     const isImage =
       (file.type && file.type.startsWith('image/')) ||
-      /\.(jpe?g|png|webp|gif|avif|heic|heif|bmp|jfif)$/i.test(file.name || '');
+      /\.(jpe?g|png|webp|gif|avif|heic|heif|bmp|jfif|svg)$/i.test(file.name || '');
 
     if (!isImage) {
       return NextResponse.json(
-        { message: 'শুধুমাত্র ছবি (JPG, PNG, WEBP, GIF ইত্যাদি) ফাইল সমর্থনযোগ্য' },
+        { message: 'শুধুমাত্র ছবি (JPG, PNG, WEBP, AVIF, JFIF ইত্যাদি) ফাইল সমর্থনযোগ্য' },
         { status: 400 }
       );
     }
 
-    // Max 10MB for smartphone camera photos
-    if (file.size > 10 * 1024 * 1024) {
+    // Max 25MB for modern high-resolution smartphone camera photos and gallery uploads
+    if (file.size > 25 * 1024 * 1024) {
       return NextResponse.json(
-        { message: 'ছবির সাইজ সর্বোচ্চ ১০MB হতে পারবে' },
+        { message: 'ছবির সাইজ সর্বোচ্চ ২৫MB হতে পারবে' },
         { status: 400 }
       );
     }
@@ -95,8 +95,24 @@ export async function POST(request) {
         await mkdir(uploadDir, { recursive: true });
       }
 
-      const rawExt = (file.name?.split('.').pop() || 'jpg').toLowerCase();
-      const ext = rawExt.replace(/[^a-z0-9]/g, '') || 'jpg';
+      const mimeToExt = {
+        'image/jpeg': 'jpg',
+        'image/pjpeg': 'jpg',
+        'image/png': 'png',
+        'image/webp': 'webp',
+        'image/avif': 'avif',
+        'image/gif': 'gif',
+        'image/svg+xml': 'svg',
+        'image/bmp': 'bmp',
+        'image/x-ms-bmp': 'bmp',
+        'image/heic': 'heic',
+        'image/heif': 'heif',
+      };
+
+      let rawExt = file.name?.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
+      // Normalize JFIF and JPEG to standard JPG for universal browser and Next.js compatibility
+      if (rawExt === 'jfif' || rawExt === 'jpeg') rawExt = 'jpg';
+      const ext = rawExt.replace(/[^a-z0-9]/g, '') || mimeToExt[file.type] || 'jpg';
       const filename = `upload_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const filepath = path.join(uploadDir, filename);
       await writeFile(filepath, buffer);

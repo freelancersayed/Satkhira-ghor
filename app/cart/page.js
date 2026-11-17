@@ -95,8 +95,8 @@ export default function CartPage() {
   const deliveryCharge = isFreeDelivery
     ? 0
     : isDhaka
-    ? deliveryConfig.insideDhaka
-    : deliveryConfig.outsideDhaka;
+      ? deliveryConfig.insideDhaka
+      : deliveryConfig.outsideDhaka;
   const total = Math.max(0, subtotal - discount + deliveryCharge);
   const remainingForFree = Math.max(0, deliveryConfig.freeDeliveryThreshold - subtotal);
 
@@ -360,9 +360,8 @@ export default function CartPage() {
                     <span className="text-xs font-bold text-[#016831] flex items-center gap-1">
                       <span>অর্ডার সারসংক্ষেপ</span>
                       <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                          showOrderSummaryMobile ? 'rotate-180' : ''
-                        }`}
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${showOrderSummaryMobile ? 'rotate-180' : ''
+                          }`}
                       />
                     </span>
                     <span className="text-[10px] text-stone-500 block">
@@ -385,9 +384,10 @@ export default function CartPage() {
                       <div key={item.id} className="py-2.5 flex items-center gap-2.5">
                         <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#FAF8F5] flex-shrink-0 border border-[#E8E2D5]">
                           <Image
-                            src={item.image}
+                            src={item.image || 'https://images.unsplash.com/photo-1587049352846-4a222e784d38'}
                             alt={item.name}
                             fill
+                            unoptimized={Boolean(item.image?.startsWith('data:') || item.image?.startsWith('blob:') || /\.(svg|jfif|bmp|heic|heif)(\?.*)?$/i.test(item.image))}
                             className="object-cover"
                             sizes="48px"
                           />
@@ -515,11 +515,10 @@ export default function CartPage() {
                         <button
                           type="button"
                           onClick={() => setFormData({ ...formData, city: 'ঢাকা' })}
-                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${
-                            isDhaka
+                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${isDhaka
                               ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
                               : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-stone-800">ঢাকার ভেতরে</span>
@@ -535,11 +534,10 @@ export default function CartPage() {
                         <button
                           type="button"
                           onClick={() => setFormData({ ...formData, city: 'ঢাকার বাইরে' })}
-                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${
-                            !isDhaka
+                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${!isDhaka
                               ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
                               : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-stone-800">ঢাকার বাইরে</span>
@@ -617,11 +615,10 @@ export default function CartPage() {
                     {/* Cash on Delivery (COD) */}
                     <div
                       onClick={() => setFormData({ ...formData, paymentMethod: 'cod' })}
-                      className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 ${
-                        formData.paymentMethod === 'cod'
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 ${formData.paymentMethod === 'cod'
                           ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
                           : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                      }`}
+                        }`}
                     >
                       <input
                         type="radio"
@@ -647,11 +644,10 @@ export default function CartPage() {
                     {/* bKash / Nagad */}
                     <div
                       onClick={() => setFormData({ ...formData, paymentMethod: 'bkash' })}
-                      className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 ${
-                        formData.paymentMethod === 'bkash'
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 ${formData.paymentMethod === 'bkash'
                           ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
                           : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                      }`}
+                        }`}
                     >
                       <input
                         type="radio"
@@ -710,9 +706,10 @@ export default function CartPage() {
                       <div key={item.id} className="py-2.5 flex items-center gap-2.5">
                         <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#FAF8F5] flex-shrink-0 border border-[#E8E2D5]">
                           <Image
-                            src={item.image}
+                            src={item.image || 'https://images.unsplash.com/photo-1587049352846-4a222e784d38'}
                             alt={item.name}
                             fill
+                            unoptimized={Boolean(item.image?.startsWith('data:') || item.image?.startsWith('blob:') || /\.(svg|jfif|bmp|heic|heif)(\?.*)?$/i.test(item.image))}
                             className="object-cover"
                             sizes="48px"
                           />

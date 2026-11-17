@@ -301,7 +301,7 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
       <input
         ref={editFileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*, .jpg, .jpeg, .png, .webp, .avif, .gif, .jfif, .svg, .bmp, .heic, .heif"
         onChange={handleEditImageUpload}
         className="hidden"
       />

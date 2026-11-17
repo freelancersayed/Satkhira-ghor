@@ -16,14 +16,14 @@ export default function ImageUploader({ onInsert, label = 'ছবি আপল�
 
     const isImage =
       (file.type && file.type.startsWith('image/')) ||
-      /\.(jpe?g|png|webp|gif|avif|heic|heif|bmp|jfif)$/i.test(file.name || '');
+      /\.(jpe?g|png|webp|gif|avif|heic|heif|bmp|jfif|svg)$/i.test(file.name || '');
 
     if (!isImage) {
-      setError('শুধুমাত্র ছবি (JPG, PNG, WEBP, GIF ইত্যাদি) ফাইল সমর্থনযোগ্য।');
+      setError('শুধুমাত্র ছবি (JPG, PNG, WEBP, AVIF, JFIF ইত্যাদি) ফাইল সমর্থনযোগ্য।');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setError('ফাইলের আকার সর্বোচ্চ ১০MB হতে হবে।');
+    if (file.size > 25 * 1024 * 1024) {
+      setError('ফাইলের আকার সর্বোচ্চ ২৫MB হতে পারবে।');
       return;
     }
 
@@ -80,7 +80,7 @@ export default function ImageUploader({ onInsert, label = 'ছবি আপল�
         <input
           ref={fileRef}
           type="file"
-          accept="image/*"
+          accept="image/*, .jpg, .jpeg, .png, .webp, .avif, .gif, .jfif, .svg, .bmp, .heic, .heif"
           multiple
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}

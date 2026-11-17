@@ -54,6 +54,7 @@ export default function AddToCartToast() {
               src={lastAddedItem.image}
               alt={lastAddedItem.name || 'পণ্য'}
               fill
+              unoptimized={Boolean(lastAddedItem.image?.startsWith('data:') || lastAddedItem.image?.startsWith('blob:') || /\.(svg|jfif|bmp|heic|heif)(\?.*)?$/i.test(lastAddedItem.image))}
               className="object-cover"
             />
           ) : (

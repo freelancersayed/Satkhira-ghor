@@ -394,7 +394,7 @@ export default function HeroBannerEditModal({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*, .jpg, .jpeg, .png, .webp, .avif, .gif, .jfif, .svg, .bmp, .heic, .heif"
         multiple
         className="hidden"
         onChange={handleGalleryUpload}
@@ -402,14 +402,14 @@ export default function HeroBannerEditModal({
       <input
         ref={replaceFileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*, .jpg, .jpeg, .png, .webp, .avif, .gif, .jfif, .svg, .bmp, .heic, .heif"
         className="hidden"
         onChange={handleReplaceUpload}
       />
       <input
         ref={sideBannerFileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*, .jpg, .jpeg, .png, .webp, .avif, .gif, .jfif, .svg, .bmp, .heic, .heif"
         className="hidden"
         onChange={handleSideBannerUpload}
       />

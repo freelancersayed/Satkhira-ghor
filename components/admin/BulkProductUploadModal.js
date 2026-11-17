@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import { Upload, FileSpreadsheet, X, CheckCircle, AlertTriangle, Download, Trash2 } from 'lucide-react';
 
-export default function BulkProductUploadModal({ isOpen, onClose, onUploadSuccess }) {
+export default function BulkProductUploadModal({ isOpen, onClose, onUploadSuccess, categoriesList = [] }) {
   const [fileData, setFileData] = useState([]);
   const [rawText, setRawText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
+
+  const defaultCat = categoriesList.find((c) => c.slug !== 'all' && c.id !== 'all') || categoriesList[0];
 
   // Simple CSV parser
   const parseCSV = (csvText) => {
@@ -30,11 +32,19 @@ export default function BulkProductUploadModal({ isOpen, onClose, onUploadSucces
         });
 
         if (obj.name && obj.price) {
+          const matchedCat = categoriesList.find(
+            (c) =>
+              c.slug === obj.category ||
+              c.id === obj.category ||
+              c.name === obj.category ||
+              c.name === obj.categoryName
+          );
+
           parsed.push({
             name: obj.name,
             nameEn: obj.nameEn || '',
-            category: obj.category || 'honey',
-            categoryName: obj.categoryName || 'সুন্দরবনের মধু',
+            category: obj.category || (matchedCat ? (matchedCat.slug || matchedCat.id) : (defaultCat?.slug || 'honey')),
+            categoryName: obj.categoryName || (matchedCat ? matchedCat.name : (defaultCat?.name || 'সুন্দরবনের মধু')),
             price: Number(obj.price) || 0,
             originalPrice: obj.originalPrice ? Number(obj.originalPrice) : null,
             unit: obj.unit || '১ কেজি',

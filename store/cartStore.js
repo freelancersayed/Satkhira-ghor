@@ -20,9 +20,17 @@ export const useCartStore = create(
       // Add item to cart
       // autoOpen defaults to false so the user can continue shopping without unwanted popups
       addItem: (product, quantity = 1, autoOpen = false) => {
+        if (!product) return;
+        const targetId = String(product.id || product._id || product.slug);
+
+        // Prevent adding out-of-stock item
+        if (product.stock !== undefined && Number(product.stock) <= 0) {
+          return;
+        }
+
         set((state) => {
           const existingItemIndex = state.items.findIndex(
-            (item) => item.id === product.id
+            (item) => String(item.id) === targetId
           );
 
           let updatedItems;
@@ -34,15 +42,16 @@ export const useCartStore = create(
             };
           } else {
             const newItem = {
-              id: product.id,
+              id: targetId,
               name: product.name,
               nameEn: product.nameEn,
               slug: product.slug,
-              price: product.price,
-              originalPrice: product.originalPrice,
+              price: Number(product.price) || 0,
+              originalPrice: product.originalPrice ? Number(product.originalPrice) : null,
               image: product.image,
               unit: product.unit,
               quantity: quantity,
+              stock: product.stock,
             };
             updatedItems = [...state.items, newItem];
           }
@@ -51,10 +60,10 @@ export const useCartStore = create(
             items: updatedItems,
             isOpen: autoOpen ? true : state.isOpen,
             lastAddedItem: {
-              id: product.id,
+              id: targetId,
               name: product.name,
               nameEn: product.nameEn,
-              price: product.price,
+              price: Number(product.price) || 0,
               image: product.image,
               unit: product.unit,
               quantity,

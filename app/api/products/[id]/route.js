@@ -42,20 +42,23 @@ export async function PUT(request, { params }) {
 
     await connectToDatabase();
 
+    const isMongoId = mongoose.Types.ObjectId.isValid(id);
+    const filter = isMongoId ? { _id: id } : { slug: id };
+
     // If primary image was updated, ensure images array keeps the primary image at index 0
     let imagesUpdate = body.images;
     if (body.image) {
       if (Array.isArray(imagesUpdate) && imagesUpdate.length > 0) {
         imagesUpdate = [body.image, ...imagesUpdate.filter((img) => img !== body.image)];
       } else {
-        const existing = await Product.findById(id).select('images').lean();
+        const existing = await Product.findOne(filter).select('images').lean();
         const prevImages = Array.isArray(existing?.images) ? existing.images : [];
         imagesUpdate = [body.image, ...prevImages.filter((img) => img !== body.image)];
       }
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
+    const updatedProduct = await Product.findOneAndUpdate(
+      filter,
       {
         ...body,
         ...(imagesUpdate ? { images: imagesUpdate } : {}),

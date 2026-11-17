@@ -129,9 +129,10 @@ export default function CartDrawer() {
               <div key={item.id} className="py-4 flex gap-4 items-center">
                 <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-[#FEF3C7] flex-shrink-0 border border-[#E8E2D5]">
                   <Image
-                    src={item.image}
+                    src={item.image || 'https://images.unsplash.com/photo-1587049352846-4a222e784d38'}
                     alt={item.name}
                     fill
+                    unoptimized={Boolean(item.image?.startsWith('data:') || item.image?.startsWith('blob:') || /\.(svg|jfif|bmp|heic|heif)(\?.*)?$/i.test(item.image))}
                     className="object-cover"
                     sizes="64px"
                   />

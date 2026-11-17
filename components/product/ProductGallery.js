@@ -17,6 +17,15 @@ const toBanglaNum = (num) => {
   return String(num).replace(/\d/g, (d) => bnDigits[d]);
 };
 
+const isUnoptimizedSrc = (src) => {
+  if (!src || typeof src !== 'string') return false;
+  return (
+    src.startsWith('data:') ||
+    src.startsWith('blob:') ||
+    /\.(svg|jfif|bmp|heic|heif)(\?.*)?$/i.test(src)
+  );
+};
+
 export default function ProductGallery({ images = [], mainImage = '', name = 'Product Image' }) {
   // Combine primary image and additional gallery images, ensuring primary mainImage is always first
   const allImages = [
@@ -75,7 +84,7 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
             alt={`${name} - ছবি ${currentIndex + 1}`}
             fill
             priority
-            unoptimized={Boolean(selectedImage?.startsWith('data:'))}
+            unoptimized={isUnoptimizedSrc(selectedImage)}
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
@@ -157,7 +166,7 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
                     src={img}
                     alt={`${name} thumbnail ${idx + 1}`}
                     fill
-                    unoptimized={Boolean(img?.startsWith('data:'))}
+                    unoptimized={isUnoptimizedSrc(img)}
                     className="object-cover group-hover/thumb:scale-110 transition-transform duration-300"
                     sizes="80px"
                   />
@@ -223,7 +232,7 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
                   src={selectedImage}
                   alt={name}
                   fill
-                  unoptimized={Boolean(selectedImage?.startsWith('data:'))}
+                  unoptimized={isUnoptimizedSrc(selectedImage)}
                   className="object-contain"
                   sizes="100vw"
                   priority
@@ -275,7 +284,7 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
                     src={img}
                     alt={`Thumb ${idx + 1}`}
                     fill
-                    unoptimized={Boolean(img?.startsWith('data:'))}
+                    unoptimized={isUnoptimizedSrc(img)}
                     className="object-cover"
                     sizes="64px"
                   />

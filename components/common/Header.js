@@ -88,6 +88,19 @@ export default function Header() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  const [liveCategories, setLiveCategories] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.categories) && data.categories.length > 0) {
+          setLiveCategories(data.categories);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const totalItems = mounted
     ? items.reduce((sum, item) => sum + item.quantity, 0)
     : 0;
@@ -114,7 +127,7 @@ export default function Header() {
     ? rawCategories
     : (rawCategories && typeof rawCategories === 'object' && Object.values(rawCategories).length > 0)
       ? Object.values(rawCategories)
-      : (Array.isArray(categories) ? categories : []);
+      : (liveCategories.length > 0 ? liveCategories : (Array.isArray(categories) ? categories : []));
   const displayCategories = allCategories.filter((c) => c.id !== 'all' && c.slug !== 'all').slice(0, 7);
 
   return (
@@ -378,7 +391,7 @@ export default function Header() {
               {displayCategories.map((cat) => (
                 <Link
                   key={cat.id || cat.slug}
-                  href={`/shop?cat=${cat.slug}`}
+                  href={`/shop?cat=${cat.slug || cat.id}`}
                   className="px-2.5 py-1.5 rounded-lg text-[#14241E] hover:text-[#016831] hover:bg-white transition-all whitespace-nowrap flex items-center gap-1 border border-transparent hover:border-[#E8E2D5]"
                 >
                   <span>{cat.icon}</span>
@@ -544,7 +557,7 @@ export default function Header() {
                       {displayCategories.map((cat) => (
                         <Link
                           key={cat.id || cat.slug}
-                          href={`/shop?cat=${cat.slug}`}
+                          href={`/shop?cat=${cat.slug || cat.id}`}
                           onClick={() => setMobileMenuOpen(false)}
                           className="flex items-center gap-1.5 p-2 rounded-xl bg-[#FAF9F5] border border-[#E8E2D5] text-[11px] font-bold text-[#122118] hover:border-[#016831] hover:text-[#016831] transition-all"
                         >

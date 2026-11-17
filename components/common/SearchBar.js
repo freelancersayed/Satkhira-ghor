@@ -42,6 +42,7 @@ export default function SearchBar({ isMobile = false, onCloseMobile }) {
         return (
           p.name?.toLowerCase().includes(trimmed) ||
           p.nameEn?.toLowerCase().includes(trimmed) ||
+          p.category?.toLowerCase().includes(trimmed) ||
           p.categoryName?.toLowerCase().includes(trimmed) ||
           p.shortDescription?.toLowerCase().includes(trimmed)
         );
@@ -147,8 +148,8 @@ export default function SearchBar({ isMobile = false, onCloseMobile }) {
                   );
                   return (
                     <Link
-                      key={product.id || product.slug}
-                      href={`/products/${product.slug}`}
+                      key={product.id || product._id || product.slug}
+                      href={`/products/${product.slug || product.id}`}
                       onClick={handleSelectProduct}
                       className="flex items-center gap-3 p-2 rounded-xl hover:bg-[#FAF8F5] transition-colors group"
                     >

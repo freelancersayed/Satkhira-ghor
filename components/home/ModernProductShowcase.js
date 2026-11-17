@@ -185,15 +185,48 @@ export default function ModernProductShowcase({ initialProducts = [], initialCat
     container.scrollBy({ left: stepWidth, behavior: 'smooth' });
   };
 
-  // Filter products by selected Category Tab
+  // Filter products by selected Category Tab (Resilient Dynamic Match)
   const filteredProducts = useMemo(() => {
-    if (activeTab === 'all') return initialProducts;
-    return initialProducts.filter(
-      (p) =>
-        p.category === activeTab ||
-        (p.categoryName && p.categoryName.toLowerCase().includes(activeTab.toLowerCase()))
+    if (activeTab === 'all' || !activeTab) return initialProducts;
+    const target = activeTab.toLowerCase().trim();
+    const matchedCategory = activeCategories.find(
+      (c) =>
+        c.slug?.toLowerCase() === target ||
+        c.id?.toLowerCase() === target ||
+        c.name?.toLowerCase() === target ||
+        c.nameEn?.toLowerCase() === target
     );
-  }, [activeTab, initialProducts]);
+
+    return initialProducts.filter((p) => {
+      const pCat = p.category?.toLowerCase()?.trim() || '';
+      const pCatName = p.categoryName?.toLowerCase()?.trim() || '';
+
+      if (
+        pCat === target ||
+        pCatName === target ||
+        pCatName.includes(target) ||
+        target.includes(pCatName)
+      ) {
+        return true;
+      }
+      if (matchedCategory) {
+        const catSlug = matchedCategory.slug?.toLowerCase()?.trim() || '';
+        const catId = matchedCategory.id?.toLowerCase()?.trim() || '';
+        const catName = matchedCategory.name?.toLowerCase()?.trim() || '';
+        const catNameEn = matchedCategory.nameEn?.toLowerCase()?.trim() || '';
+        const norm = (s) => (s ? s.replace(/[^a-z0-9]/g, '') : '');
+
+        return (
+          (catSlug && pCat === catSlug) ||
+          (catId && pCat === catId) ||
+          (catSlug && norm(catSlug) && (norm(catSlug).includes(norm(pCat)) || norm(pCat).includes(norm(catSlug)))) ||
+          (catName && (pCat === catName || pCatName === catName || pCatName.includes(catName) || catName.includes(pCatName))) ||
+          (catNameEn && (pCat === catNameEn || pCatName.includes(catNameEn)))
+        );
+      }
+      return false;
+    });
+  }, [activeTab, initialProducts, activeCategories]);
 
   const format2Digits = (num) => String(num).padStart(2, '0');
 

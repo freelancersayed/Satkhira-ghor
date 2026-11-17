@@ -141,6 +141,7 @@ export default function MobileBottomNav() {
         return (
           p.name?.toLowerCase().includes(q) ||
           p.nameEn?.toLowerCase().includes(q) ||
+          p.category?.toLowerCase().includes(q) ||
           p.categoryName?.toLowerCase().includes(q) ||
           p.shortDescription?.toLowerCase().includes(q)
         );
@@ -497,7 +498,7 @@ export default function MobileBottomNav() {
                         </Link>
                         <div className="flex-1 min-w-0">
                           <Link
-                            href={`/products/${product.slug}`}
+                            href={`/products/${product.slug || product.id}`}
                             onClick={() => setSearchModalOpen(false)}
                             className="text-xs font-bold text-stone-900 hover:text-[#016831] line-clamp-1"
                           >
@@ -521,16 +522,18 @@ export default function MobileBottomNav() {
                         <button
                           type="button"
                           onClick={() => {
+                            const pId = product.id || product._id || product.slug;
                             addItem(product, 1, false);
-                            setAddedSearchId(product.id);
+                            setAddedSearchId(pId);
                             setTimeout(() => setAddedSearchId(null), 1800);
                           }}
-                          className={`px-2.5 py-1.5 rounded-lg active:scale-95 transition-all text-[11px] font-bold shadow-xs flex items-center gap-1 flex-shrink-0 ${addedSearchId === product.id
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-[#016831] text-white hover:bg-[#02833E]'
-                            }`}
+                          className={`px-2.5 py-1.5 rounded-lg active:scale-95 transition-all text-[11px] font-bold shadow-xs flex items-center gap-1 flex-shrink-0 ${
+                            addedSearchId === (product.id || product._id || product.slug)
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-[#016831] text-white hover:bg-[#02833E]'
+                          }`}
                         >
-                          {addedSearchId === product.id ? (
+                          {addedSearchId === (product.id || product._id || product.slug) ? (
                             <>
                               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                               <span>যুক্ত ✓</span>

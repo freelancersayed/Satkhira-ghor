@@ -15,40 +15,36 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400, // 24 hours caching for images
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'plus.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.ibb.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.ibb.co.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'ibb.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'ibb.co.com',
-      },
       {
         protocol: 'https',
         hostname: '**',
       },
+      {
+        protocol: 'http',
+        hostname: '**',
+      },
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: '/uploads/:path*.(jfif|JFIF)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'image/jpeg',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 };
 

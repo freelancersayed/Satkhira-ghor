@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { connectToDatabase } from '@/lib/mongodb';
 import SiteContent from '@/models/SiteContent';
+import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/auth';
 import { categories as defaultCategories } from '@/data/products';
 
@@ -151,6 +152,18 @@ export async function PUT(request) {
       { key: 'categories', data: updated, updatedBy: adminCheck.user.phone || 'admin' },
       { upsert: true, new: true }
     );
+
+    // Sync product categoryName across database if category name changed
+    if (name && name.trim()) {
+      try {
+        await Product.updateMany(
+          { $or: [{ category: updated[index].slug }, { category: slug }] },
+          { categoryName: name.trim() }
+        );
+      } catch (err) {
+        console.warn('Sync products categoryName error:', err.message);
+      }
+    }
 
     try {
       revalidatePath('/', 'layout');

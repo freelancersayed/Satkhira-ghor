@@ -53,9 +53,37 @@ export default function CategorySection({ initialCategories = [] }) {
 
   const displayCategories = categoriesList.filter((c) => c.id !== 'all' && c.slug !== 'all');
 
-  // Dynamically compute product counts per category
-  const getCategoryCount = (slug) => {
-    return liveProducts.filter((p) => p.category === slug).length;
+  // Dynamically compute product counts per category with intelligent resilient matching
+  const getCategoryCount = (cat) => {
+    const slug = cat.slug?.toLowerCase()?.trim() || '';
+    const name = cat.name?.toLowerCase()?.trim() || '';
+    const id = cat.id?.toLowerCase()?.trim() || '';
+    const norm = (s) => (s ? s.replace(/[^a-z0-9]/g, '') : '');
+
+    return liveProducts.filter((p) => {
+      const pCat = p.category?.toLowerCase()?.trim() || '';
+      const pName = p.categoryName?.toLowerCase()?.trim() || '';
+
+      if (
+        (slug && pCat === slug) ||
+        (id && pCat === id) ||
+        (slug && norm(slug) && (norm(slug).includes(norm(pCat)) || norm(pCat).includes(norm(slug))))
+      ) {
+        return true;
+      }
+
+      if (
+        name &&
+        (pName === name ||
+          pCat === name ||
+          pName.includes(name) ||
+          name.includes(pName))
+      ) {
+        return true;
+      }
+
+      return false;
+    }).length;
   };
 
   const toBanglaNum = (num) => {
@@ -114,11 +142,11 @@ export default function CategorySection({ initialCategories = [] }) {
         {displayCategories.length > 0 ? (
           <div className="flex sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 sm:pb-0 -mx-3 px-3 sm:mx-0 sm:px-0">
             {displayCategories.map((cat) => {
-              const count = getCategoryCount(cat.slug);
+              const count = getCategoryCount(cat);
               return (
                 <Link
                   key={cat.id || cat.slug}
-                  href={`/shop?cat=${cat.slug}`}
+                  href={`/shop?cat=${cat.slug || cat.id}`}
                   className="group flex-shrink-0 w-32 xs:w-36 sm:w-auto bg-white rounded-2xl p-2.5 sm:p-3.5 border border-[#E8E2D5] hover:border-[#016831]/50 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden"
                 >
                   {/* Visual Category Thumbnail with Rounded Container */}

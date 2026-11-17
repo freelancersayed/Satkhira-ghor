@@ -20,6 +20,15 @@ const toBanglaNum = (num) => {
   return String(num).replace(/\d/g, (d) => bnDigits[d]);
 };
 
+const isUnoptimizedSrc = (src) => {
+  if (!src || typeof src !== 'string') return false;
+  return (
+    src.startsWith('data:') ||
+    src.startsWith('blob:') ||
+    /\.(svg|jfif|bmp|heic|heif)(\?.*)?$/i.test(src)
+  );
+};
+
 export default function ProductImageGalleryManager({
   primaryImage = '',
   galleryImages = [],
@@ -140,7 +149,7 @@ export default function ProductImageGalleryManager({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*, .jpg, .jpeg, .png, .webp, .avif, .gif, .jfif, .svg, .bmp, .heic, .heif"
         multiple
         onChange={handleFilesSelected}
         className="hidden"
@@ -163,7 +172,7 @@ export default function ProductImageGalleryManager({
                 src={img}
                 alt={`Product image ${idx + 1}`}
                 fill
-                unoptimized={Boolean(img?.startsWith('data:'))}
+                unoptimized={isUnoptimizedSrc(img)}
                 className="object-cover"
                 sizes="120px"
               />

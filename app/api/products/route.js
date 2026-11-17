@@ -9,27 +9,65 @@ export const dynamic = 'force-dynamic';
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
+    const category = searchParams.get('category') || searchParams.get('cat');
     const search = searchParams.get('search');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const minPrice = searchParams.get('minPrice');
+    const maxPrice = searchParams.get('maxPrice');
+    const inStock = searchParams.get('inStock');
+    const sort = searchParams.get('sort') || 'newest';
+    const limit = parseInt(searchParams.get('limit') || '150');
 
     await connectToDatabase();
 
-    const query = {
-      isDeleted: { $ne: true },
-    };
+    const andConditions = [{ isDeleted: { $ne: true } }];
+
     if (category && category !== 'all') {
-      query.category = category;
-    }
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { nameEn: { $regex: search, $options: 'i' } },
-        { shortDescription: { $regex: search, $options: 'i' } },
-      ];
+      const cleanCat = category.trim();
+      andConditions.push({
+        $or: [
+          { category: cleanCat },
+          { categoryName: cleanCat },
+          { category: { $regex: new RegExp(`^${cleanCat}$`, 'i') } },
+          { categoryName: { $regex: new RegExp(`^${cleanCat}$`, 'i') } },
+          { categoryName: { $regex: cleanCat, $options: 'i' } },
+        ],
+      });
     }
 
-    let dbProducts = await Product.find(query).sort({ createdAt: -1 }).limit(limit).lean();
+    if (search && search.trim()) {
+      const s = search.trim();
+      andConditions.push({
+        $or: [
+          { name: { $regex: s, $options: 'i' } },
+          { nameEn: { $regex: s, $options: 'i' } },
+          { shortDescription: { $regex: s, $options: 'i' } },
+          { category: { $regex: s, $options: 'i' } },
+          { categoryName: { $regex: s, $options: 'i' } },
+          { slug: { $regex: s, $options: 'i' } },
+        ],
+      });
+    }
+
+    if (minPrice || maxPrice) {
+      const priceFilter = {};
+      if (minPrice && !isNaN(Number(minPrice))) priceFilter.$gte = Number(minPrice);
+      if (maxPrice && !isNaN(Number(maxPrice))) priceFilter.$lte = Number(maxPrice);
+      andConditions.push({ price: priceFilter });
+    }
+
+    if (inStock === 'true' || inStock === '1') {
+      andConditions.push({ stock: { $gt: 0 } });
+    }
+
+    const query = andConditions.length > 1 ? { $and: andConditions } : andConditions[0];
+
+    let sortOption = { createdAt: -1 };
+    if (sort === 'price-low') sortOption = { price: 1 };
+    else if (sort === 'price-high') sortOption = { price: -1 };
+    else if (sort === 'rating') sortOption = { rating: -1, reviewCount: -1 };
+    else if (sort === 'newest') sortOption = { createdAt: -1 };
+
+    let dbProducts = await Product.find(query).sort(sortOption).limit(limit).lean();
 
     let formattedProducts = dbProducts.map((p) => ({
       ...p,
@@ -39,6 +77,7 @@ export async function GET(request) {
     return NextResponse.json(
       {
         products: formattedProducts,
+        total: formattedProducts.length,
         source: 'database',
       },
       {

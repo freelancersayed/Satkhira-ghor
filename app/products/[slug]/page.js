@@ -109,16 +109,34 @@ export default async function ProductDetailPage({ params }) {
     product.slug
   );
 
-  // Related products from MongoDB database
+  // Related products from MongoDB database (prioritize same category)
   let relatedProducts = [];
   try {
-    const relatedDb = await Product.find({
+    const sameCatQuery = {
       isDeleted: { $ne: true },
       slug: { $ne: product.slug },
-    })
+      $or: [
+        { category: product.category },
+        { categoryName: product.categoryName },
+      ],
+    };
+    let relatedDb = await Product.find(sameCatQuery)
       .sort({ createdAt: -1 })
       .limit(4)
       .lean();
+
+    if (!relatedDb || relatedDb.length < 4) {
+      const existingSlugs = [product.slug, ...(relatedDb || []).map((p) => p.slug)];
+      const fallbackRelated = await Product.find({
+        isDeleted: { $ne: true },
+        slug: { $nin: existingSlugs },
+      })
+        .sort({ createdAt: -1 })
+        .limit(4 - (relatedDb ? relatedDb.length : 0))
+        .lean();
+      relatedDb = [...(relatedDb || []), ...(fallbackRelated || [])];
+    }
+
     if (relatedDb && relatedDb.length > 0) {
       relatedProducts = JSON.parse(JSON.stringify(relatedDb)).map((p) => ({
         ...p,
@@ -150,7 +168,12 @@ export default async function ProductDetailPage({ params }) {
             সব পণ্য
           </Link>
           <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#E8E2D5]" />
-          <span className="text-[#B45309] font-semibold">{product.categoryName}</span>
+          <Link
+            href={`/shop?cat=${encodeURIComponent(product.category || product.categoryName || 'all')}`}
+            className="text-[#B45309] hover:text-[#016831] font-semibold transition-colors"
+          >
+            {product.categoryName || product.category}
+          </Link>
           <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#E8E2D5]" />
           <span className="text-[#016831] font-bold line-clamp-1">
             {product.name}
@@ -176,13 +199,23 @@ export default async function ProductDetailPage({ params }) {
             <div className="space-y-3 sm:space-y-4">
               {/* Category & Stock Status */}
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] sm:text-xs font-bold text-[#B45309] uppercase tracking-wider bg-[#FEF3C7] px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-[#FDE68A]">
+                <Link
+                  href={`/shop?cat=${encodeURIComponent(product.category || 'all')}`}
+                  className="text-[11px] sm:text-xs font-bold text-[#B45309] uppercase tracking-wider bg-[#FEF3C7] hover:bg-[#FDE68A] px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-[#FDE68A] transition-colors"
+                >
                   {product.categoryName}
-                </span>
-                <span className="text-[11px] sm:text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                  স্টকে আছে ({product.stock || 25} টি অবশিষ্ট)
-                </span>
+                </Link>
+                {product.stock !== undefined && Number(product.stock) <= 0 ? (
+                  <span className="text-[11px] sm:text-xs font-bold text-red-700 bg-red-50 border border-red-200 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-red-600" />
+                    স্টক শেষ (আপাতত অনুপলব্ধ)
+                  </span>
+                ) : (
+                  <span className="text-[11px] sm:text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                    স্টকে আছে ({product.stock !== undefined ? product.stock : 25} টি অবশিষ্ট)
+                  </span>
+                )}
               </div>
 
               {/* Title & English Subtitle */}

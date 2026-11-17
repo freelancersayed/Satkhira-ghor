@@ -45,6 +45,7 @@ export default function HalumChatWindow({
     },
   ]);
 
+  const [liveProducts, setLiveProducts] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [addedItemSlug, setAddedItemSlug] = useState(null);
@@ -57,12 +58,25 @@ export default function HalumChatWindow({
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useCartStore((state) => state.openCart);
 
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.products)) {
+          setLiveProducts(data.products);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const catalogProducts = liveProducts.length > 0 ? liveProducts : (Array.isArray(products) ? products : []);
+
   // Auto-adapt greeting based on the current product route
   useEffect(() => {
     if (pathname && pathname.startsWith('/products/')) {
       const slug = pathname.replace('/products/', '').split('?')[0].split('/')[0];
       const productInfo = getHalumProductKnowledge(slug);
-      const catalogItem = products.find((p) => p.slug === slug || p.id === slug);
+      const catalogItem = catalogProducts.find((p) => p.slug === slug || p.id === slug);
 
       if (productInfo) {
         setMessages([
@@ -78,7 +92,7 @@ export default function HalumChatWindow({
         ]);
       }
     }
-  }, [pathname]);
+  }, [pathname, catalogProducts]);
 
   // Auto scroll to bottom
   const scrollToBottom = () => {
@@ -222,7 +236,7 @@ export default function HalumChatWindow({
     }
 
     if (text.includes('৳১,০০০ এর মধ্যে') || text.includes('১০০০') || text.includes('1000')) {
-      const khalsiHoney = products.find((p) => p.slug === 'sundarbans-pure-khalsi-honey') || products[0];
+      const khalsiHoney = catalogProducts.find((p) => p.slug === 'sundarbans-pure-khalsi-honey') || catalogProducts[0];
       setTimeout(() => {
         const botMsg = {
           id: `quiz-res-1000-${Date.now()}`,
@@ -246,8 +260,8 @@ export default function HalumChatWindow({
       text.includes('1500+') ||
       text.includes('ফ্রি ডেলিভারি')
     ) {
-      const combo = products.find((p) => p.slug === 'satkhira-sundarbans-mega-family-combo') || products[2];
-      const ghee = products.find((p) => p.slug === 'bilona-gawa-ghee') || products[1];
+      const combo = catalogProducts.find((p) => p.slug === 'satkhira-sundarbans-mega-family-combo') || catalogProducts[2];
+      const ghee = catalogProducts.find((p) => p.slug === 'bilona-gawa-ghee') || catalogProducts[1];
       setTimeout(() => {
         const botMsg = {
           id: `quiz-res-1500-${Date.now()}`,

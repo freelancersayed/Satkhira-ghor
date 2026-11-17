@@ -22,7 +22,7 @@ import {
 import { useSiteContentStore } from '@/store/siteContentStore';
 import ImageUploadInput from '@/components/common/ImageUploadInput';
 
-export default function AdminCategoriesView() {
+export default function AdminCategoriesView({ onCategoriesUpdated }) {
   const { content, updateSection } = useSiteContentStore();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -57,6 +57,7 @@ export default function AdminCategoriesView() {
       const data = await res.json();
       if (data.categories) {
         setCategories(data.categories);
+        if (onCategoriesUpdated) onCategoriesUpdated(data.categories);
       }
     } catch (e) {
       console.warn('Failed to fetch categories:', e);
@@ -86,6 +87,7 @@ export default function AdminCategoriesView() {
       if (url) {
         const updated = categories.map((c) => (c.slug === slug ? { ...c, image: url } : c));
         setCategories(updated);
+        if (onCategoriesUpdated) onCategoriesUpdated(updated);
 
         await fetch('/api/categories', {
           method: 'PUT',
@@ -130,6 +132,7 @@ export default function AdminCategoriesView() {
       if (!res.ok) throw new Error(data.message || 'সিরিয়াল সংরক্ষণ ব্যর্থ');
 
       updateSection('categories', updatedList);
+      if (onCategoriesUpdated) onCategoriesUpdated(updatedList);
       setNotification(successMsg);
       setTimeout(() => setNotification(''), 2500);
     } catch (err) {
@@ -180,6 +183,7 @@ export default function AdminCategoriesView() {
       if (!res.ok) throw new Error(data.message || 'আপডেট ব্যর্থ');
 
       updateSection('categories', data.categories);
+      if (onCategoriesUpdated) onCategoriesUpdated(data.categories);
       setNotification(`"${cat.name}" সফলভাবে আপডেট হয়েছে!`);
       setTimeout(() => setNotification(''), 3000);
     } catch (err) {
@@ -206,6 +210,7 @@ export default function AdminCategoriesView() {
 
       setCategories(data.categories);
       updateSection('categories', data.categories);
+      if (onCategoriesUpdated) onCategoriesUpdated(data.categories);
       setNotification(`"${name}" ক্যাটাগরি ডিলিট সম্পন্ন!`);
       setTimeout(() => setNotification(''), 3000);
     } catch (err) {
@@ -235,6 +240,7 @@ export default function AdminCategoriesView() {
 
       setCategories(data.categories);
       updateSection('categories', data.categories);
+      if (onCategoriesUpdated) onCategoriesUpdated(data.categories);
       setNotification(`নতুন ক্যাটাগরি "${newCat.name}" সফলভাবে যুক্ত হয়েছে!`);
       setNewCatModalOpen(false);
       setNewCat({
@@ -270,7 +276,7 @@ export default function AdminCategoriesView() {
       <input
         ref={editFileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*, .jpg, .jpeg, .png, .webp, .avif, .gif, .jfif, .svg, .bmp, .heic, .heif"
         onChange={handleEditImageUpload}
         className="hidden"
       />
