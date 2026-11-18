@@ -4,6 +4,8 @@ import { v2 as cloudinary } from 'cloudinary';
 import { writeFile, mkdir, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import dbConnect from '@/lib/mongodb';
+import Media from '@/models/Media';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,57 +90,62 @@ export async function POST(request) {
       }
     }
 
-    // ── 2. LOCAL UPLOAD FALLBACK (Local Development / Computer) ─────────
+    // ── 2. DURABLE UPLOAD (Local Disk + MongoDB Media Collection) ──────
+    const mimeToExt = {
+      'image/jpeg': 'jpg',
+      'image/pjpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/avif': 'avif',
+      'image/gif': 'gif',
+      'image/svg+xml': 'svg',
+      'image/bmp': 'bmp',
+      'image/x-ms-bmp': 'bmp',
+      'image/heic': 'heic',
+      'image/heif': 'heif',
+    };
+
+    let rawExt = file.name?.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
+    // Normalize JFIF and JPEG to standard JPG for universal browser and Next.js compatibility
+    if (rawExt === 'jfif' || rawExt === 'jpeg') rawExt = 'jpg';
+    const ext = rawExt.replace(/[^a-z0-9]/g, '') || mimeToExt[file.type] || 'jpg';
+    const filename = `upload_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const contentType = file.type || `image/${ext}`;
+
+    // A. Write to local disk if writable
     try {
       const uploadDir = path.join(process.cwd(), 'public', 'uploads');
       if (!existsSync(uploadDir)) {
         await mkdir(uploadDir, { recursive: true });
       }
-
-      const mimeToExt = {
-        'image/jpeg': 'jpg',
-        'image/pjpeg': 'jpg',
-        'image/png': 'png',
-        'image/webp': 'webp',
-        'image/avif': 'avif',
-        'image/gif': 'gif',
-        'image/svg+xml': 'svg',
-        'image/bmp': 'bmp',
-        'image/x-ms-bmp': 'bmp',
-        'image/heic': 'heic',
-        'image/heif': 'heif',
-      };
-
-      let rawExt = file.name?.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
-      // Normalize JFIF and JPEG to standard JPG for universal browser and Next.js compatibility
-      if (rawExt === 'jfif' || rawExt === 'jpeg') rawExt = 'jpg';
-      const ext = rawExt.replace(/[^a-z0-9]/g, '') || mimeToExt[file.type] || 'jpg';
-      const filename = `upload_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const filepath = path.join(uploadDir, filename);
       await writeFile(filepath, buffer);
-
-      return NextResponse.json({
-        success: true,
-        url: `/uploads/${filename}`,
-        message: 'ছবি সফলভাবে লোকালে সেভ হয়েছে',
-      });
-    } catch (fsErr) {
-      // If filesystem is read-only (e.g. Vercel without Cloudinary configured)
-      // Provide Base64 data URI fallback for images
-      if (file.size <= 3 * 1024 * 1024) {
-        const mime = file.type || 'image/jpeg';
-        const base64Data = `data:${mime};base64,${buffer.toString('base64')}`;
-        return NextResponse.json({
-          success: true,
-          url: base64Data,
-          message: 'ছবি আপলোড হয়েছে (Data URI)',
-        });
-      }
-
-      throw new Error(
-        'ছবি আপলোড ব্যর্থ হয়েছে। দয়া করে সঠিক Cloudinary তথ্য যোগ করুন।'
-      );
+    } catch (diskErr) {
+      console.warn('Local disk write skipped (read-only filesystem):', diskErr.message);
     }
+
+    // B. Always persist to MongoDB Media collection for durability across Vercel serverless instances
+    try {
+      await dbConnect();
+      await Media.findOneAndUpdate(
+        { filename },
+        {
+          filename,
+          data: buffer,
+          contentType,
+          size: buffer.length,
+        },
+        { upsert: true, new: true }
+      );
+    } catch (dbErr) {
+      console.warn('Could not save to MongoDB Media:', dbErr.message);
+    }
+
+    return NextResponse.json({
+      success: true,
+      url: `/uploads/${filename}`,
+      message: 'ছবি সফলভাবে আপলোড হয়েছে',
+    });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(
