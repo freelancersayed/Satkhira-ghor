@@ -14,38 +14,10 @@ import {
 import { useSiteContentStore } from '@/store/siteContentStore';
 import HeroBannerEditModal from '@/components/home/HeroBannerEditModal';
 
-// ─────────────────────────────────────────────────────────────
-// Default fallback slides (used only if database slides are empty)
-// ─────────────────────────────────────────────────────────────
-export const DEFAULT_SLIDES = [
-  {
-    url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=90&w=1920',
-    link: '/products/sundarbans-pure-khalsi-honey',
-    label: 'সুন্দরবনের খাঁটি মধু',
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1631451095765-2c91616fc9e6?auto=format&fit=crop&q=90&w=1920',
-    link: '/products/traditional-bilona-pure-cow-ghee',
-    label: 'খাঁটি গাওয়া ঘি',
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&q=90&w=1920',
-    link: '/products/cold-pressed-mustard-oil-ghani',
-    label: 'ঘানি ভাঙা সরিষার তেল',
-  },
-];
-
-export const DEFAULT_SIDE_BANNER = {
-  url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=90&w=1200',
-  link: '/products/satkhira-sundarbans-mega-family-combo',
-  label: 'মধু স্পেশাল কম্বোপ্যাক অফার',
-  showOnMobile: true,
-};
-
 const SLIDE_INTERVAL_MS = 4500;
 
 export default function HeroBanner() {
-  const { content, fetchContent } = useSiteContentStore();
+  const { content, loaded, fetchContent } = useSiteContentStore();
   const hero = content?.hero || {};
 
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -57,7 +29,7 @@ export default function HeroBanner() {
     fetchContent();
   }, [fetchContent]);
 
-  // Extract and normalize slides dynamically from database
+  // Extract and normalize slides dynamically from database (pure dynamic, zero static fallback)
   const slides = useMemo(() => {
     if (Array.isArray(hero.slides) && hero.slides.length > 0) {
       const dbSlides = hero.slides
@@ -80,10 +52,10 @@ export default function HeroBanner() {
         return dbSlides;
       }
     }
-    return DEFAULT_SLIDES;
+    return [];
   }, [hero.slides]);
 
-  // 2nd side banner (small banner next to main slider - Polli Bazar style)
+  // 2nd side banner (small banner next to main slider - Polli Bazar style, pure dynamic)
   const sideBanner = useMemo(() => {
     if (hero.sideBanner && typeof hero.sideBanner === 'object' && hero.sideBanner.url) {
       return {
@@ -101,15 +73,8 @@ export default function HeroBanner() {
         showOnMobile: true,
       };
     }
-    // If database slides has extra slide, use the last one for side banner
-    if (slides.length > 3) {
-      return {
-        ...slides[slides.length - 1],
-        showOnMobile: true,
-      };
-    }
-    return DEFAULT_SIDE_BANNER;
-  }, [hero.sideBanner, slides]);
+    return null;
+  }, [hero.sideBanner]);
 
   // Auto slide timer
   useEffect(() => {
@@ -122,16 +87,20 @@ export default function HeroBanner() {
 
   // Wrap around index safely
   useEffect(() => {
-    if (currentIdx >= slides.length) {
+    if (slides.length === 0) {
+      setCurrentIdx(0);
+    } else if (currentIdx >= slides.length) {
       setCurrentIdx(0);
     }
   }, [slides.length, currentIdx]);
 
   const handlePrev = useCallback(() => {
+    if (slides.length <= 1) return;
     setCurrentIdx((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
   }, [slides.length]);
 
   const handleNext = useCallback(() => {
+    if (slides.length <= 1) return;
     setCurrentIdx((prev) => (prev + 1) % slides.length);
   }, [slides.length]);
 
@@ -154,14 +123,37 @@ export default function HeroBanner() {
     }
   };
 
+  // Skeleton Loader while dynamic banner data is loading
+  if (!loaded && slides.length === 0) {
+    return (
+      <section className="py-2.5 sm:py-4 bg-[#FCFBF7]">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-5 items-stretch">
+            <div className="lg:col-span-8 xl:col-span-8 relative overflow-hidden rounded-2xl sm:rounded-3xl bg-[#FAF8F5] border border-[#E8E2D5] h-[200px] xs:h-[240px] sm:h-[320px] md:h-[380px] lg:h-[440px] xl:h-[480px] animate-pulse">
+              <div className="w-full h-full bg-linear-to-r from-[#FAF8F5] via-amber-50/50 to-[#FAF8F5]" />
+            </div>
+            <div className="hidden lg:block lg:col-span-4 xl:col-span-4 rounded-2xl sm:rounded-3xl bg-[#FAF8F5] border border-[#E8E2D5] lg:h-[440px] xl:h-[480px] animate-pulse">
+              <div className="w-full h-full bg-linear-to-r from-[#FAF8F5] via-emerald-50/30 to-[#FAF8F5]" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mt-3 sm:mt-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-14 sm:h-16 rounded-xl bg-white border border-[#E8E2D5] animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-2.5 sm:py-4 bg-[#FCFBF7]">
-      {/* ── Max Width 1600px (Polli Bazar Container Width) ── */}
+      {/* ── Max Width 1600px (Container Width) ── */}
       <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
-        
+
         {/* ── Dual Banner Layout (Polli Bazar Style: 1st Large + 2nd Small) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-5 items-stretch">
-          
+
           {/* ═════════════════════════════════════════════════════════════════
               ১ম ব্যানার (বড় স্লাইডার - ~৭২% / Col Span 8/9)
               ═════════════════════════════════════════════════════════════════ */}
@@ -177,42 +169,54 @@ export default function HeroBanner() {
               <HeroBannerEditModal defaultTab="slides" triggerText="১ম ব্যানার স্লাইডার এডিট" />
             </div>
 
-            {/* Slides (Pure Dynamic Graphics, Zero Text Overlay) */}
-            {slides.map((slide, i) => {
-              const isActive = i === currentIdx;
-              const slideContent = (
-                <div
-                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                    isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
-                  }`}
-                >
-                  <Image
-                    src={slide.url}
-                    alt={slide.label || `সাতক্ষীরা ঘর প্রধান ব্যানার ${i + 1}`}
-                    fill
-                    priority={i === 0}
-                    className="object-cover object-center w-full h-full select-none"
-                    sizes="(max-width: 1024px) 100vw, 72vw"
-                    quality={90}
-                  />
+            {/* Slides (Pure Dynamic Graphics, Zero Static Fallback) */}
+            {slides.length === 0 ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-linear-to-br from-[#016831]/5 via-[#FAF8F5] to-[#FEF3C7]/30">
+                <div className="w-12 h-12 rounded-2xl bg-[#016831]/10 text-[#016831] flex items-center justify-center mb-2">
+                  <Leaf className="w-6 h-6" />
                 </div>
-              );
+                <h2 className="text-xl sm:text-2xl font-black text-[#016831] mb-1">সাতক্ষীরা ঘর</h2>
+                <p className="text-xs sm:text-sm text-[#5B6B64] max-w-sm">
+                  সুন্দরবন ও সাতক্ষীরার ১০০% খাঁটি ও প্রাকৃতিক খাদ্য সম্ভার
+                </p>
+              </div>
+            ) : (
+              slides.map((slide, i) => {
+                const isActive = i === currentIdx;
+                const slideContent = (
+                  <div
+                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                      isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
+                    }`}
+                  >
+                    <Image
+                      src={slide.url}
+                      alt={slide.label || `সাতক্ষীরা ঘর প্রধান ব্যানার ${i + 1}`}
+                      fill
+                      priority={i === 0}
+                      className="object-cover object-center w-full h-full select-none"
+                      sizes="(max-width: 1024px) 100vw, 72vw"
+                      quality={90}
+                    />
+                  </div>
+                );
 
-              return slide.link ? (
-                <Link
-                  key={`${slide.url}-${i}`}
-                  href={slide.link}
-                  aria-label={slide.label || `ব্যানার লিংক ${i + 1}`}
-                  className="block w-full h-full"
-                >
-                  {slideContent}
-                </Link>
-              ) : (
-                <div key={`${slide.url}-${i}`}>{slideContent}</div>
-              );
-            })}
+                return slide.link ? (
+                  <Link
+                    key={`${slide.url}-${i}`}
+                    href={slide.link}
+                    aria-label={slide.label || `ব্যানার লিংক ${i + 1}`}
+                    className="block w-full h-full"
+                  >
+                    {slideContent}
+                  </Link>
+                ) : (
+                  <div key={`${slide.url}-${i}`}>{slideContent}</div>
+                );
+              })
+            )}
 
-            {/* Navigation Arrows (Clean white buttons on edges, matching reference image) */}
+            {/* Navigation Arrows */}
             {slides.length > 1 && (
               <>
                 <button
@@ -243,7 +247,7 @@ export default function HeroBanner() {
               </>
             )}
 
-            {/* Bottom-Left Dot Indicators (Matching reference image) */}
+            {/* Bottom-Left Dot Indicators */}
             {slides.length > 1 && (
               <div className="absolute bottom-3 left-4 sm:left-6 z-20 flex items-center gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/20">
                 {slides.map((_, i) => (
@@ -270,7 +274,7 @@ export default function HeroBanner() {
               ═════════════════════════════════════════════════════════════════ */}
           <div
             className={`relative group/side overflow-hidden rounded-2xl sm:rounded-3xl bg-[#FAF8F5] border border-[#E8E2D5] shadow-xs hover:shadow-md transition-shadow ${
-              sideBanner.showOnMobile !== false
+              sideBanner && sideBanner.showOnMobile !== false
                 ? 'block h-[170px] xs:h-[210px] sm:h-[260px] md:h-[300px]'
                 : 'hidden'
             } lg:block lg:col-span-4 xl:col-span-4 lg:h-[440px] xl:h-[480px]`}
@@ -280,20 +284,30 @@ export default function HeroBanner() {
               <HeroBannerEditModal defaultTab="sideBanner" triggerText="২নং ব্যানার এডিট" />
             </div>
 
-            <Link
-              href={sideBanner.link || '/shop?cat=combos'}
-              aria-label={sideBanner.label || 'সাইড ব্যানার'}
-              className="block w-full h-full relative"
-            >
-              <Image
-                src={sideBanner.url}
-                alt={sideBanner.label || 'সাতক্ষীরা ঘর স্পেশাল অফার'}
-                fill
-                className="object-cover object-center w-full h-full select-none transition-transform duration-500 group-hover/side:scale-105"
-                sizes="(max-width: 1024px) 100vw, 28vw"
-                quality={90}
-              />
-            </Link>
+            {sideBanner?.url ? (
+              <Link
+                href={sideBanner.link || '/shop?cat=combos'}
+                aria-label={sideBanner.label || 'সাইড ব্যানার'}
+                className="block w-full h-full relative"
+              >
+                <Image
+                  src={sideBanner.url}
+                  alt={sideBanner.label || 'সাতক্ষীরা ঘর স্পেশাল অফার'}
+                  fill
+                  className="object-cover object-center w-full h-full select-none transition-transform duration-500 group-hover/side:scale-105"
+                  sizes="(max-width: 1024px) 100vw, 28vw"
+                  quality={90}
+                />
+              </Link>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-linear-to-b from-[#FEF3C7]/20 to-white">
+                <div className="w-12 h-12 rounded-xl bg-amber-50 text-[#D97706] flex items-center justify-center mb-2">
+                  <Award className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-bold text-[#016831]">স্পেশাল কম্বো অফার</h3>
+                <p className="text-[11px] text-[#8E9C96] mt-1">খাঁটি খাদ্য পণ্যের সেরা প্যাকেজ</p>
+              </div>
+            )}
           </div>
 
         </div>
@@ -325,7 +339,7 @@ export default function HeroBanner() {
               <Award className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h4 className="text-xs sm:text-sm font-extrabold text-[#016831]">ল্যাব টেস্ট সার্টিফাইড</h4>
+              <h4 className="text-xs sm:text-sm font-extrabold text-[#016831]">প্রিমিয়াম কোয়ালিটি</h4>
               <p className="text-[10px] sm:text-xs text-[#8E9C96]">গুণগত মানের শতভাগ নিশ্চয়তা</p>
             </div>
           </div>

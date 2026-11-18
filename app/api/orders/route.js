@@ -5,6 +5,7 @@ import Product from '@/models/Product';
 import { getSessionUser, requireStaffOrAdmin } from '@/lib/auth';
 import { extractClientIp, getIpGeoInfo } from '@/lib/geo';
 import { checkCourierHistoryAndFraud } from '@/lib/courierFraudCheck';
+import { sanitizeBase64, invalidateCache } from '@/lib/performance';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +51,17 @@ export async function POST(request) {
 
     const totalAmount = Number(subtotal) + Number(deliveryFee);
 
+    const sanitizedItems = await Promise.all(
+      items.map(async (item) => ({
+        productId: item.id || item.productId || item.slug,
+        name: item.name,
+        price: Number(item.price),
+        quantity: Number(item.quantity),
+        unit: item.unit || '',
+        image: await sanitizeBase64(item.image || '', `order_item_${item.slug || 'it'}`),
+      }))
+    );
+
     const newOrder = await Order.create({
       orderNumber,
       user: userId,
@@ -61,14 +73,7 @@ export async function POST(request) {
         city: customer.city ? customer.city.trim() : 'ঢাকা',
         notes: customer.notes || '',
       },
-      items: items.map((item) => ({
-        productId: item.id || item.productId || item.slug,
-        name: item.name,
-        price: Number(item.price),
-        quantity: Number(item.quantity),
-        unit: item.unit || '',
-        image: item.image || '',
-      })),
+      items: sanitizedItems,
       subtotal: Number(subtotal),
       deliveryFee: Number(deliveryFee),
       totalAmount,
@@ -101,6 +106,8 @@ export async function POST(request) {
     } catch (stockErr) {
       console.warn('Could not update product stock:', stockErr);
     }
+
+    invalidateCache('admin_stats');
 
     return NextResponse.json(
       {

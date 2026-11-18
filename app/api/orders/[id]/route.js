@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import { requireStaffOrAdmin, getSessionUser } from '@/lib/auth';
+import { invalidateCache } from '@/lib/performance';
 
 export async function GET(request, { params }) {
   try {
@@ -50,6 +51,8 @@ export async function PATCH(request, { params }) {
     if (!updatedOrder) {
       return NextResponse.json({ message: 'অর্ডারটি খুঁজে পাওয়া যায়নি' }, { status: 404 });
     }
+
+    invalidateCache('admin_stats');
 
     return NextResponse.json({
       message: 'অর্ডার স্ট্যাটাস আপডেট করা হয়েছে',

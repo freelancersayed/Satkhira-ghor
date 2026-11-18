@@ -14,15 +14,25 @@ export const useAuthStore = create(
           const res = await fetch('/api/auth/me');
           if (res.ok) {
             const data = await res.json();
-            set({ user: data.user, isLoading: false });
-            return data.user;
-          } else {
+            if (data && data.user) {
+              set({ user: data.user, isLoading: false });
+              return data.user;
+            } else {
+              set({ user: null, isLoading: false });
+              return null;
+            }
+          } else if (res.status === 401 || res.status === 403) {
             set({ user: null, isLoading: false });
             return null;
+          } else {
+            // If server error or transient 500, preserve existing user from storage
+            set({ isLoading: false });
+            return get().user;
           }
         } catch (error) {
-          set({ user: null, isLoading: false });
-          return null;
+          // On network failure or offline, preserve persisted user session
+          set({ isLoading: false });
+          return get().user;
         }
       },
 
@@ -49,6 +59,11 @@ export const useAuthStore = create(
         };
       }),
       partialize: (state) => ({ user: state.user }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isLoading = false;
+        }
+      },
     }
   )
 );

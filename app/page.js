@@ -6,7 +6,7 @@ import SpecialBanner from '@/components/home/SpecialBanner';
 import { connectToDatabase } from '@/lib/mongodb';
 import SiteContent from '@/models/SiteContent';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 async function getCategories() {
   try {

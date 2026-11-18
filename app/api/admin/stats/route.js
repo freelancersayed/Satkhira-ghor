@@ -4,6 +4,7 @@ import Order from '@/models/Order';
 import Product from '@/models/Product';
 import User from '@/models/User';
 import { requireStaffOrAdmin } from '@/lib/auth';
+import { getCachedData, setCachedData } from '@/lib/performance';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,17 @@ export async function GET(request) {
         { message: authCheck.error },
         { status: authCheck.status }
       );
+    }
+
+    // Fast RAM cache check for Admin stats (15 seconds TTL)
+    const cachedStats = getCachedData('admin_stats');
+    if (cachedStats) {
+      return NextResponse.json(cachedStats, {
+        headers: {
+          'Cache-Control': 'private, no-cache, no-store',
+          'X-Cache': 'HIT',
+        },
+      });
     }
 
     await connectToDatabase();
@@ -182,7 +194,7 @@ export async function GET(request) {
       });
     }
 
-    return NextResponse.json({
+    const payload = {
       stats: {
         totalRevenue,
         totalOrders,
@@ -206,6 +218,15 @@ export async function GET(request) {
         return acc;
       }, {}),
       recentOrders,
+    };
+
+    setCachedData('admin_stats', payload, 15);
+
+    return NextResponse.json(payload, {
+      headers: {
+        'Cache-Control': 'private, no-cache, no-store',
+        'X-Cache': 'MISS',
+      },
     });
   } catch (error) {
     console.error('Advanced Stats Aggregation Error:', error);

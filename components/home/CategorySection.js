@@ -4,16 +4,17 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Sparkles, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
-import { categories as fallbackCategories } from '@/data/products';
 import { useSiteContentStore } from '@/store/siteContentStore';
 import AdminSectionEditModal from '@/components/common/AdminSectionEditModal';
 import CategoryEditModal from '@/components/home/CategoryEditModal';
+import CategoryGridSkeleton from '@/components/home/CategoryGridSkeleton';
 
 export default function CategorySection({ initialCategories = [] }) {
   const { content } = useSiteContentStore();
   const catContent = content?.categorySection || {};
   const [liveProducts, setLiveProducts] = useState([]);
   const [liveCategories, setLiveCategories] = useState(initialCategories);
+  const [loading, setLoading] = useState(initialCategories.length === 0);
 
   useEffect(() => {
     fetch('/api/products')
@@ -32,10 +33,11 @@ export default function CategorySection({ initialCategories = [] }) {
           setLiveCategories(data.categories);
         }
       })
-      .catch(() => { });
+      .catch(() => { })
+      .finally(() => setLoading(false));
   }, []);
 
-  // Extract dynamic categories from database, fallback to initial categories
+  // Extract dynamic categories from database, strictly removing static fallback
   const categoriesList = useMemo(() => {
     const rawCategories = content?.categories;
     if (Array.isArray(rawCategories) && rawCategories.length > 0) {
@@ -48,7 +50,7 @@ export default function CategorySection({ initialCategories = [] }) {
     if (liveCategories.length > 0) {
       return liveCategories;
     }
-    return Array.isArray(fallbackCategories) ? fallbackCategories : [];
+    return [];
   }, [content?.categories, liveCategories]);
 
   const displayCategories = categoriesList.filter((c) => c.id !== 'all' && c.slug !== 'all');
@@ -189,6 +191,8 @@ export default function CategorySection({ initialCategories = [] }) {
               );
             })}
           </div>
+        ) : loading ? (
+          <CategoryGridSkeleton count={7} />
         ) : (
           <div className="py-8 text-center bg-white rounded-2xl border border-dashed border-[#E8E2D5] p-6 max-w-lg mx-auto">
             <p className="text-xs sm:text-sm font-bold text-[#016831] mb-1">ক্যাটাগরি তালিকা খালি</p>

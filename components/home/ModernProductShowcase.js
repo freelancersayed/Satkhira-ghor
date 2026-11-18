@@ -15,7 +15,7 @@ import {
   Award,
 } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
-import { categories as fallbackCategories } from '@/data/products';
+import ProductGridSkeleton from '@/components/product/ProductGridSkeleton';
 import { useSiteContentStore } from '@/store/siteContentStore';
 import FlashSaleEditModal from '@/components/home/FlashSaleEditModal';
 
@@ -39,7 +39,7 @@ export default function ModernProductShowcase({ initialProducts = [], initialCat
       .catch(() => { });
   }, []);
 
-  // Dynamic Categories from database
+  // Dynamic Categories from database (strictly remove static fallback)
   const activeCategories = useMemo(() => {
     const rawCategories = content?.categories;
     if (Array.isArray(rawCategories) && rawCategories.length > 0) {
@@ -52,7 +52,7 @@ export default function ModernProductShowcase({ initialProducts = [], initialCat
     if (liveCategories.length > 0) {
       return liveCategories;
     }
-    return Array.isArray(fallbackCategories) ? fallbackCategories : [];
+    return [];
   }, [content?.categories, liveCategories]);
 
   // Flash Sale Countdown Timer
@@ -406,6 +406,8 @@ export default function ModernProductShowcase({ initialProducts = [], initialCat
               <ProductCard key={product.id || product.slug} product={product} />
             ))}
           </div>
+        ) : initialProducts.length === 0 ? (
+          <ProductGridSkeleton count={8} />
         ) : (
           <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-[#E8E2D5]">
             <p className="text-sm text-[#6B7280] font-medium">

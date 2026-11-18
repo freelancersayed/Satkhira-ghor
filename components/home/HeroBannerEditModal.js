@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useSiteContentStore } from '@/store/siteContentStore';
-import { DEFAULT_SIDE_BANNER } from '@/components/home/HeroBanner';
 
 export default function HeroBannerEditModal({
   defaultTab = 'slides',
@@ -78,9 +77,9 @@ export default function HeroBannerEditModal({
     floatingBadge2Sub: '',
     slides: [],
     sideBanner: {
-      url: DEFAULT_SIDE_BANNER?.url || '',
-      link: DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
-      label: DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+      url: '',
+      link: '/shop?cat=combos',
+      label: 'স্পেশাল অফার',
       showOnMobile: true,
     },
   });
@@ -105,24 +104,24 @@ export default function HeroBannerEditModal({
 
     // Normalize side banner
     let initialSideBanner = {
-      url: DEFAULT_SIDE_BANNER?.url || '',
-      link: DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
-      label: DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+      url: '',
+      link: '/shop?cat=combos',
+      label: 'স্পেশাল অফার',
       showOnMobile: true,
     };
 
     if (hero.sideBanner && typeof hero.sideBanner === 'object') {
       initialSideBanner = {
-        url: hero.sideBanner.url || DEFAULT_SIDE_BANNER?.url || '',
-        link: hero.sideBanner.link || DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
-        label: hero.sideBanner.label || DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+        url: hero.sideBanner.url || '',
+        link: hero.sideBanner.link || '/shop?cat=combos',
+        label: hero.sideBanner.label || 'স্পেশাল অফার',
         showOnMobile: hero.sideBanner.showOnMobile !== false,
       };
     } else if (typeof hero.sideBanner === 'string' && hero.sideBanner.trim()) {
       initialSideBanner = {
         url: hero.sideBanner.trim(),
-        link: DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
-        label: DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+        link: '/shop?cat=combos',
+        label: 'স্পেশাল অফার',
         showOnMobile: true,
       };
     }
@@ -336,17 +335,17 @@ export default function HeroBannerEditModal({
   };
 
   const handleResetSideBanner = () => {
-    if (!confirm('আপনি কি ২নং ব্যানার ডিফল্ট ছবিতে রিসেট করতে চান?')) return;
+    if (!confirm('আপনি কি ২নং ব্যানার মুছে ফেলতে চান?')) return;
     setFormData((prev) => ({
       ...prev,
       sideBanner: {
-        url: DEFAULT_SIDE_BANNER?.url || '',
-        link: DEFAULT_SIDE_BANNER?.link || '/shop?cat=combos',
-        label: DEFAULT_SIDE_BANNER?.label || 'স্পেশাল অফার',
+        url: '',
+        link: '/shop?cat=combos',
+        label: 'স্পেশাল অফার',
         showOnMobile: true,
       },
     }));
-    setNotification('২নং ব্যানার ডিফল্টে রিসেট করা হয়েছে!');
+    setNotification('২নং ব্যানার রিমুভ করা হয়েছে!');
     setTimeout(() => setNotification(''), 2500);
   };
 
@@ -565,7 +564,7 @@ export default function HeroBannerEditModal({
                         type="url"
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
-                        placeholder="https://images.unsplash.com/... অথবা ছবির সরাসরি লিংক পেস্ট করুন"
+                        placeholder="ছবির সরাসরি ওয়েব লিংক পেস্ট করুন"
                         className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 bg-[#FCFAF7] focus:outline-none focus:border-[#016831]"
                       />
                       <button
@@ -615,8 +614,7 @@ export default function HeroBannerEditModal({
                               alt={slide.label || `Slide ${index + 1}`}
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                e.currentTarget.src =
-                                  'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=300&q=80';
+                                e.currentTarget.style.display = 'none';
                               }}
                             />
                           </div>

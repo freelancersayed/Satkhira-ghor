@@ -5,6 +5,7 @@ import SiteContent from '@/models/SiteContent';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/auth';
 import { categories as defaultCategories } from '@/data/products';
+import { getCachedData, setCachedData, invalidateCache, sanitizeBase64 } from '@/lib/performance';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,11 +18,34 @@ async function getStoredCategories() {
   return defaultCategories || [];
 }
 
-// GET all categories
+// GET all categories (cached in RAM for instant 1ms response)
 export async function GET() {
   try {
+    const cached = getCachedData('categories_all');
+    if (cached) {
+      return NextResponse.json(
+        { success: true, categories: cached },
+        {
+          headers: {
+            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+            'X-Cache': 'HIT',
+          },
+        }
+      );
+    }
+
     const categories = await getStoredCategories();
-    return NextResponse.json({ success: true, categories });
+    setCachedData('categories_all', categories, 60);
+
+    return NextResponse.json(
+      { success: true, categories },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+          'X-Cache': 'MISS',
+        },
+      }
+    );
   } catch (error) {
     console.warn('Categories GET fallback:', error.message);
     return NextResponse.json({ success: true, categories: defaultCategories || [] });
@@ -61,13 +85,18 @@ export async function POST(request) {
       return NextResponse.json({ message: 'এই স্লাগ দিয়ে ইতিমধ্যে একটি ক্যাটাগরি রয়েছে' }, { status: 400 });
     }
 
+    const cleanImage = await sanitizeBase64(
+      image?.trim() || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400',
+      `cat_${cleanSlug}`
+    );
+
     const newCategory = {
       id: cleanSlug,
       name: name.trim(),
       nameEn: nameEn?.trim() || name.trim(),
       slug: cleanSlug,
       icon: icon?.trim() || '🌿',
-      image: image?.trim() || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400',
+      image: cleanImage,
       description: description?.trim() || '',
     };
 
@@ -78,6 +107,9 @@ export async function POST(request) {
       { key: 'categories', data: updatedCategories, updatedBy: adminCheck.user.phone || 'admin' },
       { upsert: true, new: true }
     );
+
+    invalidateCache('categories');
+    invalidateCache('products');
 
     try {
       revalidatePath('/', 'layout');
@@ -108,11 +140,14 @@ export async function PUT(request) {
 
     // Case 1: Bulk replace / reorder
     if (Array.isArray(body.categories)) {
+      const sanitizedCategories = await sanitizeBase64(body.categories, 'cat_bulk');
       await SiteContent.findOneAndUpdate(
         { key: 'categories' },
-        { key: 'categories', data: body.categories, updatedBy: adminCheck.user.phone || 'admin' },
+        { key: 'categories', data: sanitizedCategories, updatedBy: adminCheck.user.phone || 'admin' },
         { upsert: true, new: true }
       );
+      invalidateCache('categories');
+      invalidateCache('products');
       try {
         revalidatePath('/', 'layout');
         revalidatePath('/shop');
@@ -120,7 +155,7 @@ export async function PUT(request) {
       return NextResponse.json({
         success: true,
         message: 'ক্যাটাগরি তালিকা সফলভাবে সংরক্ষিত হয়েছে',
-        categories: body.categories,
+        categories: sanitizedCategories,
       });
     }
 
@@ -137,13 +172,15 @@ export async function PUT(request) {
       return NextResponse.json({ message: 'ক্যাটাগরি খুঁজে পাওয়া যায়নি' }, { status: 404 });
     }
 
+    const cleanImg = image !== undefined ? await sanitizeBase64(image.trim(), `cat_${slug}`) : updated[index]?.image;
+
     const updated = [...currentCategories];
     updated[index] = {
       ...updated[index],
       name: name !== undefined ? name.trim() : updated[index].name,
       nameEn: nameEn !== undefined ? nameEn.trim() : updated[index].nameEn,
       icon: icon !== undefined ? icon.trim() : updated[index].icon,
-      image: image !== undefined ? image.trim() : updated[index].image,
+      image: cleanImg !== undefined ? cleanImg : updated[index].image,
       description: description !== undefined ? description.trim() : updated[index].description,
     };
 
@@ -152,6 +189,9 @@ export async function PUT(request) {
       { key: 'categories', data: updated, updatedBy: adminCheck.user.phone || 'admin' },
       { upsert: true, new: true }
     );
+
+    invalidateCache('categories');
+    invalidateCache('products');
 
     // Sync product categoryName across database if category name changed
     if (name && name.trim()) {
@@ -205,6 +245,9 @@ export async function DELETE(request) {
       { key: 'categories', data: filtered, updatedBy: adminCheck.user.phone || 'admin' },
       { upsert: true, new: true }
     );
+
+    invalidateCache('categories');
+    invalidateCache('products');
 
     try {
       revalidatePath('/', 'layout');

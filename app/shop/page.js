@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { categories as defaultDataCategories } from '@/data/products';
 import ProductGrid from '@/components/product/ProductGrid';
+import ProductGridSkeleton from '@/components/product/ProductGridSkeleton';
 
 const toBanglaNum = (num) => {
   const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
@@ -48,9 +49,7 @@ function ShopContent() {
   const [inStockOnly, setInStockOnly] = useState(initialInStock);
 
   const [productList, setProductList] = useState([]);
-  const [categoriesList, setCategoriesList] = useState(
-    Array.isArray(defaultDataCategories) ? defaultDataCategories : []
-  );
+  const [categoriesList, setCategoriesList] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Sync state if URL query params change externally
@@ -529,10 +528,7 @@ function ShopContent() {
 
         {/* Product Grid / Loading / Empty State */}
         {loading ? (
-          <div className="py-24 text-center">
-            <div className="w-10 h-10 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-xs text-[#6B7280] font-medium">পণ্য লোড হচ্ছে...</p>
-          </div>
+          <ProductGridSkeleton count={10} />
         ) : filteredProducts.length === 0 ? (
           <div className="bg-white rounded-3xl p-8 sm:p-14 text-center border border-[#E8E2D5] max-w-xl mx-auto space-y-4 shadow-xs">
             <div className="w-16 h-16 bg-[#FEF3C7] rounded-full flex items-center justify-center mx-auto text-2xl text-[#D97706]">

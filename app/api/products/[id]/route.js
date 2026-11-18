@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireManagerOrAdmin } from '@/lib/auth';
+import { invalidateCache, sanitizeBase64 } from '@/lib/performance';
 
 export async function GET(request, { params }) {
   try {
@@ -45,6 +46,14 @@ export async function PUT(request, { params }) {
     const isMongoId = mongoose.Types.ObjectId.isValid(id);
     const filter = isMongoId ? { _id: id } : { slug: id };
 
+    // Auto-sanitize any Base64 images to static files
+    if (body.image) {
+      body.image = await sanitizeBase64(body.image, `prod_edit_${id}`);
+    }
+    if (body.images) {
+      body.images = await sanitizeBase64(body.images, `prod_edit_${id}_gallery`);
+    }
+
     // If primary image was updated, ensure images array keeps the primary image at index 0
     let imagesUpdate = body.images;
     if (body.image) {
@@ -72,6 +81,8 @@ export async function PUT(request, { params }) {
     if (!updatedProduct) {
       return NextResponse.json({ message: 'পণ্যটি খুঁজে পাওয়া যায়নি' }, { status: 404 });
     }
+
+    invalidateCache('products');
 
     try {
       revalidatePath('/', 'layout');
@@ -146,6 +157,8 @@ export async function DELETE(request, { params }) {
     if (!deleted) {
       return NextResponse.json({ message: 'পণ্যটি খুঁজে পাওয়া যায়নি' }, { status: 404 });
     }
+
+    invalidateCache('products');
 
     try {
       revalidatePath('/', 'layout');

@@ -6,34 +6,12 @@ const defaultContent = {
     title: 'প্রকৃতির সেরা উপহার, \nসরাসরি আপনার খাবার টেবিলে',
     description:
       'সাতক্ষীরার গভীর সুন্দরবনের খাঁটি খলসী ফুলের মধু, প্রাচীন বিলোনা পদ্ধতির দেশি গাওয়া ঘি এবং খাঁটি ঘানি ভাঙা সরিষার তেল। ১০০% বিশুদ্ধ ও কেমিক্যালমুক্ত।',
-    image:
-      'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800',
-    slides: [
-      {
-        url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=90&w=1920',
-        label: 'সুন্দরবনের খাঁটি মধু',
-      },
-      {
-        url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=90&w=1920',
-        label: 'জেলেদের তাজা মাছ আহরণ',
-      },
-      {
-        url: 'https://images.unsplash.com/photo-1565031491910-e57fac031c41?auto=format&fit=crop&q=90&w=1920',
-        label: 'উপকূলের তাজা চিংড়ি',
-      },
-      {
-        url: 'https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&q=90&w=1920',
-        label: 'সাতক্ষীরার বিখ্যাত হিমসাগর আম',
-      },
-      {
-        url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=90&w=1920',
-        label: 'খাঁটি দেশি খাদ্য সম্ভার',
-      },
-    ],
+    image: '',
+    slides: [],
     sideBanner: {
-      url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=90&w=1200',
-      link: '/products/satkhira-sundarbans-mega-family-combo',
-      label: 'মধু স্পেশাল কম্বোপ্যাক অফার',
+      url: '',
+      link: '/shop?cat=combos',
+      label: 'স্পেশাল অফার',
       showOnMobile: true,
     },
     primaryBtnText: 'পণ্য কিনুন',
@@ -100,10 +78,14 @@ const defaultContent = {
   },
 };
 
-// Preload cached theme from localStorage if in browser
+// Preload cached content and theme from storage if in browser
 let initialContent = { ...defaultContent };
 if (typeof window !== 'undefined') {
   try {
+    const cached = sessionStorage.getItem('satkhira_site_content');
+    if (cached) {
+      initialContent = { ...defaultContent, ...JSON.parse(cached) };
+    }
     const cachedTheme = localStorage.getItem('satkhira_theme');
     if (cachedTheme) {
       initialContent.theme = { ...defaultContent.theme, ...JSON.parse(cachedTheme) };
@@ -129,9 +111,12 @@ export const useSiteContentStore = create((set, get) => ({
           if (data.content.categories && !Array.isArray(data.content.categories) && typeof data.content.categories === 'object') {
             data.content.categories = Object.values(data.content.categories);
           }
-          if (data.content.theme && typeof window !== 'undefined') {
+          if (typeof window !== 'undefined') {
             try {
-              localStorage.setItem('satkhira_theme', JSON.stringify(data.content.theme));
+              sessionStorage.setItem('satkhira_site_content', JSON.stringify(data.content));
+              if (data.content.theme) {
+                localStorage.setItem('satkhira_theme', JSON.stringify(data.content.theme));
+              }
             } catch (e) { }
           }
           set({ content: data.content, loaded: true, loading: false });
@@ -160,9 +145,12 @@ export const useSiteContentStore = create((set, get) => ({
         },
       });
 
-      if (sectionKey === 'theme' && typeof window !== 'undefined') {
+      if (typeof window !== 'undefined') {
         try {
-          localStorage.setItem('satkhira_theme', JSON.stringify(sectionData));
+          sessionStorage.setItem('satkhira_site_content', JSON.stringify(get().content));
+          if (sectionKey === 'theme') {
+            localStorage.setItem('satkhira_theme', JSON.stringify(sectionData));
+          }
         } catch (e) { }
       }
 

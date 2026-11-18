@@ -4,6 +4,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import SiteContent from '@/models/SiteContent';
 import { requireAdmin } from '@/lib/auth';
 import { saveThemeToFile } from '@/lib/themeServer';
+import { getCachedData, setCachedData, invalidateCache, sanitizeBase64 } from '@/lib/performance';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,13 +113,32 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const key = searchParams.get('key');
+    const cacheKey = `site_content_${key || 'all'}`;
+
+    // Fast In-Memory RAM Cache (< 1ms)
+    const cached = getCachedData(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+          'X-Cache': 'HIT',
+        },
+      });
+    }
 
     await connectToDatabase();
 
     if (key) {
-      const item = await SiteContent.findOne({ key });
-      return NextResponse.json({
+      const item = await SiteContent.findOne({ key }).lean();
+      const payload = {
         data: item ? item.data : defaultSiteContent[key] || {},
+      };
+      setCachedData(cacheKey, payload, 60);
+      return NextResponse.json(payload, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+          'X-Cache': 'MISS',
+        },
       });
     }
 
@@ -135,7 +155,15 @@ export async function GET(request) {
       }
     });
 
-    return NextResponse.json({ content: result });
+    const payload = { content: result };
+    setCachedData(cacheKey, payload, 60);
+
+    return NextResponse.json(payload, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        'X-Cache': 'MISS',
+      },
+    });
   } catch (error) {
     console.warn('Site content fetch fallback:', error.message);
     return NextResponse.json({ content: defaultSiteContent });
@@ -161,16 +189,21 @@ export async function PUT(request) {
       );
     }
 
+    // Auto-convert any Base64 images to static files to prevent database/payload bloat
+    const cleanData = await sanitizeBase64(data, `content_${key}`);
+
     await connectToDatabase();
 
     const updated = await SiteContent.findOneAndUpdate(
       { key },
-      { key, data, updatedBy: adminCheck.user.phone || 'admin' },
+      { key, data: cleanData, updatedBy: adminCheck.user.phone || 'admin' },
       { upsert: true, new: true }
     );
 
+    invalidateCache('site_content');
+
     if (key === 'theme') {
-      saveThemeToFile(data);
+      saveThemeToFile(cleanData);
     }
 
     try {

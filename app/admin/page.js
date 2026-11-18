@@ -72,12 +72,21 @@ import {
   isMuted,
 } from '@/lib/audioAlert';
 
+const DEFAULT_CATEGORIES = [
+  { slug: 'honey', name: 'সুন্দরবনের মধু' },
+  { slug: 'ghee', name: 'খাঁটি গাওয়া ঘি' },
+  { slug: 'oil', name: 'সরিষার তেল' },
+  { slug: 'sweets', name: 'সাতক্ষীরার সন্দেশ' },
+  { slug: 'pickles', name: 'আচার ও মশলা' },
+];
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { user, isLoading, logout, checkAuth } = useAuthStore();
 
   // Navigation tab: 'overview' | 'products' | 'orders' | 'reports' | 'crm' | 'marketing' | 'reviews'
   const [activeTab, setActiveTab] = useState('overview');
+  const [authReady, setAuthReady] = useState(false);
 
   // Audio & Notification state
   const [audioMuted, setAudioMuted] = useState(false);
@@ -97,6 +106,13 @@ export default function AdminDashboardPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
   const [categoriesList, setCategoriesList] = useState([]);
+
+  const effectiveCategories = useMemo(() => {
+    const selectable = (categoriesList || []).filter(
+      (c) => c && c.slug !== 'all' && c.id !== 'all'
+    );
+    return selectable.length > 0 ? selectable : DEFAULT_CATEGORIES;
+  }, [categoriesList]);
 
   // Product Form state (with variation matrix & full dynamic specifications)
   const initialProductFormState = {
@@ -162,13 +178,15 @@ export default function AdminDashboardPage() {
   const isAdmin = user && user.role === 'admin';
 
   useEffect(() => {
-    checkAuth();
+    checkAuth().finally(() => {
+      setAuthReady(true);
+    });
     // Initialize audio context on first user click/interaction
     initAudioOnUserGesture();
   }, [checkAuth]);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && authReady) {
       if (!user) {
         router.push('/login?redirect=/admin');
       } else if (!isPrivileged) {
@@ -177,7 +195,7 @@ export default function AdminDashboardPage() {
         loadDashboardData();
       }
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, authReady, router]);
 
   // Real-time Live Orders Poller (1 to 2.5-second latency pipeline)
   useEffect(() => {
@@ -558,32 +576,13 @@ export default function AdminDashboardPage() {
     }
   };
 
-  if (isLoading || !user || !isPrivileged) {
+  if (!authReady || isLoading || !user || !isPrivileged) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
         <div className="w-10 h-10 border-4 border-[#016831] border-t-[#F59E0B] rounded-full animate-spin" />
       </div>
     );
   }
-
-  // Dynamic categories helper (fallback to defaults if empty)
-  const defaultCategories = useMemo(
-    () => [
-      { slug: 'honey', name: 'সুন্দরবনের মধু' },
-      { slug: 'ghee', name: 'খাঁটি গাওয়া ঘি' },
-      { slug: 'oil', name: 'সরিষার তেল' },
-      { slug: 'sweets', name: 'সাতক্ষীরার সন্দেশ' },
-      { slug: 'pickles', name: 'আচার ও মশলা' },
-    ],
-    []
-  );
-
-  const effectiveCategories = useMemo(() => {
-    const selectable = (categoriesList || []).filter(
-      (c) => c && c.slug !== 'all' && c.id !== 'all'
-    );
-    return selectable.length > 0 ? selectable : defaultCategories;
-  }, [categoriesList, defaultCategories]);
 
   // Filter products
   const filteredProducts = products.filter((p) => {

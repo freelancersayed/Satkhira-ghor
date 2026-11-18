@@ -5,6 +5,7 @@ import Review from '@/models/Review';
 import Product from '@/models/Product';
 import Order from '@/models/Order';
 import { getSessionUser } from '@/lib/auth';
+import { sanitizeBase64 } from '@/lib/performance';
 
 export const dynamic = 'force-dynamic';
 
@@ -151,11 +152,14 @@ export async function POST(request) {
       product: product._id,
     });
 
-    const finalImages = Array.isArray(images)
+    const rawImages = Array.isArray(images)
       ? images.filter(Boolean)
       : typeof images === 'string' && images
       ? [images]
       : [];
+
+    const finalImages = await sanitizeBase64(rawImages, `rev_${user.id || 'u'}`);
+    const finalProductImage = await sanitizeBase64(productImage || product.image, `rev_prod_${product._id}`);
 
     if (review) {
       // Update existing review
@@ -166,7 +170,7 @@ export async function POST(request) {
       review.userPhone = user.phone || review.userPhone;
       review.productName = product.name;
       review.productSlug = product.slug;
-      review.productImage = product.image;
+      review.productImage = finalProductImage;
       if (isVerifiedPurchase) review.isVerifiedPurchase = true;
       await review.save();
     } else {
@@ -178,7 +182,7 @@ export async function POST(request) {
         product: product._id,
         productName: product.name,
         productSlug: product.slug,
-        productImage: product.image,
+        productImage: finalProductImage,
         rating: Number(rating),
         comment: comment.trim(),
         images: finalImages,

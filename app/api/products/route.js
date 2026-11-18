@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/auth';
+import { getCachedData, setCachedData, invalidateCache, sanitizeBase64 } from '@/lib/performance';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,18 @@ export async function GET(request) {
     const inStock = searchParams.get('inStock');
     const sort = searchParams.get('sort') || 'newest';
     const limit = parseInt(searchParams.get('limit') || '150');
+
+    // ── 1. Fast In-Memory RAM Cache Check (< 2ms) ───────────────────
+    const cacheKey = `products_${request.url}`;
+    const cachedResponse = getCachedData(cacheKey);
+    if (cachedResponse) {
+      return NextResponse.json(cachedResponse, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+          'X-Cache': 'HIT',
+        },
+      });
+    }
 
     await connectToDatabase();
 
@@ -74,18 +87,21 @@ export async function GET(request) {
       id: p._id ? p._id.toString() : p.slug,
     }));
 
-    return NextResponse.json(
-      {
-        products: formattedProducts,
-        total: formattedProducts.length,
-        source: 'database',
+    const responsePayload = {
+      products: formattedProducts,
+      total: formattedProducts.length,
+      source: 'database',
+    };
+
+    // Cache in RAM for 30 seconds
+    setCachedData(cacheKey, responsePayload, 30);
+
+    return NextResponse.json(responsePayload, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+        'X-Cache': 'MISS',
       },
-      {
-        headers: {
-          'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
-        },
-      }
-    );
+    });
   } catch (error) {
     console.warn('MongoDB products fetch error:', error.message);
     return NextResponse.json({
@@ -157,6 +173,10 @@ export async function POST(request) {
     const existing = await Product.findOne({ slug: finalSlug });
     const uniqueSlug = existing ? `${finalSlug}-${Date.now().toString().slice(-4)}` : finalSlug;
 
+    // Auto-sanitize Base64 images to static files to guarantee lightning-fast database responses
+    const cleanImage = await sanitizeBase64(image, `prod_${uniqueSlug}`);
+    const cleanImages = await sanitizeBase64(images, `prod_${uniqueSlug}_gallery`);
+
     const newProduct = await Product.create({
       name,
       nameEn: nameEn || '',
@@ -169,8 +189,8 @@ export async function POST(request) {
       stock: stock !== undefined ? Number(stock) : 10,
       badge: badge || '',
       badgeType: badgeType || 'forest',
-      image,
-      images: images && images.length > 0 ? [image, ...images.filter((i) => i !== image)] : [image],
+      image: cleanImage,
+      images: cleanImages && cleanImages.length > 0 ? [cleanImage, ...cleanImages.filter((i) => i !== cleanImage)] : [cleanImage],
       shortDescription: shortDescription || '',
       description: description || '',
       origin: origin || 'সুন্দরবন ও সাতক্ষীরা',
@@ -186,6 +206,8 @@ export async function POST(request) {
       hasVariations: !!hasVariations,
       variations: Array.isArray(variations) ? variations : [],
     });
+
+    invalidateCache('products');
 
     try {
       revalidatePath('/', 'layout');
