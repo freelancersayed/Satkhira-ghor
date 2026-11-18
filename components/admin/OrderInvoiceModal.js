@@ -14,6 +14,7 @@ import {
   Truck,
   ShieldCheck,
 } from 'lucide-react';
+import { deliveryConfig } from '@/lib/deliveryConfig';
 
 export default function OrderInvoiceModal({ order, onClose }) {
   const [printMode, setPrintMode] = useState('invoice'); // 'invoice' | 'shipping_label'
@@ -38,10 +39,50 @@ export default function OrderInvoiceModal({ order, onClose }) {
     order.courierBooking?.trackingCode ||
     `STDF-${order.orderNumber.replace(/[^0-9]/g, '') || '849201'}`;
 
+  const currentDomain = typeof window !== 'undefined' ? window.location.host : 'satkhiraghor.com';
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto print-dialog-overlay">
+      {/* Scoped Print Configuration */}
+      <style jsx global>{`
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+          body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          .print-dialog-overlay {
+            position: static !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+          }
+          .print-dialog-card {
+            border: none !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            border-radius: 0 !important;
+            width: 100% !important;
+          }
+          .print-area {
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          @page {
+            size: ${printMode === 'shipping_label' ? '100mm 150mm' : 'A4 portrait'};
+            margin: ${printMode === 'shipping_label' ? '4mm' : '10mm'};
+          }
+        }
+      `}</style>
+
       {/* Container - Printable Sheet */}
-      <div className="bg-white rounded-3xl max-w-2xl w-full my-6 border border-[#E8E2D5] shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-white rounded-3xl max-w-2xl w-full my-6 border border-[#E8E2D5] shadow-2xl overflow-hidden flex flex-col print-dialog-card">
         {/* Modal Action Header (Hidden during print) */}
         <div className="no-print bg-[#014D24] text-white px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div className="flex items-center gap-2">
@@ -60,6 +101,7 @@ export default function OrderInvoiceModal({ order, onClose }) {
             {/* Layout Mode Selector */}
             <div className="bg-white/10 p-1 rounded-xl flex items-center gap-1 text-xs">
               <button
+                type="button"
                 onClick={() => setPrintMode('invoice')}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 ${
                   printMode === 'invoice'
@@ -71,6 +113,7 @@ export default function OrderInvoiceModal({ order, onClose }) {
                 <span>ক্যাশ মেমো</span>
               </button>
               <button
+                type="button"
                 onClick={() => setPrintMode('shipping_label')}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 ${
                   printMode === 'shipping_label'
@@ -84,15 +127,18 @@ export default function OrderInvoiceModal({ order, onClose }) {
             </div>
 
             <button
+              type="button"
               onClick={handlePrint}
-              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm"
+              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>প্রিন্ট করুন</span>
             </button>
             <button
+              type="button"
               onClick={onClose}
-              className="text-white/70 hover:text-white p-1 rounded-lg"
+              className="text-white/70 hover:text-white p-1 rounded-lg cursor-pointer"
+              aria-label="বন্ধ করুন"
             >
               <X className="w-5 h-5" />
             </button>
@@ -180,8 +226,8 @@ export default function OrderInvoiceModal({ order, onClose }) {
                   শ্যামনগর ও সাতক্ষীরা সদর, খুলনা বিভাগ।
                 </p>
                 <div className="text-[11px] text-gray-700 font-semibold space-y-0.5 pt-1">
-                  <div>📞 হেল্পলাইন: ০১৭০০-০০০০০০</div>
-                  <div>🌐 ওয়েবসাইট: satkhir-ghor.vercel.app</div>
+                  <div>📞 হেল্পলাইন: {deliveryConfig.supportPhone}</div>
+                  <div>🌐 ওয়েবসাইট: {currentDomain}</div>
                   <div>📦 কুরিয়ার পার্টনার: Steadfast Courier / Pathao</div>
                 </div>
               </div>
@@ -231,7 +277,12 @@ export default function OrderInvoiceModal({ order, onClose }) {
             <div className="flex justify-between items-center pt-3 border-t-2 border-gray-200">
               <div className="space-y-1 text-[11px] text-gray-500">
                 <div>পেমেন্ট মেথড: {order.paymentMethod?.toUpperCase()}</div>
-                <div>পেমেন্ট স্ট্যাটাস: {order.paymentStatus === 'paid' ? 'পরিশোধিত (Paid)' : 'ক্যাশ অন ডেলিভারি (বকেয়া)'}</div>
+                <div>
+                  পেমেন্ট স্ট্যাটাস:{' '}
+                  <span className={`font-bold ${order.paymentStatus === 'paid' ? 'text-emerald-700' : 'text-amber-700'}`}>
+                    {order.paymentStatus === 'paid' ? 'পরিশোধিত (Paid)' : 'ক্যাশ অন ডেলিভারি (বকেয়া)'}
+                  </span>
+                </div>
               </div>
               <div className="text-right space-y-1 text-xs">
                 <div>সাবটোটাল: ৳{order.subtotal}</div>
@@ -240,6 +291,11 @@ export default function OrderInvoiceModal({ order, onClose }) {
                   সর্বমোট: ৳{order.totalAmount}
                 </div>
               </div>
+            </div>
+
+            {/* Footer Disclaimer */}
+            <div className="text-center pt-4 border-t border-gray-200 text-[10px] text-gray-400">
+              সাতক্ষীরা ঘরের সাথে থাকার জন্য ধন্যবাদ! নিরাপদ ও খাঁটি পণ্যের অঙ্গীকার।
             </div>
           </div>
         )}
@@ -290,7 +346,7 @@ export default function OrderInvoiceModal({ order, onClose }) {
                   </div>
                 </div>
                 <div className="text-right text-[10px] font-bold bg-white/10 px-2 py-1 rounded">
-                  {order.paymentStatus === 'paid' ? 'PREPAID' : 'COLLECT CASH'}
+                  {order.paymentStatus === 'paid' ? 'PREPAID (পরিশোধিত)' : 'COLLECT CASH (বকেয়া)'}
                 </div>
               </div>
 
@@ -320,7 +376,7 @@ export default function OrderInvoiceModal({ order, onClose }) {
                 <div>
                   <strong>প্রেরক:</strong> সাতক্ষীরা ঘর<br />
                   শ্যামনগর, সাতক্ষীরা<br />
-                  হেল্পলাইন: ০১৭০০-০০০০০০
+                  হেল্পলাইন: {deliveryConfig.supportPhone}
                 </div>
                 <div className="text-right">
                   <strong>অর্ডার:</strong> #{order.orderNumber}<br />

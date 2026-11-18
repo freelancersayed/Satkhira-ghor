@@ -49,6 +49,8 @@ import {
   Calendar,
   Info,
   Loader2,
+  Phone,
+  MessageSquare,
 } from 'lucide-react';
 
 import { useAuthStore } from '@/store/authStore';
@@ -162,6 +164,8 @@ export default function AdminDashboardPage() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [orderSearch, setOrderSearch] = useState('');
   const [orderFilter, setOrderFilter] = useState('all');
+  const [orderPaymentFilter, setOrderPaymentFilter] = useState('all');
+  const [orderRiskFilter, setOrderRiskFilter] = useState('all');
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [printingOrder, setPrintingOrder] = useState(null);
   const [bookingCourierLoading, setBookingCourierLoading] = useState(false);
@@ -643,7 +647,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Update Order Status (including Hold, Processing, Shipped, Delivered)
+  // Update Order Status (including Hold, Processing, Shipped, Delivered, Cancelled)
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
       const res = await fetch(`/api/orders/${orderId}`, {
@@ -656,11 +660,76 @@ export default function AdminDashboardPage() {
         showNotification(`অর্ডার স্ট্যাটাস "${newStatus}" এ পরিবর্তন করা হয়েছে`, 'success');
         fetchOrders();
         fetchStats();
+        fetchProducts(); // Ensures stock is immediately synced in admin UI
+        if (selectedOrderDetails && selectedOrderDetails._id === orderId) {
+          setSelectedOrderDetails((prev) => ({
+            ...prev,
+            orderStatus: newStatus,
+          }));
+        }
       } else {
         showNotification(data.message, 'error');
       }
     } catch (err) {
       showNotification('স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
+    }
+  };
+
+  // Quick Payment Status Toggle (Unpaid / Paid)
+  const handleUpdatePaymentStatus = async (orderId, newPaymentStatus) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentStatus: newPaymentStatus }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification(
+          `পেমেন্ট স্ট্যাটাস "${newPaymentStatus === 'paid' ? 'পরিশোধিত' : 'বকেয়া'}" করা হয়েছে`,
+          'success'
+        );
+        fetchOrders();
+        fetchStats();
+        if (selectedOrderDetails && selectedOrderDetails._id === orderId) {
+          setSelectedOrderDetails((prev) => ({
+            ...prev,
+            paymentStatus: newPaymentStatus,
+          }));
+        }
+      } else {
+        showNotification(data.message, 'error');
+      }
+    } catch (err) {
+      showNotification('পেমেন্ট স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
+    }
+  };
+
+  // Safe Order Delete with Automatic Stock Inventory Restoration
+  const handleDeleteOrder = async (orderId, orderNum) => {
+    if (
+      !confirm(
+        `আপনি কি নিশ্চিত যে #${orderNum} অর্ডারটি ডিলিট করতে চান?\n\nযদি অর্ডারটি সক্রিয় থাকে, তবে পণ্যের স্টক স্বয়ংক্রিয়ভাবে ইনভেন্টরিতে ফেরত যাবে।`
+      )
+    ) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification(data.message || 'অর্ডারটি সফলভাবে ডিলিট করা হয়েছে', 'success');
+        if (selectedOrderDetails && selectedOrderDetails._id === orderId) {
+          setSelectedOrderDetails(null);
+        }
+        fetchOrders();
+        fetchStats();
+        fetchProducts();
+      } else {
+        showNotification(data.message, 'error');
+      }
+    } catch (err) {
+      showNotification('অর্ডার ডিলিট করতে সমস্যা হয়েছে: ' + err.message, 'error');
     }
   };
 
@@ -716,15 +785,38 @@ export default function AdminDashboardPage() {
     return matchesSearch && matchesCat && matchesStock;
   });
 
-  // Filter orders
-  const filteredOrders = orders.filter((o) => {
-    const matchesSearch =
-      o.orderNumber?.toLowerCase().includes(orderSearch.toLowerCase()) ||
-      o.customer?.phone?.includes(orderSearch) ||
-      o.customer?.name?.toLowerCase().includes(orderSearch.toLowerCase());
-    const matchesStatus = orderFilter === 'all' || o.orderStatus === orderFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Enhanced Multi-Criteria Filter for Orders (Bengali numerals normalization, phone, items, city, risk, payment)
+  const filteredOrders = useMemo(() => {
+    const normalizeDigits = (str) =>
+      (str || '')
+        .toLowerCase()
+        .replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d))
+        .trim();
+
+    const cleanSearch = normalizeDigits(orderSearch).replace(/^#/, '');
+
+    return orders.filter((o) => {
+      const orderNum = normalizeDigits(o.orderNumber);
+      const custPhone = normalizeDigits(o.customer?.phone).replace(/[^0-9]/g, '');
+      const custName = (o.customer?.name || '').toLowerCase();
+      const custCity = (o.customer?.city || '').toLowerCase();
+      const itemMatch = o.items?.some((it) => (it.name || '').toLowerCase().includes(cleanSearch));
+
+      const matchesSearch =
+        !cleanSearch ||
+        orderNum.includes(cleanSearch) ||
+        custPhone.includes(cleanSearch) ||
+        custName.includes(cleanSearch) ||
+        custCity.includes(cleanSearch) ||
+        itemMatch;
+
+      const matchesStatus = orderFilter === 'all' || o.orderStatus === orderFilter;
+      const matchesPayment = orderPaymentFilter === 'all' || o.paymentStatus === orderPaymentFilter;
+      const matchesRisk = orderRiskFilter === 'all' || o.fraudRisk === orderRiskFilter;
+
+      return matchesSearch && matchesStatus && matchesPayment && matchesRisk;
+    });
+  }, [orders, orderSearch, orderFilter, orderPaymentFilter, orderRiskFilter]);
 
   const stats = statsData?.stats;
 
@@ -1294,32 +1386,87 @@ export default function AdminDashboardPage() {
         {activeTab === 'orders' && (
           <div className="space-y-4">
             {/* Filter and Search Bar */}
-            <div className="bg-white p-4 rounded-2xl border border-[#E8E2D5] shadow-sm flex flex-col sm:flex-row justify-between gap-3">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="text"
-                  value={orderSearch}
-                  onChange={(e) => setOrderSearch(e.target.value)}
-                  placeholder="অর্ডার আইডি (#SKG-...), গ্রাহক বা মোবাইল নম্বর দিয়ে খুঁজুন..."
-                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#E8E2D5] text-xs outline-none focus:border-[#016831]"
-                />
+            <div className="bg-white p-4 rounded-2xl border border-[#E8E2D5] shadow-sm flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    value={orderSearch}
+                    onChange={(e) => setOrderSearch(e.target.value)}
+                    placeholder="অর্ডার আইডি (#SKG-...), গ্রাহকের নাম, মোবাইল বা পণ্য দিয়ে খুঁজুন..."
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#E8E2D5] text-xs outline-none focus:border-[#016831]"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Status Filter */}
+                  <select
+                    value={orderFilter}
+                    onChange={(e) => setOrderFilter(e.target.value)}
+                    className="py-2 px-3 rounded-xl border border-[#E8E2D5] text-xs bg-white text-slate-900 outline-none cursor-pointer"
+                  >
+                    <option value="all">সব অর্ডার স্ট্যাটাস</option>
+                    <option value="hold">🔴 অ্যান্টি-ফ্রড হোল্ড (Hold)</option>
+                    <option value="pending">পেন্ডিং (Pending)</option>
+                    <option value="processing">প্রস্তুত হচ্ছে (Processing)</option>
+                    <option value="shipped">শিপড (Shipped)</option>
+                    <option value="delivered">ডেলিভার্ড (Delivered)</option>
+                    <option value="cancelled">বাতিল (Cancelled)</option>
+                  </select>
+
+                  {/* Payment Status Filter */}
+                  <select
+                    value={orderPaymentFilter}
+                    onChange={(e) => setOrderPaymentFilter(e.target.value)}
+                    className="py-2 px-3 rounded-xl border border-[#E8E2D5] text-xs bg-white text-slate-900 outline-none cursor-pointer"
+                  >
+                    <option value="all">সব পেমেন্ট</option>
+                    <option value="unpaid">ক্যাশ অন ডেলিভারি (বকেয়া)</option>
+                    <option value="paid">পরিশোধিত (Paid)</option>
+                  </select>
+
+                  {/* Anti-Fraud Risk Filter */}
+                  <select
+                    value={orderRiskFilter}
+                    onChange={(e) => setOrderRiskFilter(e.target.value)}
+                    className="py-2 px-3 rounded-xl border border-[#E8E2D5] text-xs bg-white text-slate-900 outline-none cursor-pointer"
+                  >
+                    <option value="all">সব ফ্রড রিস্ক</option>
+                    <option value="high">🔴 উচ্চ ঝুঁকি (High Risk)</option>
+                    <option value="medium">🟡 মধ্যম ঝুঁকি (Medium Risk)</option>
+                    <option value="low">🟢 নিরাপদ গ্রাহক (Low Risk)</option>
+                  </select>
+
+                  {/* Reset Filters if active */}
+                  {(orderSearch || orderFilter !== 'all' || orderPaymentFilter !== 'all' || orderRiskFilter !== 'all') && (
+                    <button
+                      onClick={() => {
+                        setOrderSearch('');
+                        setOrderFilter('all');
+                        setOrderPaymentFilter('all');
+                        setOrderRiskFilter('all');
+                      }}
+                      className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      রিসেট
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <select
-                  value={orderFilter}
-                  onChange={(e) => setOrderFilter(e.target.value)}
-                  className="py-2 px-3 rounded-xl border border-[#E8E2D5] text-xs bg-white text-slate-900 outline-none"
-                >
-                  <option value="all">সব অর্ডার</option>
-                  <option value="hold">🔴 হোল্ড (Anti-Fraud Hold)</option>
-                  <option value="pending">পেন্ডিং (Pending)</option>
-                  <option value="processing">প্রস্তুত হচ্ছে (Processing)</option>
-                  <option value="shipped">শিপড (Shipped)</option>
-                  <option value="delivered">ডেলিভার্ড (Delivered)</option>
-                  <option value="cancelled">বাতিল (Cancelled)</option>
-                </select>
+              {/* Counter Indicator */}
+              <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-[#E8E2D5]/50">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <span>মোট দৃশ্যমান অর্ডার:</span>
+                  <span className="text-[#016831] font-black">{filteredOrders.length} টি</span>
+                  {orders.length !== filteredOrders.length && (
+                    <span className="text-slate-400"> (মোট ডাটাবেজে {orders.length} টি)</span>
+                  )}
+                </div>
+                <div className="text-slate-400">
+                  💡 পরামর্শ: পেমেন্ট স্ট্যাটাস পরিবর্তন করতে বিলের নিচে বকেয়া/পরিশোধিত ব্যাজে ক্লিক করুন।
+                </div>
               </div>
             </div>
 
@@ -1329,12 +1476,12 @@ export default function AdminDashboardPage() {
                 <table className="w-full text-xs text-left">
                   <thead className="bg-[#FDFBF7] text-slate-600 font-bold border-b border-[#E8E2D5]">
                     <tr>
-                      <th className="py-3 px-4">অর্ডার আইডি</th>
-                      <th className="py-3 px-4">তারিখ</th>
-                      <th className="py-3 px-4">গ্রাহক ও মোবাইল</th>
-                      <th className="py-3 px-4">কুরিয়ার হিস্টোরি ও ফ্রড রিক্স</th>
-                      <th className="py-3 px-4">ঠিকানা</th>
-                      <th className="py-3 px-4">মোট বিল</th>
+                      <th className="py-3 px-4">অর্ডার ও কুরিয়ার</th>
+                      <th className="py-3 px-4">তারিখ ও সময়</th>
+                      <th className="py-3 px-4">গ্রাহক ও যোগাযোগ</th>
+                      <th className="py-3 px-4">কুরিয়ার হিস্টোরি ও রিস্ক</th>
+                      <th className="py-3 px-4">আইটেম ও ঠিকানা</th>
+                      <th className="py-3 px-4">মোট বিল ও পেমেন্ট</th>
                       <th className="py-3 px-4">স্ট্যাটাস</th>
                       <th className="py-3 px-4 text-right">অ্যাকশন</th>
                     </tr>
@@ -1342,13 +1489,15 @@ export default function AdminDashboardPage() {
                   <tbody className="divide-y divide-[#E8E2D5]">
                     {filteredOrders.length === 0 ? (
                       <tr>
-                        <td colSpan="8" className="py-8 text-center text-slate-400">
+                        <td colSpan="8" className="py-12 text-center text-slate-400">
+                          <Package className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
                           কোনো অর্ডার পাওয়া যায়নি
                         </td>
                       </tr>
                     ) : (
                       filteredOrders.map((order) => {
                         const isHighRisk = order.fraudRisk === 'high' || order.orderStatus === 'hold';
+                        const cleanPhone = (order.customer?.phone || '').replace(/[^0-9]/g, '');
                         return (
                           <tr
                             key={order._id || order.orderNumber}
@@ -1358,26 +1507,76 @@ export default function AdminDashboardPage() {
                                 : 'hover:bg-emerald-50/20'
                             }`}
                           >
-                            <td className="py-3 px-4 font-mono font-bold text-[#016831]">
-                              #{order.orderNumber}
+                            {/* 1. Order ID & Courier */}
+                            <td className="py-3 px-4">
+                              <div className="font-mono font-bold text-[#016831]">
+                                #{order.orderNumber}
+                              </div>
+                              {order.courierBooking?.isBooked ? (
+                                <div className="mt-1 flex items-center gap-1">
+                                  <span className="inline-flex items-center gap-1 font-mono text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold border border-emerald-200">
+                                    <Truck className="w-3 h-3 text-emerald-600" />
+                                    <span>{order.courierBooking.trackingCode}</span>
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="text-[10px] text-slate-400 mt-0.5">
+                                  কুরিয়ার বুকিং বাকি
+                                </div>
+                              )}
                             </td>
-                            <td className="py-3 px-4 text-slate-400">
-                              {order.createdAt
-                                ? new Date(order.createdAt).toLocaleDateString('bn-BD', {
-                                    day: 'numeric',
-                                    month: 'short',
-                                  })
-                                : 'আজ'}
+
+                            {/* 2. Date & Time */}
+                            <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
+                              {order.createdAt ? (
+                                <>
+                                  <div className="font-semibold text-slate-700">
+                                    {new Date(order.createdAt).toLocaleDateString('bn-BD', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                    })}
+                                  </div>
+                                  <div className="text-[10px] text-slate-400">
+                                    {new Date(order.createdAt).toLocaleTimeString('bn-BD', {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })}
+                                  </div>
+                                </>
+                              ) : (
+                                'আজ'
+                              )}
                             </td>
+
+                            {/* 3. Customer & Contact */}
                             <td className="py-3 px-4">
                               <div className="font-bold text-slate-900">{order.customer?.name}</div>
-                              <a
-                                href={`tel:${order.customer?.phone}`}
-                                className="text-amber-700 hover:underline font-mono"
-                              >
-                                {order.customer?.phone}
-                              </a>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <a
+                                  href={`tel:${order.customer?.phone}`}
+                                  className="text-amber-700 hover:underline font-mono text-xs"
+                                  title="সরাসরি কল দিন"
+                                >
+                                  {order.customer?.phone}
+                                </a>
+                                {cleanPhone && (
+                                  <a
+                                    href={`https://wa.me/88${cleanPhone}?text=${encodeURIComponent(
+                                      `সালামু আলাইকুম ${order.customer?.name || ''}, সাতক্ষীরা ঘর থেকে আপনার অর্ডারটি (#${order.orderNumber}) নিশ্চিতকরণের জন্য যোগাযোগ করা হয়েছে।`
+                                    )}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1 rounded-md text-emerald-600 hover:bg-emerald-100 transition-colors"
+                                    title="WhatsApp-এ মেসেজ পাঠান"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                  </a>
+                                )}
+                              </div>
                             </td>
+
+                            {/* 4. Courier Fraud Badge */}
                             <td className="py-3 px-4">
                               <CourierFraudBadge
                                 fraudRisk={order.fraudRisk}
@@ -1386,12 +1585,44 @@ export default function AdminDashboardPage() {
                                 compact={true}
                               />
                             </td>
-                            <td className="py-3 px-4 max-w-xs truncate" title={order.customer?.address}>
-                              {order.customer?.address}, {order.customer?.city}
+
+                            {/* 5. Items & Address */}
+                            <td className="py-3 px-4 max-w-xs">
+                              <div className="font-semibold text-slate-900 truncate" title={order.items?.map((it) => it.name).join(', ')}>
+                                {order.items?.length || 1}টি আইটেম (
+                                {order.items?.map((it) => it.name).slice(0, 2).join(', ')}
+                                {(order.items?.length || 0) > 2 ? '...' : ''})
+                              </div>
+                              <div className="text-[11px] text-slate-500 truncate mt-0.5" title={order.customer?.address}>
+                                {order.customer?.address}, {order.customer?.city}
+                              </div>
                             </td>
-                            <td className="py-3 px-4 font-bold text-[#016831]">
-                              ৳{order.totalAmount}
+
+                            {/* 6. Total Bill & Payment Status */}
+                            <td className="py-3 px-4 whitespace-nowrap">
+                              <div className="font-bold text-[#016831] text-sm">
+                                ৳{order.totalAmount}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleUpdatePaymentStatus(
+                                    order._id,
+                                    order.paymentStatus === 'paid' ? 'unpaid' : 'paid'
+                                  )
+                                }
+                                title="পেমেন্ট স্ট্যাটাস টগল করতে ক্লিক করুন"
+                                className={`mt-0.5 inline-flex items-center gap-1 font-bold text-[10px] px-1.5 py-0.5 rounded cursor-pointer border transition-colors ${
+                                  order.paymentStatus === 'paid'
+                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200'
+                                    : 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
+                                }`}
+                              >
+                                {order.paymentStatus === 'paid' ? '✓ পরিশোধিত' : '⏳ বকেয়া (COD)'}
+                              </button>
                             </td>
+
+                            {/* 7. Order Status Dropdown */}
                             <td className="py-3 px-4">
                               <select
                                 value={order.orderStatus}
@@ -1420,20 +1651,39 @@ export default function AdminDashboardPage() {
                                 <option value="cancelled">বাতিল (Cancelled)</option>
                               </select>
                             </td>
-                            <td className="py-3 px-4 text-right space-x-1">
+
+                            {/* 8. Actions */}
+                            <td className="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                              {!order.courierBooking?.isBooked && (
+                                <button
+                                  onClick={() => handleBookCourier(order._id)}
+                                  disabled={bookingCourierLoading}
+                                  className="p-1.5 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
+                                  title="১-ক্লিকে স্টিডফাস্ট কুরিয়ারে বুকিং করুন"
+                                >
+                                  <Truck className="w-4 h-4" />
+                                </button>
+                              )}
                               <button
                                 onClick={() => setPrintingOrder(order)}
-                                className="p-1.5 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors"
-                                title="ভাউচার ও কুরিয়ার শিপিং লেবেল প্রিন্ট করুন"
+                                className="p-1.5 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors cursor-pointer"
+                                title="ভাউচার ও ৪×৬ কুরিয়ার শিপিং লেবেল প্রিন্ট করুন"
                               >
                                 <Printer className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => setSelectedOrderDetails(order)}
-                                className="p-1.5 text-[#016831] hover:bg-[#FEF3C7] rounded-lg transition-colors"
+                                className="p-1.5 text-[#016831] hover:bg-[#FEF3C7] rounded-lg transition-colors cursor-pointer"
                                 title="সিকিউরিটি লগ ও বিস্তারিত দেখুন"
                               >
                                 <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteOrder(order._id, order.orderNumber)}
+                                className="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
+                                title="অর্ডার ডিলিট করুন (ইনভেন্টরি স্টক স্বয়ংক্রিয়ভাবে ফেরত যাবে)"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </td>
                           </tr>
@@ -2592,11 +2842,28 @@ export default function AdminDashboardPage() {
                 </div>
                 <button
                   onClick={() => setSelectedOrderDetails(null)}
-                  className="text-slate-400 hover:text-slate-900"
+                  className="text-slate-400 hover:text-slate-900 p-1 cursor-pointer"
+                  aria-label="বন্ধ করুন"
                 >
                   ✕
                 </button>
               </div>
+
+              {/* Anti-Fraud Hold Action Notice */}
+              {selectedOrderDetails.orderStatus === 'hold' && (
+                <div className="bg-red-50 border border-red-300 rounded-2xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                  <div className="text-red-900 font-bold">
+                    ⚠️ অ্যান্টি-ফ্রড সতর্কতা: গ্রাহককে ফোন করে ঠিকানা যাচাই করুন।
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleUpdateOrderStatus(selectedOrderDetails._id, 'processing')}
+                    className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow-xs whitespace-nowrap cursor-pointer transition-colors"
+                  >
+                    ✓ যাচাই সম্পন্ন (Approve)
+                  </button>
+                </div>
+              )}
 
               {/* Requirement 2 & 3: Customer Security Info & Anti-Fraud Card */}
               <CustomerSecurityCard
@@ -2625,7 +2892,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {selectedOrderDetails.courierBooking?.isBooked ? (
-                  <div className="font-mono text-[11px] bg-white p-2 rounded-xl border border-[#E8E2D5] space-y-0.5">
+                  <div className="font-mono text-[11px] bg-white p-2.5 rounded-xl border border-[#E8E2D5] space-y-1">
                     <div>কুরিয়ার: <strong>{selectedOrderDetails.courierBooking.courierName}</strong></div>
                     <div>ট্র্যাকিং কোড: <strong className="text-amber-700">{selectedOrderDetails.courierBooking.trackingCode}</strong></div>
                     <div>কনসাইনমেন্ট নং: <strong>{selectedOrderDetails.courierBooking.consignmentId}</strong></div>
@@ -2634,7 +2901,7 @@ export default function AdminDashboardPage() {
                   <button
                     disabled={bookingCourierLoading}
                     onClick={() => handleBookCourier(selectedOrderDetails._id)}
-                    className="w-full py-2 bg-[#016831] hover:bg-emerald-900 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                    className="w-full py-2 bg-[#016831] hover:bg-emerald-900 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
                   >
                     <Truck className="w-3.5 h-3.5 text-[#F59E0B]" />
                     <span>
@@ -2646,15 +2913,76 @@ export default function AdminDashboardPage() {
                 )}
               </div>
 
-              {/* Customer Box */}
-              <div className="bg-[#FDFBF7] p-3.5 rounded-2xl text-xs space-y-1 border border-[#E8E2D5]">
-                <div><strong>গ্রাহকের নাম:</strong> {selectedOrderDetails.customer?.name}</div>
-                <div><strong>মোবাইল নম্বর:</strong> {selectedOrderDetails.customer?.phone}</div>
-                <div><strong>ঠিকানা:</strong> {selectedOrderDetails.customer?.address}, {selectedOrderDetails.customer?.city}</div>
-                {selectedOrderDetails.customer?.notes && (
-                  <div><strong>গ্রাহকের নোট:</strong> {selectedOrderDetails.customer.notes}</div>
-                )}
-                <div><strong>পেমেন্ট মাধ্যম:</strong> {selectedOrderDetails.paymentMethod === 'cod' ? 'ক্যাশ অন ডেলিভারি (COD)' : selectedOrderDetails.paymentMethod}</div>
+              {/* Customer Box with Direct Call and WhatsApp */}
+              <div className="bg-[#FDFBF7] p-4 rounded-2xl text-xs space-y-2 border border-[#E8E2D5]">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-[#016831]">গ্রাহকের যোগাযোগ তথ্য:</span>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`tel:${selectedOrderDetails.customer?.phone}`}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-[11px] transition-colors"
+                    >
+                      <Phone className="w-3 h-3" />
+                      <span>কল দিন</span>
+                    </a>
+                    {selectedOrderDetails.customer?.phone && (
+                      <a
+                        href={`https://wa.me/88${selectedOrderDetails.customer.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                          `সালামু আলাইকুম ${selectedOrderDetails.customer.name || ''}, সাতক্ষীরা ঘর থেকে আপনার #${selectedOrderDetails.orderNumber} অর্ডারটি নিশ্চিতকরণের জন্য যোগাযোগ করা হয়েছে।`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[11px] transition-colors"
+                      >
+                        <MessageSquare className="w-3 h-3" />
+                        <span>WhatsApp</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-slate-800">
+                  <div><strong>নাম:</strong> {selectedOrderDetails.customer?.name}</div>
+                  <div><strong>মোবাইল:</strong> <span className="font-mono text-amber-800 font-bold">{selectedOrderDetails.customer?.phone}</span></div>
+                  <div><strong>ঠিকানা:</strong> {selectedOrderDetails.customer?.address}, {selectedOrderDetails.customer?.city}</div>
+                  {selectedOrderDetails.customer?.notes && (
+                    <div className="bg-amber-50 p-2 rounded-lg border border-amber-200 text-amber-900 mt-1">
+                      <strong>গ্রাহকের নোট:</strong> {selectedOrderDetails.customer.notes}
+                    </div>
+                  )}
+                  <div><strong>পেমেন্ট মাধ্যম:</strong> {selectedOrderDetails.paymentMethod === 'cod' ? 'ক্যাশ অন ডেলিভারি (COD)' : selectedOrderDetails.paymentMethod}</div>
+                </div>
+              </div>
+
+              {/* Status and Payment Controls */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 rounded-2xl border border-[#E8E2D5]">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 block mb-1">অর্ডার স্ট্যাটাস:</label>
+                  <select
+                    value={selectedOrderDetails.orderStatus}
+                    onChange={(e) => handleUpdateOrderStatus(selectedOrderDetails._id, e.target.value)}
+                    className="w-full py-1.5 px-2.5 rounded-xl border border-[#E8E2D5] bg-white text-xs font-bold outline-none cursor-pointer"
+                  >
+                    <option value="hold">🔴 হোল্ড (Hold)</option>
+                    <option value="pending">পেন্ডিং (Pending)</option>
+                    <option value="processing">প্রস্তুত হচ্ছে (Processing)</option>
+                    <option value="shipped">শিপড (Shipped)</option>
+                    <option value="delivered">ডেলিভার্ড (Delivered)</option>
+                    <option value="cancelled">বাতিল (Cancelled)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 block mb-1">পেমেন্ট অবস্থা:</label>
+                  <select
+                    value={selectedOrderDetails.paymentStatus || 'unpaid'}
+                    onChange={(e) => handleUpdatePaymentStatus(selectedOrderDetails._id, e.target.value)}
+                    className="w-full py-1.5 px-2.5 rounded-xl border border-[#E8E2D5] bg-white text-xs font-bold outline-none cursor-pointer"
+                  >
+                    <option value="unpaid">ক্যাশ অন ডেলিভারি (বকেয়া - Unpaid)</option>
+                    <option value="paid">পরিশোধিত (Paid)</option>
+                  </select>
+                </div>
               </div>
 
               {/* Items Table */}
@@ -2682,13 +3010,24 @@ export default function AdminDashboardPage() {
                 <span>৳{selectedOrderDetails.totalAmount}</span>
               </div>
 
-              <div className="pt-2">
+              {/* Action Buttons: Print & Delete */}
+              <div className="pt-2 flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => setPrintingOrder(selectedOrderDetails)}
-                  className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01]"
+                  className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.01] cursor-pointer"
                 >
                   <Printer className="w-4 h-4 text-slate-950" />
                   <span>ভাউচার ও ৪×৬ কুরিয়ার শিপিং লেবেল প্রিন্ট করুন</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDeleteOrder(selectedOrderDetails._id, selectedOrderDetails.orderNumber)}
+                  className="p-3 text-red-600 hover:bg-red-50 border border-red-200 rounded-2xl transition-colors cursor-pointer"
+                  title="অর্ডার মুছে ফেলুন (স্টক স্বয়ংক্রিয়ভাবে ইনভেন্টরিতে ফেরত যাবে)"
+                >
+                  <Trash2 className="w-5 h-5" />
                 </button>
               </div>
             </div>

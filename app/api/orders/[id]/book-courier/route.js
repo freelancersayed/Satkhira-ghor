@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import { requireStaffOrAdmin } from '@/lib/auth';
+import { invalidateCache } from '@/lib/performance';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +47,8 @@ export async function POST(request, { params }) {
     }
 
     await order.save();
+
+    invalidateCache('admin_stats');
 
     return NextResponse.json({
       success: true,

@@ -18,12 +18,24 @@ export async function GET(request) {
 
     await connectToDatabase();
     const cleanQuery = queryStr.trim();
+    const englishDigits = cleanQuery.replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+    const cleanDigitsOnly = englishDigits.replace(/[^0-9]/g, '');
+    const cleanOrderNumber = cleanQuery.replace(/^#/, '').toUpperCase();
+
+    const orConditions = [
+      { orderNumber: cleanOrderNumber },
+      { orderNumber: { $regex: cleanOrderNumber, $options: 'i' } },
+      { 'customer.phone': cleanQuery },
+      { 'customer.phone': englishDigits },
+    ];
+
+    if (cleanDigitsOnly.length >= 10) {
+      const suffix = cleanDigitsOnly.slice(-10);
+      orConditions.push({ 'customer.phone': { $regex: suffix + '$' } });
+    }
 
     const orders = await Order.find({
-      $or: [
-        { orderNumber: cleanQuery.toUpperCase() },
-        { 'customer.phone': cleanQuery },
-      ],
+      $or: orConditions,
     })
       .sort({ createdAt: -1 })
       .select('-customer.notes');
