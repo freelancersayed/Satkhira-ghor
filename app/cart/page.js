@@ -80,6 +80,33 @@ export default function CartPage() {
     }
   }, [user]);
 
+  // Auto Abandoned Cart Capture Engine (Stores incomplete checkouts so admin can recover sales)
+  useEffect(() => {
+    if (!mounted || orderPlaced || items.length === 0) return;
+    const cleanPhone = (formData.phone || '')
+      .replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d))
+      .replace(/[^\d]/g, '');
+    if (cleanPhone.length < 11) return;
+
+    const timer = setTimeout(() => {
+      fetch('/api/cart/abandoned', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer: {
+            ...formData,
+            phone: cleanPhone,
+          },
+          items,
+          cartTotal: Math.max(0, getTotalPrice() - discount + (formData.city === 'ঢাকা' ? deliveryConfig.insideDhaka : deliveryConfig.outsideDhaka)),
+          step: formData.address?.trim() ? 'address_entered' : 'checkout_initiated',
+        }),
+      }).catch(() => {});
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [formData.phone, formData.name, formData.address, formData.city, items, discount, mounted, orderPlaced, getTotalPrice]);
+
   if (!mounted) {
     return (
       <div className="py-20 text-center bg-[#FDFBF7] min-h-[50vh] flex flex-col items-center justify-center">
@@ -152,9 +179,12 @@ export default function CartPage() {
       return;
     }
 
-    // Basic Bangladeshi phone number validation
-    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.length < 11) {
+    // Phone number normalization & Bangladeshi mobile validation (supports Bengali numerals)
+    const cleanPhone = (formData.phone || '')
+      .replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d))
+      .replace(/[^0-9]/g, '');
+
+    if (cleanPhone.length < 11 || !cleanPhone.startsWith('01')) {
       setOrderError('অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন: 017XXXXXXXX)।');
       return;
     }
@@ -167,9 +197,12 @@ export default function CartPage() {
         body: JSON.stringify({
           customer: {
             ...formData,
+            phone: cleanPhone,
             city: formData.city || 'ঢাকা',
           },
           items,
+          couponCode: discount > 0 ? couponCode.trim() : undefined,
+          discount: discount,
           subtotal: Math.max(0, subtotal - discount),
           deliveryFee: deliveryCharge,
           paymentMethod: formData.paymentMethod,

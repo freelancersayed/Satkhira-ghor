@@ -1,27 +1,53 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectToDatabase } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
+import Coupon from '@/models/Coupon';
+import AbandonedCart from '@/models/AbandonedCart';
 import { getSessionUser, requireStaffOrAdmin } from '@/lib/auth';
 import { extractClientIp, getIpGeoInfo } from '@/lib/geo';
 import { checkCourierHistoryAndFraud } from '@/lib/courierFraudCheck';
 import { sanitizeBase64, invalidateCache } from '@/lib/performance';
+import { deliveryConfig } from '@/lib/deliveryConfig';
 
 export const dynamic = 'force-dynamic';
+
+const bnToEn = (str) =>
+  (str || '').replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { customer, items, subtotal, deliveryFee = 100, paymentMethod = 'cod' } = body;
+    const {
+      customer,
+      items,
+      couponCode = '',
+      paymentMethod = 'cod',
+    } = body;
 
-    if (!customer || !customer.name || !customer.phone || !customer.address) {
+    // 1. Mandatory Customer Details Validation
+    if (!customer || !customer.name?.trim() || !customer.phone?.trim() || !customer.address?.trim()) {
       return NextResponse.json(
         { message: 'নাম, মোবাইল নম্বর এবং সম্পূর্ণ ডেলিভারি ঠিকানা আবশ্যক' },
         { status: 400 }
       );
     }
 
-    if (!items || items.length === 0) {
+    // 2. Phone Normalization (Bengali to English digits, strip symbols)
+    const rawPhone = bnToEn(customer.phone);
+    const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+
+    // Bangladeshi phone verification: exactly 11 digits, starts with 01
+    if (cleanPhone.length !== 11 || !cleanPhone.startsWith('01')) {
+      return NextResponse.json(
+        { message: 'অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন: 017XXXXXXXX)' },
+        { status: 400 }
+      );
+    }
+
+    // 3. Cart Items Non-empty Check
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { message: 'কার্টে কোনো পণ্য নেই' },
         { status: 400 }
@@ -30,91 +56,223 @@ export async function POST(request) {
 
     await connectToDatabase();
 
-    // Check if user is logged in
+    // 4. Server-Side Price & Stock Anti-Tamper Engine
+    // Authoritatively verify each item from the MongoDB Product collection
+    let verifiedSubtotal = 0;
+    const sanitizedItems = [];
+    const stockToDecrement = [];
+
+    for (const item of items) {
+      const quantity = Math.max(1, parseInt(item.quantity) || 1);
+      const rawId = item.id || item.productId || '';
+      const rawSlug = item.slug || '';
+
+      let dbProduct = null;
+      if (rawId && mongoose.Types.ObjectId.isValid(rawId)) {
+        dbProduct = await Product.findById(rawId);
+      }
+      if (!dbProduct && rawSlug) {
+        dbProduct = await Product.findOne({ slug: rawSlug });
+      }
+      if (!dbProduct && rawId && typeof rawId === 'string') {
+        dbProduct = await Product.findOne({ slug: rawId });
+      }
+
+      if (dbProduct) {
+        // Out-of-Stock Check
+        if (typeof dbProduct.stock === 'number' && dbProduct.stock <= 0) {
+          return NextResponse.json(
+            { message: `দুঃখিত, "${dbProduct.name}" পণ্যটি বর্তমানে স্টক আউট। অনুগ্রহ করে কার্ট থেকে বাদ দিন।` },
+            { status: 400 }
+          );
+        }
+
+        // Insufficient Stock Check
+        if (typeof dbProduct.stock === 'number' && quantity > dbProduct.stock) {
+          return NextResponse.json(
+            { message: `দুঃখিত, "${dbProduct.name}" পণ্যের মাত্র ${dbProduct.stock} টি স্টকে রয়েছে। আপনি চেয়েছেন ${quantity} টি।` },
+            { status: 400 }
+          );
+        }
+
+        // Use authoritative server-side price from MongoDB
+        const authoritativePrice = Number(dbProduct.price) || 0;
+        const lineTotal = authoritativePrice * quantity;
+        verifiedSubtotal += lineTotal;
+
+        const safeImage = await sanitizeBase64(
+          dbProduct.image || item.image || '',
+          `order_item_${dbProduct.slug}`
+        );
+
+        sanitizedItems.push({
+          productId: dbProduct._id.toString(),
+          name: dbProduct.name,
+          price: authoritativePrice,
+          quantity,
+          unit: dbProduct.unit || item.unit || '',
+          image: safeImage,
+        });
+
+        stockToDecrement.push({
+          productId: dbProduct._id,
+          quantity,
+        });
+      } else {
+        // Fallback for edge cases where product is not in DB
+        const fallbackPrice = Math.max(0, Number(item.price) || 0);
+        verifiedSubtotal += fallbackPrice * quantity;
+
+        const safeImage = await sanitizeBase64(
+          item.image || '',
+          `order_item_${rawSlug || 'custom'}`
+        );
+
+        sanitizedItems.push({
+          productId: rawId || rawSlug || 'custom_item',
+          name: item.name || 'পণ্য',
+          price: fallbackPrice,
+          quantity,
+          unit: item.unit || '',
+          image: safeImage,
+        });
+      }
+    }
+
+    // 5. Server-Side Coupon Verification (Prevents unauthorized discount manipulation)
+    let verifiedDiscount = 0;
+    const cleanCouponCode = (couponCode || '').trim().toUpperCase();
+
+    if (cleanCouponCode) {
+      if (cleanCouponCode === 'SATKHIRA100') {
+        verifiedDiscount = 100;
+      } else if (cleanCouponCode === 'SUNDARBAN') {
+        verifiedDiscount = Math.round(verifiedSubtotal * 0.1);
+      } else {
+        const coupon = await Coupon.findOne({ code: cleanCouponCode, isActive: true });
+        if (coupon) {
+          const isNotExpired = !coupon.expiryDate || new Date() <= new Date(coupon.expiryDate);
+          const meetsMinAmount = !coupon.minOrderAmount || verifiedSubtotal >= coupon.minOrderAmount;
+          if (isNotExpired && meetsMinAmount) {
+            if (coupon.discountType === 'percentage') {
+              let disc = Math.round((verifiedSubtotal * coupon.discountAmount) / 100);
+              if (coupon.maxDiscountAmount && disc > coupon.maxDiscountAmount) {
+                disc = coupon.maxDiscountAmount;
+              }
+              verifiedDiscount = disc;
+            } else {
+              verifiedDiscount = coupon.discountAmount;
+            }
+          }
+        }
+      }
+    }
+
+    // Clamp discount so it cannot exceed subtotal
+    verifiedDiscount = Math.min(verifiedDiscount, verifiedSubtotal);
+    const subtotalAfterDiscount = Math.max(0, verifiedSubtotal - verifiedDiscount);
+
+    // 6. Server-Side Authoritative Delivery Fee Engine
+    const isFreeDelivery = subtotalAfterDiscount >= deliveryConfig.freeDeliveryThreshold && subtotalAfterDiscount > 0;
+    const customerCity = (customer.city || 'ঢাকা').trim();
+    const isDhaka = customerCity === 'ঢাকা' || customerCity.toLowerCase().includes('dhaka');
+
+    const verifiedDeliveryFee = isFreeDelivery
+      ? 0
+      : isDhaka
+        ? deliveryConfig.insideDhaka
+        : deliveryConfig.outsideDhaka;
+
+    const totalAmount = subtotalAfterDiscount + verifiedDeliveryFee;
+
+    // 7. Customer Session Check
     const session = await getSessionUser(request);
     const userId = session ? session.id : null;
 
-    // 1. Customer IP & Geolocation Extraction (Requirement 2)
+    // 8. Customer IP & Geolocation Security Extraction
     const clientIp = extractClientIp(request);
     const userAgent = request.headers.get('user-agent') || '';
     const geoInfo = await getIpGeoInfo(clientIp);
 
-    // 2. Automated Courier History Check & Anti-Fraud Engine (Requirement 3)
-    const fraudAssessment = await checkCourierHistoryAndFraud(customer.phone);
-
-    // If High Risk, automatically set order status to 'hold', otherwise 'pending'
+    // 9. Automated Courier History Check & Anti-Fraud Engine
+    const fraudAssessment = await checkCourierHistoryAndFraud(cleanPhone);
     const initialOrderStatus = fraudAssessment.suggestedOrderStatus || 'pending';
 
-    // Generate unique order number (e.g. SKG-748392)
+    // 10. Generate Unique Order Number (e.g. SKG-748392)
     const randomDigits = Math.floor(100000 + Math.random() * 900000);
     const orderNumber = `SKG-${randomDigits}`;
 
-    const totalAmount = Number(subtotal) + Number(deliveryFee);
-
-    const sanitizedItems = await Promise.all(
-      items.map(async (item) => ({
-        productId: item.id || item.productId || item.slug,
-        name: item.name,
-        price: Number(item.price),
-        quantity: Number(item.quantity),
-        unit: item.unit || '',
-        image: await sanitizeBase64(item.image || '', `order_item_${item.slug || 'it'}`),
-      }))
-    );
-
+    // 11. Create Order in Database
     const newOrder = await Order.create({
       orderNumber,
       user: userId,
       customer: {
         name: customer.name.trim(),
-        phone: customer.phone.trim(),
+        phone: cleanPhone,
         email: customer.email ? customer.email.trim() : (session?.email || ''),
         address: customer.address.trim(),
-        city: customer.city ? customer.city.trim() : 'ঢাকা',
+        city: customerCity,
         notes: customer.notes || '',
       },
       items: sanitizedItems,
-      subtotal: Number(subtotal),
-      deliveryFee: Number(deliveryFee),
+      subtotal: subtotalAfterDiscount,
+      deliveryFee: verifiedDeliveryFee,
       totalAmount,
       paymentMethod,
       paymentStatus: 'unpaid',
       orderStatus: initialOrderStatus,
-      // Security & Geolocation
       securityInfo: {
         ipAddress: geoInfo.ipAddress || clientIp,
-        city: geoInfo.city || 'ঢাকা',
+        city: geoInfo.city || customerCity,
         country: geoInfo.country || 'বাংলাদেশ',
         isp: geoInfo.isp || 'Telecom / ISP Gateway',
         userAgent,
       },
-      // Courier History & Fraud Metrics
       courierHistory: fraudAssessment.courierHistory,
       fraudRisk: fraudAssessment.fraudRisk,
       fraudReason: fraudAssessment.fraudReason,
     });
 
-    // Optionally decrement product stock if product exists in MongoDB
-    try {
-      for (const item of items) {
-        if (item.id && item.id.match(/^[0-9a-fA-F]{24}$/)) {
-          await Product.findByIdAndUpdate(item.id, {
-            $inc: { stock: -Number(item.quantity) },
-          });
-        }
+    // 12. Safe Stock Decrement Engine
+    for (const item of stockToDecrement) {
+      try {
+        await Product.findByIdAndUpdate(item.productId, {
+          $inc: { stock: -item.quantity },
+        });
+      } catch (stockErr) {
+        console.warn(`Could not update stock for product ${item.productId}:`, stockErr.message);
       }
-    } catch (stockErr) {
-      console.warn('Could not update product stock:', stockErr);
     }
 
+    // 13. Auto Recover Abandoned Cart (Closes loop for incomplete checkouts)
+    try {
+      await AbandonedCart.updateMany(
+        {
+          'customer.phone': cleanPhone,
+          recoveryStatus: { $ne: 'recovered' },
+        },
+        {
+          $set: {
+            recoveryStatus: 'recovered',
+            notes: `অর্ডার নিশ্চিত করা হয়েছে (#${orderNumber})`,
+            lastActivityAt: new Date(),
+          },
+        }
+      );
+    } catch (abandonedErr) {
+      console.warn('Could not update abandoned cart recovery status:', abandonedErr.message);
+    }
+
+    // 14. Invalidate Performance Caches
     invalidateCache('admin_stats');
 
     return NextResponse.json(
       {
         success: true,
-        message: initialOrderStatus === 'hold'
-          ? 'অর্ডার গৃহীত হয়েছে (নিরাপত্তা যাচাইয়ের জন্য পর্যালোচনাধীন)'
-          : 'অর্ডার সফলভাবে সম্পন্ন হয়েছে!',
+        message:
+          initialOrderStatus === 'hold'
+            ? 'অর্ডার গৃহীত হয়েছে (নিরাপত্তা যাচাইয়ের জন্য পর্যালোচনাধীন)'
+            : 'অর্ডার সফলভাবে সম্পন্ন হয়েছে!',
         order: {
           id: newOrder._id.toString(),
           orderNumber: newOrder.orderNumber,

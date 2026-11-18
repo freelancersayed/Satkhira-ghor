@@ -280,7 +280,7 @@ export default function HalumChatWindow({
     }
 
     // 2. Check Local Intent Engine First (0ms Response Time)
-    const localMatch = matchLocalHalumIntent(text, { pathname });
+    const localMatch = matchLocalHalumIntent(text, { pathname }, catalogProducts);
 
     if (localMatch) {
       // Intent: Direct Phone/ID Tracking Query

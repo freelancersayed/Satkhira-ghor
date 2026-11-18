@@ -5,19 +5,74 @@
 import { products } from '../../data/products.js';
 import { deliveryConfig } from '../../lib/deliveryConfig.js';
 
-// Format product for in-chat card
-function formatCard(slugOrId) {
-  const p = products.find((item) => item.slug === slugOrId || item.id === slugOrId);
+let currentLiveCatalog = [];
+
+export function setHalumLiveCatalog(catalog) {
+  if (Array.isArray(catalog) && catalog.length > 0) {
+    currentLiveCatalog = catalog;
+  }
+}
+
+// Format product for in-chat card (with dynamic fallback)
+function formatCard(slugOrId, catalog = currentLiveCatalog) {
+  const activeCatalog = (Array.isArray(catalog) && catalog.length > 0)
+    ? catalog
+    : (Array.isArray(currentLiveCatalog) && currentLiveCatalog.length > 0 ? currentLiveCatalog : products);
+
+  if (!activeCatalog || activeCatalog.length === 0) return null;
+
+  // 1. Direct match by slug or id
+  let p = activeCatalog.find(
+    (item) => item.slug === slugOrId || item.id === slugOrId || (item._id && item._id.toString() === slugOrId)
+  );
+
+  // 2. Dynamic keyword fallback if hardcoded slug doesn't exist in live DB
+  if (!p && typeof slugOrId === 'string') {
+    const s = slugOrId.toLowerCase();
+    if (s.includes('honey') || s.includes('khalsi') || s.includes('modhu')) {
+      p = activeCatalog.find((item) => {
+        const text = `${item.name} ${item.category} ${item.slug}`.toLowerCase();
+        return text.includes('মধু') || text.includes('honey') || text.includes('khalsi');
+      });
+    } else if (s.includes('ghee') || s.includes('bilona')) {
+      p = activeCatalog.find((item) => {
+        const text = `${item.name} ${item.category} ${item.slug}`.toLowerCase();
+        return text.includes('ঘি') || text.includes('ghee');
+      });
+    } else if (s.includes('oil') || s.includes('mustard')) {
+      p = activeCatalog.find((item) => {
+        const text = `${item.name} ${item.category} ${item.slug}`.toLowerCase();
+        return text.includes('তেল') || text.includes('oil');
+      });
+    } else if (s.includes('combo')) {
+      p = activeCatalog.find((item) => {
+        const text = `${item.name} ${item.category} ${item.slug}`.toLowerCase();
+        return text.includes('কম্বো') || text.includes('combo') || item.isCombo;
+      });
+    } else if (s.includes('sandesh') || s.includes('sweet') || s.includes('kheer')) {
+      p = activeCatalog.find((item) => {
+        const text = `${item.name} ${item.category} ${item.slug}`.toLowerCase();
+        return text.includes('সন্দেশ') || text.includes('মিষ্টি');
+      });
+    }
+
+    // Fallback to first available product
+    if (!p) {
+      p = activeCatalog[0];
+    }
+  }
+
   if (!p) return null;
+
   return {
-    id: p.id,
+    id: p._id ? p._id.toString() : (p.id || p.slug),
     name: p.name,
     slug: p.slug,
     price: p.price,
     originalPrice: p.originalPrice || null,
-    image: p.image,
-    unit: p.unit,
-    badge: p.badge || (p.originalPrice > p.price ? 'বিশেষ ছাড়' : '১০০% খাঁটি'),
+    image: p.image || '/assets/logo-1.png',
+    unit: p.unit || '১ কেজি',
+    badge: p.badge || (p.originalPrice > p.price ? 'বিশেষ ছাড়' : '১০০% খাঁটি'),
   };
 }
 
@@ -60,7 +115,10 @@ function hasAny(text, list) {
   });
 }
 
-export function matchLocalHalumIntent(message = '', context = {}) {
+export function matchLocalHalumIntent(message = '', context = {}, dynamicCatalog = []) {
+  if (Array.isArray(dynamicCatalog) && dynamicCatalog.length > 0) {
+    currentLiveCatalog = dynamicCatalog;
+  }
   const rawText = (message || '').trim();
   const text = normalizeText(rawText);
   if (!text) return null;
