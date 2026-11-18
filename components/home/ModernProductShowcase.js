@@ -29,18 +29,30 @@ export default function ModernProductShowcase({ initialProducts = [], initialCat
   const [liveCategories, setLiveCategories] = useState(initialCategories);
 
   useEffect(() => {
-    fetch('/api/categories')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && Array.isArray(data.categories) && data.categories.length > 0) {
-          setLiveCategories(data.categories);
-        }
-      })
-      .catch(() => { });
+    const loadCats = () => {
+      fetch('/api/categories')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && Array.isArray(data.categories) && data.categories.length > 0) {
+            setLiveCategories(data.categories);
+          }
+        })
+        .catch(() => { });
+    };
+
+    loadCats();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('categories:updated', loadCats);
+      return () => window.removeEventListener('categories:updated', loadCats);
+    }
   }, []);
 
   // Dynamic Categories from database (strictly remove static fallback)
   const activeCategories = useMemo(() => {
+    if (liveCategories.length > 0) {
+      return liveCategories;
+    }
     const rawCategories = content?.categories;
     if (Array.isArray(rawCategories) && rawCategories.length > 0) {
       return rawCategories;

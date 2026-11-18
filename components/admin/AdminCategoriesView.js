@@ -96,6 +96,9 @@ export default function AdminCategoriesView({ onCategoriesUpdated }) {
         });
 
         updateSection('categories', updated);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('categories:updated', { detail: updated }));
+        }
         setNotification('গ্যালারি থেকে ছবি সফলভাবে আপডেট ও সেভ হয়েছে!');
         setTimeout(() => setNotification(''), 3000);
       }
@@ -133,6 +136,9 @@ export default function AdminCategoriesView({ onCategoriesUpdated }) {
 
       updateSection('categories', updatedList);
       if (onCategoriesUpdated) onCategoriesUpdated(updatedList);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('categories:updated', { detail: updatedList }));
+      }
       setNotification(successMsg);
       setTimeout(() => setNotification(''), 2500);
     } catch (err) {
@@ -184,6 +190,9 @@ export default function AdminCategoriesView({ onCategoriesUpdated }) {
 
       updateSection('categories', data.categories);
       if (onCategoriesUpdated) onCategoriesUpdated(data.categories);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('categories:updated', { detail: data.categories }));
+      }
       setNotification(`"${cat.name}" সফলভাবে আপডেট হয়েছে!`);
       setTimeout(() => setNotification(''), 3000);
     } catch (err) {
@@ -211,6 +220,9 @@ export default function AdminCategoriesView({ onCategoriesUpdated }) {
       setCategories(data.categories);
       updateSection('categories', data.categories);
       if (onCategoriesUpdated) onCategoriesUpdated(data.categories);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('categories:updated', { detail: data.categories }));
+      }
       setNotification(`"${name}" ক্যাটাগরি ডিলিট সম্পন্ন!`);
       setTimeout(() => setNotification(''), 3000);
     } catch (err) {
@@ -241,6 +253,9 @@ export default function AdminCategoriesView({ onCategoriesUpdated }) {
       setCategories(data.categories);
       updateSection('categories', data.categories);
       if (onCategoriesUpdated) onCategoriesUpdated(data.categories);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('categories:updated', { detail: data.categories }));
+      }
       setNotification(`নতুন ক্যাটাগরি "${newCat.name}" সফলভাবে যুক্ত হয়েছে!`);
       setNewCatModalOpen(false);
       setNewCat({

@@ -102,14 +102,23 @@ function ShopContent() {
       .catch((e) => console.warn('Products fetch error:', e))
       .finally(() => setLoading(false));
 
-    fetch('/api/categories')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && Array.isArray(data.categories)) {
-          setCategoriesList(data.categories);
-        }
-      })
-      .catch((e) => console.warn('Categories fetch error:', e));
+    const loadCategories = () => {
+      fetch('/api/categories')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && Array.isArray(data.categories)) {
+            setCategoriesList(data.categories);
+          }
+        })
+        .catch((e) => console.warn('Categories fetch error:', e));
+    };
+
+    loadCategories();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('categories:updated', loadCategories);
+      return () => window.removeEventListener('categories:updated', loadCategories);
+    }
   }, []);
 
   // Compute live product counts per category with intelligent resilient matching

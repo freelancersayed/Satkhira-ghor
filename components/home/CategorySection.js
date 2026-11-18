@@ -26,19 +26,31 @@ export default function CategorySection({ initialCategories = [] }) {
       })
       .catch(() => { });
 
-    fetch('/api/categories')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && Array.isArray(data.categories) && data.categories.length > 0) {
-          setLiveCategories(data.categories);
-        }
-      })
-      .catch(() => { })
-      .finally(() => setLoading(false));
+    const loadCats = () => {
+      fetch('/api/categories')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && Array.isArray(data.categories) && data.categories.length > 0) {
+            setLiveCategories(data.categories);
+          }
+        })
+        .catch(() => { })
+        .finally(() => setLoading(false));
+    };
+
+    loadCats();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('categories:updated', loadCats);
+      return () => window.removeEventListener('categories:updated', loadCats);
+    }
   }, []);
 
   // Extract dynamic categories from database, strictly removing static fallback
   const categoriesList = useMemo(() => {
+    if (liveCategories.length > 0) {
+      return liveCategories;
+    }
     const rawCategories = content?.categories;
     if (Array.isArray(rawCategories) && rawCategories.length > 0) {
       return rawCategories;

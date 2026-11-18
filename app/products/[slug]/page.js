@@ -8,6 +8,7 @@ import AddToCartButton from '@/components/product/AddToCartButton';
 import ProductCard from '@/components/product/ProductCard';
 import ProductReviewsSection from '@/components/product/ProductReviewsSection';
 import ProductDetailsCard from '@/components/product/ProductDetailsCard';
+import { deliveryConfig } from '@/lib/deliveryConfig';
 import {
   Star,
   ShieldCheck,
@@ -356,11 +357,11 @@ export default async function ProductDetailPage({ params }) {
                   <>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
-                      <span>সরাসরি সুন্দরবনের প্রান্তিক মৌয়াল ও চাষীদের থেকে সংগৃহীত</span>
+                      <span>শতভাগ খাঁটি ও নিজস্ব তত্ত্বাবধানে সংগৃহীত/প্রস্তুতকৃত</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
-                      <span>কোনো প্রকার রাসায়নিক, সুগার বা কৃত্রিম প্রিজারভেটিভ নেই</span>
+                      <span>কোনো প্রকার রাসায়নিক বা কৃত্রিম প্রিজারভেটিভ নেই</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#016831] flex-shrink-0 mt-0.5" />
@@ -372,8 +373,8 @@ export default async function ProductDetailPage({ params }) {
 
               <div className="pt-2 border-t border-[#E8E2D5] flex items-center justify-between text-[11px] text-[#016831] font-semibold bg-[#FAF8F5] p-2.5 rounded-xl">
                 <span>📞 সরাসরি অর্ডারে সহায়তার জন্য:</span>
-                <a href="tel:01700000000" className="font-bold text-[#B45309] hover:underline">
-                  কল করুন
+                <a href={`tel:${deliveryConfig.supportPhoneRaw}`} className="font-bold text-[#B45309] hover:underline">
+                  {deliveryConfig.supportPhone}
                 </a>
               </div>
             </div>

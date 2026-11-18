@@ -116,6 +116,9 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
 
         updateSection('categories', updated);
         if (onCategoriesUpdated) onCategoriesUpdated(updated);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('categories:updated', { detail: updated }));
+        }
 
         setNotification('গ্যালারি থেকে ছবি সফলভাবে পরিবর্তন ও সেভ হয়েছে!');
         setTimeout(() => setNotification(''), 3000);
@@ -143,6 +146,9 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
 
       updateSection('categories', updatedList);
       if (onCategoriesUpdated) onCategoriesUpdated(updatedList);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('categories:updated', { detail: updatedList }));
+      }
       setNotification(successMsg);
       setTimeout(() => setNotification(''), 2500);
     } catch (err) {
@@ -202,6 +208,9 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
 
       updateSection('categories', data.categories || categoriesList);
       if (onCategoriesUpdated) onCategoriesUpdated(data.categories || categoriesList);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('categories:updated', { detail: data.categories || categoriesList }));
+      }
 
       setNotification(`"${cat.name}" সফলভাবে আপডেট করা হয়েছে!`);
       setTimeout(() => setNotification(''), 3000);
@@ -231,6 +240,9 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
       setCategoriesList(data.categories);
       updateSection('categories', data.categories);
       if (onCategoriesUpdated) onCategoriesUpdated(data.categories);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('categories:updated', { detail: data.categories }));
+      }
 
       setNotification(`"${name}" ক্যাটাগরি সফলভাবে ডিলিট করা হয়েছে!`);
       setTimeout(() => setNotification(''), 3000);
@@ -263,6 +275,9 @@ export default function CategoryEditModal({ onCategoriesUpdated }) {
       setCategoriesList(data.categories);
       updateSection('categories', data.categories);
       if (onCategoriesUpdated) onCategoriesUpdated(data.categories);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('categories:updated', { detail: data.categories }));
+      }
 
       setNotification(`নতুন ক্যাটাগরি "${newCat.name}" সফলভাবে যুক্ত হয়েছে!`);
       setNewCat({

@@ -130,30 +130,6 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // If it's a fallback product that was not yet in MongoDB, record it as isDeleted: true
-    if (!deleted) {
-      const fb = fallbackProducts.find((p) => p.slug === id || p.id === id);
-      if (fb) {
-        await Product.create({
-          name: fb.name,
-          nameEn: fb.nameEn || '',
-          slug: fb.slug,
-          category: fb.category,
-          categoryName: fb.categoryName,
-          price: fb.price,
-          originalPrice: fb.originalPrice || null,
-          unit: fb.unit || '১ কেজি',
-          image: fb.image,
-          images: fb.images || [fb.image],
-          shortDescription: fb.shortDescription || '',
-          description: fb.description || '',
-          origin: fb.origin || 'সাতক্ষীরা',
-          isDeleted: true,
-        });
-        deleted = true;
-      }
-    }
-
     if (!deleted) {
       return NextResponse.json({ message: 'পণ্যটি খুঁজে পাওয়া যায়নি' }, { status: 404 });
     }

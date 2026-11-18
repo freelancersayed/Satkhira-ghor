@@ -48,6 +48,7 @@ import {
   MapPin,
   Calendar,
   Info,
+  Loader2,
 } from 'lucide-react';
 
 import { useAuthStore } from '@/store/authStore';
@@ -71,14 +72,6 @@ import {
   setMuted,
   isMuted,
 } from '@/lib/audioAlert';
-
-const DEFAULT_CATEGORIES = [
-  { slug: 'honey', name: 'সুন্দরবনের মধু' },
-  { slug: 'ghee', name: 'খাঁটি গাওয়া ঘি' },
-  { slug: 'oil', name: 'সরিষার তেল' },
-  { slug: 'sweets', name: 'সাতক্ষীরার সন্দেশ' },
-  { slug: 'pickles', name: 'আচার ও মশলা' },
-];
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -107,40 +100,52 @@ export default function AdminDashboardPage() {
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
   const [categoriesList, setCategoriesList] = useState([]);
 
+  // Inline Quick-Add Category state inside Product Modal
+  const [showInlineAddCat, setShowInlineAddCat] = useState(false);
+  const [inlineCatData, setInlineCatData] = useState({
+    name: '',
+    nameEn: '',
+    slug: '',
+    icon: '🌿',
+    image: '',
+    description: '',
+  });
+  const [savingInlineCat, setSavingInlineCat] = useState(false);
+  const [inlineCatError, setInlineCatError] = useState('');
+
   const effectiveCategories = useMemo(() => {
-    const selectable = (categoriesList || []).filter(
+    return (categoriesList || []).filter(
       (c) => c && c.slug !== 'all' && c.id !== 'all'
     );
-    return selectable.length > 0 ? selectable : DEFAULT_CATEGORIES;
   }, [categoriesList]);
 
-  // Product Form state (with variation matrix & full dynamic specifications)
+  // Clean, versatile Product Form state (No hardcoded honey or static defaults)
   const initialProductFormState = {
     name: '',
     nameEn: '',
     slug: '',
-    category: 'honey',
-    categoryName: 'সুন্দরবনের মধু',
+    category: '',
+    categoryName: '',
     price: '',
     originalPrice: '',
-    unit: '১ কেজি (1 kg)',
-    stock: 20,
+    unit: '',
+    stock: 10,
     badge: '',
     badgeType: 'forest',
     image: '',
     images: [],
     shortDescription: '',
     description: '',
-    origin: 'সুন্দরবন ও সাতক্ষীরা',
+    origin: '',
     harvestDate: '',
-    packaging: 'ফুড-গ্রেড এয়ারটাইট জার',
-    purityGuarantee: '১০০% প্রাকৃতিক ও খাঁটি',
-    paymentTerms: 'ক্যাশ অন ডেলিভারি',
-    storageTips: 'আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।',
+    packaging: '',
+    purityGuarantee: '',
+    paymentTerms: '',
+    storageTips: '',
     benefits: [],
     nutritionalInfo: {},
     specialFeatures: [],
-    deliveryTimeline: 'ঢাকা সিটির ভেতর ২৪-৪৮ ঘণ্টা, সারাদেশে ২-৩ কার্যদিবস',
+    deliveryTimeline: '',
     hasVariations: false,
     variations: [],
   };
@@ -183,6 +188,12 @@ export default function AdminDashboardPage() {
     });
     // Initialize audio context on first user click/interaction
     initAudioOnUserGesture();
+
+    const handleCatUpdate = () => fetchCategories();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('categories:updated', handleCatUpdate);
+      return () => window.removeEventListener('categories:updated', handleCatUpdate);
+    }
   }, [checkAuth]);
 
   useEffect(() => {
@@ -421,6 +432,81 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Inline Quick-Add Category inside Product Modal
+  const handleSaveInlineCategory = async () => {
+    if (!inlineCatData.name || !inlineCatData.name.trim()) {
+      setInlineCatError('ক্যাটাগরির বাংলা নাম লিখুন');
+      return;
+    }
+
+    try {
+      setSavingInlineCat(true);
+      setInlineCatError('');
+
+      const cleanName = inlineCatData.name.trim();
+      const cleanNameEn = (inlineCatData.nameEn || cleanName).trim();
+      const generatedSlug = (inlineCatData.slug || cleanNameEn || cleanName)
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0980-\u09FF-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+      const payload = {
+        name: cleanName,
+        nameEn: cleanNameEn,
+        slug: generatedSlug,
+        icon: inlineCatData.icon || '🌿',
+        image: inlineCatData.image || '',
+        description: inlineCatData.description || '',
+      };
+
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'ক্যাটাগরি তৈরি করা সম্ভব হয়নি');
+      }
+
+      // Update categories list in state
+      if (Array.isArray(data.categories)) {
+        setCategoriesList(data.categories);
+      } else {
+        setCategoriesList((prev) => [...prev, payload]);
+      }
+
+      // Automatically select this newly created category in the active product form!
+      setProductFormData((prev) => ({
+        ...prev,
+        category: payload.slug,
+        categoryName: payload.name,
+      }));
+
+      // Reset inline form & close
+      setInlineCatData({
+        name: '',
+        nameEn: '',
+        slug: '',
+        icon: '🌿',
+        image: '',
+        description: '',
+      });
+      setShowInlineAddCat(false);
+      showNotification(`"${payload.name}" ক্যাটাগরি তৈরি ও নির্বাচিত হয়েছে!`, 'success');
+
+      // Dispatch real-time event for Header, CategorySection, Showcase across site
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('categories:updated', { detail: payload }));
+      }
+    } catch (err) {
+      setInlineCatError(err.message);
+    } finally {
+      setSavingInlineCat(false);
+    }
+  };
+
   // Open Edit Product Modal
   const handleOpenEditProduct = (prod) => {
     setEditingProduct(prod);
@@ -429,32 +515,34 @@ export default function AdminDashboardPage() {
     setNewFeatureInput('');
     setNewNutritionKey('');
     setNewNutritionValue('');
+    setShowInlineAddCat(false);
+    setInlineCatError('');
     setProductFormData({
       name: prod.name || '',
       nameEn: prod.nameEn || '',
       slug: prod.slug || '',
-      category: prod.category || (effectiveCategories[0]?.slug || 'honey'),
-      categoryName: prod.categoryName || (effectiveCategories.find((c) => (c.slug || c.id) === prod.category)?.name) || 'সুন্দরবনের মধু',
+      category: prod.category || (effectiveCategories[0]?.slug || ''),
+      categoryName: prod.categoryName || (effectiveCategories.find((c) => (c.slug || c.id) === prod.category)?.name) || '',
       price: prod.price || '',
       originalPrice: prod.originalPrice || '',
-      unit: prod.unit || '১ কেজি (1 kg)',
-      stock: prod.stock !== undefined ? prod.stock : 20,
+      unit: prod.unit || '',
+      stock: prod.stock !== undefined ? prod.stock : 10,
       badge: prod.badge || '',
       badgeType: prod.badgeType || 'forest',
       image: prod.image || '',
       images: Array.isArray(prod.images) && prod.images.length > 0 ? prod.images : (prod.image ? [prod.image] : []),
       shortDescription: prod.shortDescription || '',
       description: prod.description || '',
-      origin: prod.origin || 'সুন্দরবন ও সাতক্ষীরা',
+      origin: prod.origin || '',
       harvestDate: prod.harvestDate || '',
-      packaging: prod.packaging || 'ফুড-গ্রেড এয়ারটাইট জার',
-      purityGuarantee: prod.purityGuarantee || '১০০% প্রাকৃতিক ও খাঁটি',
-      paymentTerms: prod.paymentTerms || 'ক্যাশ অন ডেলিভারি',
-      storageTips: prod.storageTips || 'আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।',
+      packaging: prod.packaging || '',
+      purityGuarantee: prod.purityGuarantee || '',
+      paymentTerms: prod.paymentTerms || '',
+      storageTips: prod.storageTips || '',
       benefits: Array.isArray(prod.benefits) ? [...prod.benefits] : [],
       nutritionalInfo: prod.nutritionalInfo && typeof prod.nutritionalInfo === 'object' ? { ...prod.nutritionalInfo } : {},
       specialFeatures: Array.isArray(prod.specialFeatures) ? [...prod.specialFeatures] : [],
-      deliveryTimeline: prod.deliveryTimeline || 'ঢাকা সিটির ভেতর ২৪-৪৮ ঘণ্টা, সারাদেশে ২-৩ কার্যদিবস',
+      deliveryTimeline: prod.deliveryTimeline || '',
       hasVariations: !!prod.hasVariations,
       variations: prod.variations || [],
     });
@@ -989,10 +1077,12 @@ export default function AdminDashboardPage() {
                     setNewFeatureInput('');
                     setNewNutritionKey('');
                     setNewNutritionValue('');
+                    setShowInlineAddCat(false);
+                    setInlineCatError('');
                     setProductFormData({
                       ...initialProductFormState,
-                      category: firstValidCat ? (firstValidCat.slug || firstValidCat.id) : 'honey',
-                      categoryName: firstValidCat ? firstValidCat.name : 'সুন্দরবনের মধু',
+                      category: firstValidCat ? (firstValidCat.slug || firstValidCat.id) : '',
+                      categoryName: firstValidCat ? firstValidCat.name : '',
                     });
                     setProductModalOpen(true);
                   }}
@@ -1750,68 +1840,195 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="block font-bold text-[#016831]">
-                            ক্যাটাগরি <span className="text-red-500">*</span>
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setProductModalOpen(false);
-                              setActiveTab('categories');
-                            }}
-                            className="text-[11px] text-[#016831] hover:underline font-semibold"
-                            title="নতুন ক্যাটাগরি তৈরি করতে ক্যাটাগরি ট্যাবে যান"
-                          >
-                            + নতুন ক্যাটাগরি তৈরি
-                          </button>
-                        </div>
-                        <select
-                          value={productFormData.category}
-                          onChange={(e) => {
-                            const catVal = e.target.value;
-                            const matched = effectiveCategories.find(
-                              (c) => (c.slug || c.id) === catVal
-                            );
-                            setProductFormData({
-                              ...productFormData,
-                              category: catVal,
-                              categoryName: matched ? (matched.name || matched.nameBn || catVal) : catVal,
-                            });
+                    {/* Category Selection & Inline Quick Category Creator */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="block font-bold text-[#016831]">
+                          ক্যাটাগরি <span className="text-red-500">*</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowInlineAddCat(!showInlineAddCat);
+                            setInlineCatError('');
                           }}
-                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none font-medium"
+                          className="text-[11px] font-bold text-[#016831] hover:text-[#0D3528] bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors flex items-center gap-1 shadow-2xs"
                         >
-                          {productFormData.category &&
-                            !effectiveCategories.some(
-                              (c) => (c.slug || c.id) === productFormData.category
-                            ) && (
-                              <option value={productFormData.category}>
-                                {productFormData.categoryName || productFormData.category} (বর্তমান)
-                              </option>
-                            )}
-                          {effectiveCategories.map((cat) => (
-                            <option key={cat.slug || cat.id} value={cat.slug || cat.id}>
-                              {cat.name} {cat.nameEn ? `(${cat.nameEn})` : ''}
-                            </option>
-                          ))}
-                        </select>
+                          <FolderPlus className="w-3.5 h-3.5 text-[#016831]" />
+                          <span>{showInlineAddCat ? '✕ প্যানেল বন্ধ করুন' : '+ নতুন ক্যাটাগরি তৈরি'}</span>
+                        </button>
                       </div>
 
-                      <div>
-                        <label className="block font-bold text-[#016831] mb-1">
-                          ডিফল্ট পরিমাপ ইউনিট
-                        </label>
-                        <input
-                          type="text"
-                          value={productFormData.unit}
-                          onChange={(e) =>
-                            setProductFormData({ ...productFormData, unit: e.target.value })
-                          }
-                          placeholder="১ কেজি (1 kg)"
-                          className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none"
-                        />
+                      {/* Expandable Inline Quick Category Creation Card */}
+                      {showInlineAddCat && (
+                        <div className="p-3.5 bg-gradient-to-br from-emerald-50/90 to-amber-50/70 rounded-2xl border-2 border-[#016831]/30 shadow-xs space-y-2.5 animate-fadeIn">
+                          <div className="flex items-center justify-between border-b border-emerald-200/60 pb-1.5">
+                            <span className="font-black text-[#016831] text-xs flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                              <span>তাত্ক্ষণিক নতুন ক্যাটাগরি তৈরি করুন (হেডার ও হোমপেজে স্বয়ংক্রিয়ভাবে যুক্ত হবে)</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowInlineAddCat(false);
+                                setInlineCatError('');
+                              }}
+                              className="text-stone-400 hover:text-stone-700 text-xs font-bold"
+                            >
+                              ✕
+                            </button>
+                          </div>
+
+                          {inlineCatError && (
+                            <p className="text-[11px] text-red-600 bg-red-50 p-1.5 rounded-lg border border-red-200">
+                              ⚠️ {inlineCatError}
+                            </p>
+                          )}
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-[11px] font-bold text-stone-700 mb-0.5">
+                                ক্যাটাগরির নাম (বাংলা) <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={inlineCatData.name}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setInlineCatData((prev) => ({
+                                    ...prev,
+                                    name: val,
+                                  }));
+                                }}
+                                placeholder="যেমন: মশলা ও রান্নার উপকরণ"
+                                className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs outline-none focus:border-[#016831]"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-bold text-stone-700 mb-0.5">
+                                ইংরেজি নাম / Slug
+                              </label>
+                              <input
+                                type="text"
+                                value={inlineCatData.nameEn}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const slug = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                                  setInlineCatData((prev) => ({
+                                    ...prev,
+                                    nameEn: val,
+                                    slug: slug,
+                                  }));
+                                }}
+                                placeholder="যেমন: Spices (spices)"
+                                className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs outline-none focus:border-[#016831]"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Quick Icon Selector */}
+                          <div>
+                            <label className="block text-[11px] font-bold text-stone-700 mb-1">
+                              প্রতীক / আইকন নির্বাচন করুন:
+                            </label>
+                            <div className="flex flex-wrap gap-1.5 items-center">
+                              {['🌿', '🍯', '🧈', '🌾', '🌶️', '🥭', '🥛', '🍪', '🐟', '📦', '✨', '☕', '🧂'].map((ic) => (
+                                <button
+                                  key={ic}
+                                  type="button"
+                                  onClick={() => setInlineCatData((prev) => ({ ...prev, icon: ic }))}
+                                  className={`w-7 h-7 rounded-lg text-sm flex items-center justify-center transition-all ${
+                                    inlineCatData.icon === ic
+                                      ? 'bg-[#016831] text-white ring-2 ring-[#016831] scale-110 shadow-xs'
+                                      : 'bg-white border border-stone-200 hover:bg-emerald-50'
+                                  }`}
+                                >
+                                  {ic}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowInlineAddCat(false);
+                                setInlineCatError('');
+                              }}
+                              className="px-3 py-1 rounded-xl border border-stone-300 text-stone-600 text-xs font-bold hover:bg-stone-50"
+                            >
+                              বাতিল
+                            </button>
+                            <button
+                              type="button"
+                              disabled={savingInlineCat}
+                              onClick={handleSaveInlineCategory}
+                              className="px-3.5 py-1.5 rounded-xl bg-[#016831] hover:bg-[#0D3528] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                            >
+                              {savingInlineCat ? (
+                                <>
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  <span>সংরক্ষণ হচ্ছে...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>ক্যাটাগরি তৈরি ও সিলেক্ট করুন</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <select
+                            required
+                            value={productFormData.category}
+                            onChange={(e) => {
+                              const catVal = e.target.value;
+                              const matched = effectiveCategories.find(
+                                (c) => (c.slug || c.id) === catVal
+                              );
+                              setProductFormData({
+                                ...productFormData,
+                                category: catVal,
+                                categoryName: matched ? (matched.name || matched.nameBn || catVal) : catVal,
+                              });
+                            }}
+                            className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none font-medium"
+                          >
+                            <option value="">-- ক্যাটাগরি নির্বাচন করুন --</option>
+                            {productFormData.category &&
+                              !effectiveCategories.some(
+                                (c) => (c.slug || c.id) === productFormData.category
+                              ) && (
+                                <option value={productFormData.category}>
+                                  {productFormData.categoryName || productFormData.category} (বর্তমান)
+                                </option>
+                              )}
+                            {effectiveCategories.map((cat) => (
+                              <option key={cat.slug || cat.id} value={cat.slug || cat.id}>
+                                {cat.name} {cat.nameEn ? `(${cat.nameEn})` : ''}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <input
+                            type="text"
+                            value={productFormData.unit}
+                            onChange={(e) =>
+                              setProductFormData({ ...productFormData, unit: e.target.value })
+                            }
+                            placeholder="পরিমাপ একক (যেমন: ১ কেজি, ৫০০ গ্রাম, ১ পিস)"
+                            className="w-full px-3 py-2 rounded-xl border border-[#E8E2D5] bg-white outline-none"
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -1934,7 +2151,7 @@ export default function AdminDashboardPage() {
                         onChange={(e) =>
                           setProductFormData({ ...productFormData, description: e.target.value })
                         }
-                        placeholder="সুন্দরবনের প্রাকৃতিক মৌচাক থেকে সরাসরি মৌয়ালদের মাধ্যমে সংগৃহীত খলসী ফুলের খাঁটি মধু। কোনো প্রকার চিনি বা কৃত্রিম উপাদান মেশানো হয়নি। কাঁচা মধুর সমস্ত এনজাইম ও প্রাকৃতিক পরাগরেণু অক্ষুণ্ণ রয়েছে..."
+                        placeholder="পণ্যের পূর্ণাঙ্গ বিস্তারিত বিবরণ, গুণগত মান, খাঁটি কাঁচামালের উৎস, পুষ্টিগুণ ও প্রস্তুত প্রণালী লিখুন..."
                         className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-[#FCFAF7] text-xs text-slate-900 leading-relaxed outline-none focus:border-[#016831]"
                       />
                       <p className="text-[11px] text-slate-500">
@@ -1961,11 +2178,11 @@ export default function AdminDashboardPage() {
                             onChange={(e) =>
                               setProductFormData({ ...productFormData, origin: e.target.value })
                             }
-                            placeholder="যেমন: শ্যামনগর, সাতক্ষীরা"
+                            placeholder="যেমন: সাতক্ষীরা, খুলনা বা সংগৃহীত এলাকা"
                             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
                           />
                           <div className="flex flex-wrap gap-1 mt-1.5">
-                            {['সুন্দরবন ও সাতক্ষীরা', 'শ্যামনগর, সাতক্ষীরা', 'কালিগঞ্জ, সাতক্ষীরা', 'তালা, সাতক্ষীরা'].map((txt) => (
+                            {['সাতক্ষীরা', 'সুন্দরবন', 'খুলনা', 'যশোর', 'বাগেরহাট', 'দেশি নিজস্ব খামার'].map((txt) => (
                               <button
                                 key={txt}
                                 type="button"
@@ -1988,11 +2205,11 @@ export default function AdminDashboardPage() {
                             onChange={(e) =>
                               setProductFormData({ ...productFormData, harvestDate: e.target.value })
                             }
-                            placeholder="যেমন: তাজা সংগ্রহ (অক্টোবর ২০২৪)"
+                            placeholder="যেমন: তাজা নতুন সংগ্রহ বা চলতি মৌসুম"
                             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
                           />
                           <div className="flex flex-wrap gap-1 mt-1.5">
-                            {['তাজা সংগ্রহ', 'মৌসুমী সংগ্রহ', 'নতুন মৌসুম ২০২৪'].map((txt) => (
+                            {['তাজা নতুন সংগ্রহ', 'চলতি মৌসুমের উৎপাদন', 'অর্গানিক ফার্ম ফ্রেশ', 'তাজা প্রস্তুতকৃত'].map((txt) => (
                               <button
                                 key={txt}
                                 type="button"
@@ -2018,11 +2235,11 @@ export default function AdminDashboardPage() {
                             onChange={(e) =>
                               setProductFormData({ ...productFormData, packaging: e.target.value })
                             }
-                            placeholder="যেমন: ফুড-গ্রেড এয়ারটাইট জার"
+                            placeholder="যেমন: বায়ুরোধী ফুড-গ্রেড প্যাকেট, জার বা বোতল"
                             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
                           />
                           <div className="flex flex-wrap gap-1 mt-1.5">
-                            {['ফুড-গ্রেড এয়ারটাইট জার', 'কাঁচের প্রিমিয়াম জার', 'ফুড-গ্রেড বোতল', 'বায়ুরোধী মেটাল ফয়েল প্যাক'].map((txt) => (
+                            {['বায়ুরোধী ফুড-গ্রেড প্যাকেট', 'ফুড-গ্রেড এয়ারটাইট জার', 'কাঁচের প্রিমিয়াম বোতল', 'এয়ারটাইট কন্টেইনার', 'ইকো-ফ্রেন্ডলি বক্স'].map((txt) => (
                               <button
                                 key={txt}
                                 type="button"
@@ -2045,7 +2262,7 @@ export default function AdminDashboardPage() {
                             onChange={(e) =>
                               setProductFormData({ ...productFormData, purityGuarantee: e.target.value })
                             }
-                            placeholder="যেমন: ১০০% প্রাকৃতিক ও খাঁটি"
+                            placeholder="যেমন: ১০০% প্রাকৃতিক, অর্গানিক বা বিশুদ্ধতার নিশ্চয়তা"
                             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
                           />
                           <div className="flex flex-wrap gap-1 mt-1.5">
@@ -2075,7 +2292,7 @@ export default function AdminDashboardPage() {
                             onChange={(e) =>
                               setProductFormData({ ...productFormData, paymentTerms: e.target.value })
                             }
-                            placeholder="যেমন: ক্যাশ অন ডেলিভারি"
+                            placeholder="যেমন: ক্যাশ অন ডেলিভারি (পণ্য দেখে মূল্য পরিশোধ)"
                             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
                           />
                         </div>
@@ -2108,7 +2325,7 @@ export default function AdminDashboardPage() {
                         onChange={(e) =>
                           setProductFormData({ ...productFormData, storageTips: e.target.value })
                         }
-                        placeholder="আর্দ্রতামুক্ত ও শীতল স্থানে বায়ুরোধী পাত্রে সংরক্ষণ করুন। সরাসরি সূর্যালোক ও অতিরিক্ত তাপ থেকে দূরে রাখুন।"
+                        placeholder="যেমন: আর্দ্রতামুক্ত ও শীতল স্থানে স্বাভাবিক তাপমাত্রায় বায়ুরোধী পাত্রে সংরক্ষণ করুন..."
                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
                       />
                     </div>
@@ -2157,12 +2374,12 @@ export default function AdminDashboardPage() {
                           <Sparkles className="w-3 h-3 text-amber-500" /> দ্রুত যোগ করুন:
                         </span>
                         {[
+                          '১০০% খাঁটি ও নির্ভেজাল',
                           'রোগ প্রতিরোধ ক্ষমতা বাড়ায়',
-                          'হজম শক্তি বৃদ্ধি করে',
-                          'প্রাকৃতিক শক্তি ও বল জোগায়',
-                          'অ্যান্টিঅক্সিডেন্ট ও এনজাইম সমৃদ্ধ',
-                          'হৃদযন্ত্র সুস্থ রাখতে সহায়ক',
-                          'ত্বক ও চুলের পুষ্টি জোগায়',
+                          'প্রাকৃতিক শক্তি ও পুষ্টি জোগায়',
+                          'কোনো ক্ষতিকর প্রিজারভেটিভ নেই',
+                          'পারিবারিক সুস্বাস্থ্যের জন্য নিরাপদ',
+                          'ঐতিহ্যবাহী সেরা স্বাদের নিশ্চয়তা',
                         ].map((txt) => (
                           <button
                             key={txt}
@@ -2291,7 +2508,7 @@ export default function AdminDashboardPage() {
                               handleAddFeature();
                             }
                           }}
-                          placeholder="যেমন: কোনো প্রকার চিনি বা কৃত্রিম প্রিজারভেটিভ নেই"
+                          placeholder="যেমন: শতভাগ নিজস্ব তত্ত্বাবধানে সংগৃহীত বা কোনো ক্ষতিকর রাসায়নিক নেই"
                           className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-[#FCFAF7] outline-none focus:border-[#016831]"
                         />
                         <button
@@ -2325,7 +2542,7 @@ export default function AdminDashboardPage() {
                         </div>
                       ) : (
                         <p className="text-[11px] text-slate-400 italic">
-                          খালি রাখলে ৩টি প্রিমিয়াম ডিফল্ট কেয়ার পয়েন্ট স্বয়ংক্রিয়ভাবে প্রদর্শিত হবে।
+                          খালি রাখলে গ্রাহক সাইট থেকে সাধারণ ৩টি বিশ্বস্ত কেয়ার পয়েন্ট দেখতে পাবেন।
                         </p>
                       )}
                     </div>

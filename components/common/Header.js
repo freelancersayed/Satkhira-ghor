@@ -97,7 +97,7 @@ export default function Header() {
 
   const [liveCategories, setLiveCategories] = useState([]);
 
-  useEffect(() => {
+  const loadCategories = () => {
     fetch('/api/categories')
       .then((res) => res.json())
       .then((data) => {
@@ -106,6 +106,16 @@ export default function Header() {
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadCategories();
+
+    // Listen for category updates from admin or modal
+    if (typeof window !== 'undefined') {
+      window.addEventListener('categories:updated', loadCategories);
+      return () => window.removeEventListener('categories:updated', loadCategories);
+    }
   }, []);
 
   const totalItems = mounted
@@ -130,11 +140,13 @@ export default function Header() {
   ];
 
   const rawCategories = content?.categories;
-  const allCategories = Array.isArray(rawCategories) && rawCategories.length > 0
-    ? rawCategories
-    : (rawCategories && typeof rawCategories === 'object' && Object.values(rawCategories).length > 0)
-      ? Object.values(rawCategories)
-      : (liveCategories.length > 0 ? liveCategories : (Array.isArray(categories) ? categories : []));
+  const allCategories = liveCategories.length > 0
+    ? liveCategories
+    : (Array.isArray(rawCategories) && rawCategories.length > 0)
+      ? rawCategories
+      : (rawCategories && typeof rawCategories === 'object' && Object.values(rawCategories).length > 0)
+        ? Object.values(rawCategories)
+        : (Array.isArray(categories) ? categories : []);
   const displayCategories = allCategories.filter((c) => c.id !== 'all' && c.slug !== 'all').slice(0, 7);
 
   return (

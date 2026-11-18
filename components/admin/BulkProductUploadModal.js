@@ -40,16 +40,19 @@ export default function BulkProductUploadModal({ isOpen, onClose, onUploadSucces
               c.name === obj.categoryName
           );
 
+          const chosenCatSlug = obj.category || (matchedCat ? (matchedCat.slug || matchedCat.id) : (defaultCat?.slug || 'general'));
+          const chosenCatName = obj.categoryName || (matchedCat ? matchedCat.name : (defaultCat?.name || 'সাধারণ পণ্য'));
+
           parsed.push({
             name: obj.name,
             nameEn: obj.nameEn || '',
-            category: obj.category || (matchedCat ? (matchedCat.slug || matchedCat.id) : (defaultCat?.slug || 'honey')),
-            categoryName: obj.categoryName || (matchedCat ? matchedCat.name : (defaultCat?.name || 'সুন্দরবনের মধু')),
+            category: chosenCatSlug,
+            categoryName: chosenCatName,
             price: Number(obj.price) || 0,
             originalPrice: obj.originalPrice ? Number(obj.originalPrice) : null,
-            unit: obj.unit || '১ কেজি',
-            stock: obj.stock !== undefined ? Number(obj.stock) : 20,
-            image: obj.image || 'https://images.unsplash.com/photo-1587049352846-4a222e784d38',
+            unit: obj.unit || '১ একক',
+            stock: obj.stock !== undefined ? Number(obj.stock) : 10,
+            image: obj.image || '/assets/logo-1.png',
             shortDescription: obj.shortDescription || '',
           });
         }
