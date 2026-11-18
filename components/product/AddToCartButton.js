@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ShoppingBag, Zap, Check, Plus, Minus, Layers } from 'lucide-react';
+import { ShoppingBag, Zap, Check, Plus, Minus, Layers, MessageCircle, PhoneCall } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { useSiteContentStore } from '@/store/siteContentStore';
 
 export function getProductVariants(product) {
   if (product.variations && Array.isArray(product.variations) && product.variations.length > 0) {
@@ -88,6 +89,19 @@ export function getProductVariants(product) {
 }
 
 export default function AddToCartButton({ product }) {
+  const { content } = useSiteContentStore();
+  const helpline = content?.hero?.helpline || '০১৭১২-৩৪৫৬৭৮';
+  const bnToEn = (str) =>
+    (str || '').replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+  const rawHelpline = bnToEn(helpline);
+  const cleanPhone = rawHelpline.replace(/[^\d+]/g, '') || '01712345678';
+  const cleanPhoneWithoutCountry = cleanPhone.replace(/^\+?88/, '');
+  const whatsappNumber = cleanPhoneWithoutCountry.startsWith('0')
+    ? '88' + cleanPhoneWithoutCountry
+    : cleanPhoneWithoutCountry.length === 10
+      ? '880' + cleanPhoneWithoutCountry
+      : '8801712345678';
+
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
@@ -278,6 +292,29 @@ export default function AddToCartButton({ product }) {
           <Zap className="w-4 h-4 fill-current text-slate-950" />
           <span>এখনই অর্ডার করুন</span>
         </button>
+      </div>
+
+      {/* ── 4b. Direct WhatsApp & Phone Call Quick Order (High Conversion BD Flow) ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+        <a
+          href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+            `আসসালামু আলাইকুম! আমি সাতক্ষীরা ঘর থেকে "${product.name} (${currentUnit})" পণ্যটি অর্ডার করতে চাই।\nপরিমাণ: ${quantity} টি\nমূল্য: ৳${currentPrice * quantity}`
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="py-3 px-4 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-[#016831] border border-emerald-300 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
+        >
+          <MessageCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+          <span>হোয়াটসঅ্যাপে অর্ডার করুন</span>
+        </a>
+
+        <a
+          href={`tel:${cleanPhone}`}
+          className="py-3 px-4 rounded-2xl bg-[#FEF3C7] hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
+        >
+          <PhoneCall className="w-4 h-4 text-amber-700 flex-shrink-0" />
+          <span>ফোনে কল করে অর্ডার করুন</span>
+        </a>
       </div>
 
       {/* ── 5. Mobile Slim Sticky Bottom Bar (< 640px) ── */}

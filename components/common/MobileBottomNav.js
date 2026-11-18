@@ -69,12 +69,16 @@ export default function MobileBottomNav() {
   ).filter((c) => c.id !== 'all' && c.slug !== 'all').slice(0, 6);
 
   const helpline = content?.hero?.helpline || '০১৭১২-৩৪৫৬৭৮';
-  // Clean phone number for tel: and wa.me:
-  const helplineDigits = helpline.replace(/[^\d+]/g, '');
-  const whatsappNumber = helplineDigits.startsWith('0')
-    ? '88' + helplineDigits
-    : helplineDigits.startsWith('+88')
-      ? helplineDigits.replace('+', '')
+  // Normalize Bengali digits (০-৯) to English digits (0-9) for standard tel: and wa.me protocols
+  const bnToEn = (str) =>
+    (str || '').replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+  const rawHelpline = bnToEn(helpline);
+  const helplineDigits = rawHelpline.replace(/[^\d+]/g, '') || '01712345678';
+  const cleanPhoneWithoutCountry = helplineDigits.replace(/^\+?88/, '');
+  const whatsappNumber = cleanPhoneWithoutCountry.startsWith('0')
+    ? '88' + cleanPhoneWithoutCountry
+    : cleanPhoneWithoutCountry.length === 10
+      ? '880' + cleanPhoneWithoutCountry
       : helplineDigits.startsWith('88')
         ? helplineDigits
         : '8801712345678';

@@ -78,7 +78,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const product = await getProductBySlug(params.slug);
+  const resolvedParams = await Promise.resolve(params);
+  const product = await getProductBySlug(resolvedParams?.slug);
 
   if (!product) {
     return {
@@ -98,7 +99,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductDetailPage({ params }) {
-  const product = await getProductBySlug(params.slug);
+  const resolvedParams = await Promise.resolve(params);
+  const product = await getProductBySlug(resolvedParams?.slug);
 
   if (!product) {
     notFound();

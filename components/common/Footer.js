@@ -107,10 +107,16 @@ export default function Footer() {
                 <Link href="/shop" className="hover:text-white transition-colors">সকল পণ্য তালিকা</Link>
               </li>
               <li>
-                <Link href="/about-us" className="hover:text-white transition-colors">আমাদের গল্প ও মিশন</Link>
+                <Link href="/track-order" className="hover:text-white transition-colors">পার্সেল লাইভ ট্র্যাকিং</Link>
               </li>
               <li>
-                <Link href="/cart" className="hover:text-white transition-colors">শপিং ব্যাগ</Link>
+                <Link href="/refund-policy" className="hover:text-white transition-colors">রিটার্ন ও রিফান্ড নীতি</Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-white transition-colors">ব্যবহারের শর্তাবলি</Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:text-white transition-colors">গোপনীয়তা নীতি</Link>
               </li>
             </ul>
           </div>

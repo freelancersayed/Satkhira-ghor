@@ -37,7 +37,7 @@ export default function ProductCard({ product }) {
     );
   };
 
-  const imageSrc = product.image || 'https://images.unsplash.com/photo-1587049352846-4a222e784d38';
+  const imageSrc = product.image || '/assets/logo-1.png';
 
   return (
     <div className="group bg-white rounded-xl sm:rounded-2xl p-2.5 border border-[#E8E2D5] hover:border-[#016831]/40 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between h-full relative">

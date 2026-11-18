@@ -26,6 +26,13 @@ import AdminSectionEditModal from '@/components/common/AdminSectionEditModal';
 import SearchBar from '@/components/common/SearchBar';
 import { categories } from '@/data/products';
 
+const cleanTelNumber = (num) => {
+  if (!num) return '+8801712345678';
+  const bnToEn = num.replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+  const digits = bnToEn.replace(/[^\d+]/g, '');
+  return digits || '+8801712345678';
+};
+
 export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -572,7 +579,7 @@ export default function Header() {
                 {/* Quick Call Helpline */}
                 <div className="pt-3 border-t border-[#E8E2D5] space-y-2">
                   <a
-                    href={`tel:${hero.helpline || '+8801712345678'}`}
+                    href={`tel:${cleanTelNumber(hero.helpline)}`}
                     className="flex items-center justify-center gap-2 p-3 rounded-2xl bg-[#EBF7F0] text-[#016831] border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition-colors"
                   >
                     <PhoneCall className="w-4 h-4 text-[#016831]" />

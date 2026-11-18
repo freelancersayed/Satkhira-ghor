@@ -43,6 +43,11 @@ export const metadata = {
     'সাতক্ষীরা ঘর',
   ],
   authors: [{ name: 'Satkhira Ghor' }],
+  icons: {
+    icon: '/assets/logo-1.png',
+    shortcut: '/assets/logo-1.png',
+    apple: '/assets/logo-1.png',
+  },
   openGraph: {
     title: 'সাতক্ষীরা ঘর | Satkhira Ghor - Authentic Organic Agro',
     description:
@@ -50,6 +55,14 @@ export const metadata = {
     siteName: 'Satkhira Ghor',
     locale: 'bn_BD',
     type: 'website',
+    images: [
+      {
+        url: '/assets/logo-1.png',
+        width: 800,
+        height: 800,
+        alt: 'সাতক্ষীরা ঘর লোগো',
+      },
+    ],
   },
 };
 
