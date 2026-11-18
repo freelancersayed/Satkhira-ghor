@@ -786,37 +786,35 @@ export default function AdminDashboardPage() {
   });
 
   // Enhanced Multi-Criteria Filter for Orders (Bengali numerals normalization, phone, items, city, risk, payment)
-  const filteredOrders = useMemo(() => {
-    const normalizeDigits = (str) =>
-      (str || '')
-        .toLowerCase()
-        .replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d))
-        .trim();
+  const normalizeDigits = (str) =>
+    (str || '')
+      .toLowerCase()
+      .replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d))
+      .trim();
 
-    const cleanSearch = normalizeDigits(orderSearch).replace(/^#/, '');
+  const cleanSearch = normalizeDigits(orderSearch).replace(/^#/, '');
 
-    return orders.filter((o) => {
-      const orderNum = normalizeDigits(o.orderNumber);
-      const custPhone = normalizeDigits(o.customer?.phone).replace(/[^0-9]/g, '');
-      const custName = (o.customer?.name || '').toLowerCase();
-      const custCity = (o.customer?.city || '').toLowerCase();
-      const itemMatch = o.items?.some((it) => (it.name || '').toLowerCase().includes(cleanSearch));
+  const filteredOrders = orders.filter((o) => {
+    const orderNum = normalizeDigits(o.orderNumber);
+    const custPhone = normalizeDigits(o.customer?.phone).replace(/[^0-9]/g, '');
+    const custName = (o.customer?.name || '').toLowerCase();
+    const custCity = (o.customer?.city || '').toLowerCase();
+    const itemMatch = o.items?.some((it) => (it.name || '').toLowerCase().includes(cleanSearch));
 
-      const matchesSearch =
-        !cleanSearch ||
-        orderNum.includes(cleanSearch) ||
-        custPhone.includes(cleanSearch) ||
-        custName.includes(cleanSearch) ||
-        custCity.includes(cleanSearch) ||
-        itemMatch;
+    const matchesSearch =
+      !cleanSearch ||
+      orderNum.includes(cleanSearch) ||
+      custPhone.includes(cleanSearch) ||
+      custName.includes(cleanSearch) ||
+      custCity.includes(cleanSearch) ||
+      itemMatch;
 
-      const matchesStatus = orderFilter === 'all' || o.orderStatus === orderFilter;
-      const matchesPayment = orderPaymentFilter === 'all' || o.paymentStatus === orderPaymentFilter;
-      const matchesRisk = orderRiskFilter === 'all' || o.fraudRisk === orderRiskFilter;
+    const matchesStatus = orderFilter === 'all' || o.orderStatus === orderFilter;
+    const matchesPayment = orderPaymentFilter === 'all' || o.paymentStatus === orderPaymentFilter;
+    const matchesRisk = orderRiskFilter === 'all' || o.fraudRisk === orderRiskFilter;
 
-      return matchesSearch && matchesStatus && matchesPayment && matchesRisk;
-    });
-  }, [orders, orderSearch, orderFilter, orderPaymentFilter, orderRiskFilter]);
+    return matchesSearch && matchesStatus && matchesPayment && matchesRisk;
+  });
 
   const stats = statsData?.stats;
 
