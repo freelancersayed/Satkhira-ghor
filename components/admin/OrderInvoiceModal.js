@@ -275,14 +275,22 @@ export default function OrderInvoiceModal({ order, onClose }) {
 
             {/* Billing Summary */}
             <div className="flex justify-between items-center pt-3 border-t-2 border-gray-200">
-              <div className="space-y-1 text-[11px] text-gray-500">
-                <div>পেমেন্ট মেথড: {order.paymentMethod?.toUpperCase()}</div>
+              <div className="space-y-1 text-[11px] text-gray-600">
+                <div>পেমেন্ট মেথড: <span className="font-bold uppercase text-slate-800">{order.paymentMethod}</span></div>
                 <div>
                   পেমেন্ট স্ট্যাটাস:{' '}
                   <span className={`font-bold ${order.paymentStatus === 'paid' ? 'text-emerald-700' : 'text-amber-700'}`}>
                     {order.paymentStatus === 'paid' ? 'পরিশোধিত (Paid)' : 'ক্যাশ অন ডেলিভারি (বকেয়া)'}
                   </span>
                 </div>
+                {order.paymentDetails?.transactionId && (
+                  <div className="text-[10px] bg-amber-50 p-1.5 rounded-lg border border-amber-200 text-amber-900 mt-1">
+                    <div>TrxID: <strong className="font-mono">{order.paymentDetails.transactionId}</strong></div>
+                    {order.paymentDetails.senderNumber && (
+                      <div>প্রেরক নম্বর: <span className="font-mono">{order.paymentDetails.senderNumber}</span></div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="text-right space-y-1 text-xs">
                 <div>সাবটোটাল: ৳{order.subtotal}</div>
@@ -339,14 +347,19 @@ export default function OrderInvoiceModal({ order, onClose }) {
               <div className="bg-[#016831] text-white p-3 rounded-xl flex justify-between items-center">
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-                    ক্যাশ অন ডেলিভারি (COD Collect)
+                    {order.paymentStatus === 'paid' ? 'অনলাইন পেইড (Prepaid)' : 'ক্যাশ অন ডেলিভারি (COD Collect)'}
                   </div>
                   <div className="text-xl font-black font-mono">
-                    ৳{order.totalAmount}
+                    {order.paymentStatus === 'paid' ? '৳০ (PAID)' : `৳${order.totalAmount}`}
                   </div>
                 </div>
-                <div className="text-right text-[10px] font-bold bg-white/10 px-2 py-1 rounded">
-                  {order.paymentStatus === 'paid' ? 'PREPAID (পরিশোধিত)' : 'COLLECT CASH (বকেয়া)'}
+                <div className="text-right text-[10px] font-bold bg-white/10 px-2 py-1 rounded space-y-0.5">
+                  <div>{order.paymentStatus === 'paid' ? 'PREPAID' : 'COLLECT CASH'}</div>
+                  {order.paymentDetails?.transactionId && (
+                    <div className="font-mono text-[9px] text-[#F59E0B]">
+                      Trx: {order.paymentDetails.transactionId}
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -24,6 +24,7 @@ export async function POST(request) {
       items,
       couponCode = '',
       paymentMethod = 'cod',
+      paymentDetails = null,
     } = body;
 
     // 1. Mandatory Customer Details Validation
@@ -44,6 +45,27 @@ export async function POST(request) {
         { message: 'অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন: 017XXXXXXXX)' },
         { status: 400 }
       );
+    }
+
+    // 2.1 bKash / Nagad Transaction ID Verification
+    let cleanTrxId = '';
+    let cleanSenderNumber = '';
+    if (paymentDetails) {
+      cleanTrxId = (paymentDetails.transactionId || '').trim().toUpperCase();
+      cleanSenderNumber = bnToEn(paymentDetails.senderNumber || '').replace(/[^0-9]/g, '');
+    }
+
+    if (paymentMethod === 'bkash' || paymentMethod === 'nagad') {
+      if (!cleanTrxId || cleanTrxId.length < 4) {
+        return NextResponse.json(
+          {
+            message: `অনুগ্রহ করে ${
+              paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'
+            } পেমেন্টের সঠিক ট্রানজেকশন আইডি (TrxID) প্রদান করুন।`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // 3. Cart Items Non-empty Check
@@ -220,6 +242,12 @@ export async function POST(request) {
       totalAmount,
       paymentMethod,
       paymentStatus: 'unpaid',
+      paymentDetails: {
+        provider: paymentMethod,
+        senderNumber: cleanSenderNumber || cleanPhone,
+        transactionId: cleanTrxId,
+        submittedAt: cleanTrxId ? new Date() : null,
+      },
       orderStatus: initialOrderStatus,
       securityInfo: {
         ipAddress: geoInfo.ipAddress || clientIp,
@@ -280,6 +308,8 @@ export async function POST(request) {
           customer: newOrder.customer,
           orderStatus: newOrder.orderStatus,
           fraudRisk: newOrder.fraudRisk,
+          paymentMethod: newOrder.paymentMethod,
+          paymentDetails: newOrder.paymentDetails,
           createdAt: newOrder.createdAt,
         },
       },

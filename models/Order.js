@@ -102,6 +102,27 @@ const OrderSchema = new mongoose.Schema(
       enum: ['unpaid', 'paid'],
       default: 'unpaid',
     },
+    // Mobile Banking / Online Payment Details (bKash / Nagad TrxID)
+    paymentDetails: {
+      provider: {
+        type: String,
+        default: 'cod',
+      },
+      senderNumber: {
+        type: String,
+        default: '',
+        trim: true,
+      },
+      transactionId: {
+        type: String,
+        default: '',
+        trim: true,
+      },
+      submittedAt: {
+        type: Date,
+        default: null,
+      },
+    },
     orderStatus: {
       type: String,
       enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'hold'],

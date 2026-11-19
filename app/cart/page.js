@@ -23,6 +23,7 @@ import {
   Sparkles,
   CreditCard,
   Lock,
+  Copy,
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -55,8 +56,19 @@ export default function CartPage() {
     address: '',
     city: 'ঢাকা',
     paymentMethod: 'cod',
+    paymentSenderNumber: '',
+    paymentTrxId: '',
     notes: '',
   });
+  const [copiedNumber, setCopiedNumber] = useState(false);
+
+  const handleCopyPaymentNumber = (num) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(num);
+      setCopiedNumber(true);
+      setTimeout(() => setCopiedNumber(false), 2200);
+    }
+  };
 
   const {
     items,
@@ -189,6 +201,19 @@ export default function CartPage() {
       return;
     }
 
+    // Mobile Banking TrxID Validation
+    if (formData.paymentMethod === 'bkash' || formData.paymentMethod === 'nagad') {
+      const trx = (formData.paymentTrxId || '').trim();
+      if (!trx || trx.length < 4) {
+        setOrderError(
+          `অনুগ্রহ করে আপনার ${
+            formData.paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'
+          } পেমেন্টের সঠিক ট্রানজেকশন আইডি (TrxID) প্রদান করুন।`
+        );
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
       const res = await fetch('/api/orders', {
@@ -206,6 +231,14 @@ export default function CartPage() {
           subtotal: Math.max(0, subtotal - discount),
           deliveryFee: deliveryCharge,
           paymentMethod: formData.paymentMethod,
+          paymentDetails:
+            formData.paymentMethod !== 'cod'
+              ? {
+                  provider: formData.paymentMethod,
+                  senderNumber: (formData.paymentSenderNumber || cleanPhone).trim(),
+                  transactionId: (formData.paymentTrxId || '').trim().toUpperCase(),
+                }
+              : null,
         }),
       });
 
@@ -286,11 +319,21 @@ export default function CartPage() {
             <div className="flex justify-between">
               <span className="text-stone-500">পেমেন্ট মাধ্যম:</span>
               <span className="font-bold text-[#016831]">
-                {formData.paymentMethod === 'cod'
+                {confirmedOrder.paymentMethod === 'cod'
                   ? 'ক্যাশ অন ডেলিভারি (পণ্য পেয়ে টাকা)'
-                  : 'bKash / Nagad'}
+                  : confirmedOrder.paymentMethod === 'bkash'
+                  ? 'বিকাশ অনলাইন পেমেন্ট'
+                  : 'নগদ অনলাইন পেমেন্ট'}
               </span>
             </div>
+            {confirmedOrder.paymentDetails?.transactionId && (
+              <div className="flex justify-between items-center bg-amber-50 p-1.5 rounded-lg border border-amber-200">
+                <span className="text-amber-800 font-medium">ট্রানজেকশন আইডি (TrxID):</span>
+                <span className="font-mono font-black text-amber-950">
+                  {confirmedOrder.paymentDetails.transactionId}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between pt-1.5 border-t border-[#E8E2D5] font-black text-sm text-[#016831]">
               <span>সর্বমোট প্রদেয়:</span>
               <span className="text-[#B45309]">৳{toBanglaNum(confirmedOrder.totalAmount)}</span>
@@ -638,77 +681,219 @@ export default function CartPage() {
                 </div>
 
                 {/* 2. Payment Method Selector Card */}
-                <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#E8E2D5] p-4 sm:p-6 shadow-xs space-y-3">
+                <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#E8E2D5] p-4 sm:p-6 shadow-xs space-y-4">
                   <h2 className="text-sm sm:text-base font-bold text-[#016831] flex items-center gap-2 pb-2.5 border-b border-[#E8E2D5]">
                     <CreditCard className="w-4 h-4 text-[#D97706]" />
                     <span>২. পেমেন্ট পদ্ধতি নির্বাচন করুন</span>
                   </h2>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {/* 3 Payment Options: COD, bKash, Nagad */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     {/* Cash on Delivery (COD) */}
                     <div
                       onClick={() => setFormData({ ...formData, paymentMethod: 'cod' })}
-                      className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 ${formData.paymentMethod === 'cod'
-                          ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${
+                        formData.paymentMethod === 'cod'
+                          ? 'border-[#016831] bg-emerald-50/90 ring-2 ring-[#016831]'
                           : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                        }`}
+                      }`}
                     >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="cod"
-                        checked={formData.paymentMethod === 'cod'}
-                        onChange={() => setFormData({ ...formData, paymentMethod: 'cod' })}
-                        className="mt-0.5 accent-[#016831]"
-                      />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-stone-800">ক্যাশ অন ডেলিভারি</span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-100 text-[#016831]">
-                            জনপ্রিয়
-                          </span>
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="cod"
+                          checked={formData.paymentMethod === 'cod'}
+                          onChange={() => setFormData({ ...formData, paymentMethod: 'cod' })}
+                          className="mt-0.5 accent-[#016831]"
+                        />
+                        <div>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-bold text-stone-800">ক্যাশ অন ডেলিভারি</span>
+                          </div>
+                          <p className="text-[10px] text-stone-500 mt-0.5 leading-snug">
+                            পণ্য পেয়ে টাকা পরিশোধ
+                          </p>
                         </div>
-                        <p className="text-[11px] text-stone-500 mt-0.5 leading-snug">
-                          পণ্য হাতে পেয়ে চেক করে মূল্য পরিশোধ করুন
-                        </p>
                       </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-[#016831] text-center w-fit">
+                        জনপ্রিয় (COD)
+                      </span>
                     </div>
 
-                    {/* bKash / Nagad */}
+                    {/* bKash Payment Option */}
                     <div
                       onClick={() => setFormData({ ...formData, paymentMethod: 'bkash' })}
-                      className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 ${formData.paymentMethod === 'bkash'
-                          ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${
+                        formData.paymentMethod === 'bkash'
+                          ? 'border-[#E2136E] bg-pink-50/90 ring-2 ring-[#E2136E]'
                           : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                        }`}
+                      }`}
                     >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="bkash"
-                        checked={formData.paymentMethod === 'bkash'}
-                        onChange={() => setFormData({ ...formData, paymentMethod: 'bkash' })}
-                        className="mt-0.5 accent-[#016831]"
-                      />
-                      <div>
-                        <span className="text-xs font-bold text-stone-800">বিকাশ / নগদ (bKash/Nagad)</span>
-                        <p className="text-[11px] text-stone-500 mt-0.5 leading-snug">
-                          মোবাইল ব্যাংকিংয়ের মাধ্যমে পেমেন্ট
-                        </p>
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="bkash"
+                          checked={formData.paymentMethod === 'bkash'}
+                          onChange={() => setFormData({ ...formData, paymentMethod: 'bkash' })}
+                          className="mt-0.5 accent-[#E2136E]"
+                        />
+                        <div>
+                          <span className="text-xs font-bold text-[#E2136E]">বিকাশ (bKash)</span>
+                          <p className="text-[10px] text-stone-500 mt-0.5 leading-snug">
+                            সেন্ড মানি / অনলাইন পেমেন্ট
+                          </p>
+                        </div>
                       </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E2136E]/10 text-[#E2136E] text-center w-fit">
+                        ব্যক্তিগত (Personal)
+                      </span>
+                    </div>
+
+                    {/* Nagad Payment Option */}
+                    <div
+                      onClick={() => setFormData({ ...formData, paymentMethod: 'nagad' })}
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${
+                        formData.paymentMethod === 'nagad'
+                          ? 'border-[#F7941D] bg-orange-50/90 ring-2 ring-[#F7941D]'
+                          : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="nagad"
+                          checked={formData.paymentMethod === 'nagad'}
+                          onChange={() => setFormData({ ...formData, paymentMethod: 'nagad' })}
+                          className="mt-0.5 accent-[#F7941D]"
+                        />
+                        <div>
+                          <span className="text-xs font-bold text-[#D97706]">নগদ (Nagad)</span>
+                          <p className="text-[10px] text-stone-500 mt-0.5 leading-snug">
+                            সেন্ড মানি / অনলাইন পেমেন্ট
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-[#C2410C] text-center w-fit">
+                        ব্যক্তিগত (Personal)
+                      </span>
                     </div>
                   </div>
 
-                  {/* bKash Instructions if selected */}
-                  {formData.paymentMethod === 'bkash' && (
-                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-[#92400E] space-y-1 animate-fadeIn">
-                      <div className="font-bold flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                        <span>বিকাশ/নগদ পেমেন্ট নির্দেশনা:</span>
+                  {/* Mobile Banking Instructions & TrxID Input Card */}
+                  {(formData.paymentMethod === 'bkash' || formData.paymentMethod === 'nagad') && (
+                    <div
+                      className={`p-4 rounded-2xl border text-xs space-y-3 animate-fadeIn ${
+                        formData.paymentMethod === 'bkash'
+                          ? 'bg-pink-50/70 border-pink-200 text-[#831843]'
+                          : 'bg-orange-50/70 border-orange-200 text-[#9A3412]'
+                      }`}
+                    >
+                      {/* Brand Header */}
+                      <div className="flex justify-between items-center pb-2 border-b border-black/10">
+                        <div className="font-bold flex items-center gap-1.5 text-sm">
+                          <Sparkles className="w-4 h-4 text-amber-600" />
+                          <span>
+                            {formData.paymentMethod === 'bkash'
+                              ? 'বিকাশ (bKash) পেমেন্ট নির্দেশিকা'
+                              : 'নগদ (Nagad) পেমেন্ট নির্দেশিকা'}
+                          </span>
+                        </div>
+                        <span className="font-mono font-bold text-xs bg-white px-2.5 py-1 rounded-lg border border-black/10">
+                          প্রদেয়: ৳{toBanglaNum(total)}
+                        </span>
                       </div>
-                      <p className="text-[11px] leading-relaxed">
-                        আমাদের মার্চেন্ট নম্বর: <strong>{deliveryConfig.supportPhone}</strong> (Send Money / Payment)। অর্ডার প্লেস করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।
-                      </p>
+
+                      {/* Payment Number & Copy Button */}
+                      <div className="bg-white p-3 rounded-xl border border-black/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-2xs">
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                            আমাদের {formData.paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'} ব্যক্তিগত নম্বর (Send Money):
+                          </span>
+                          <span className="text-base font-black font-mono tracking-wider text-slate-900">
+                            {formData.paymentMethod === 'bkash'
+                              ? deliveryConfig.bkashNumber
+                              : deliveryConfig.nagadNumber}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleCopyPaymentNumber(
+                              formData.paymentMethod === 'bkash'
+                                ? deliveryConfig.bkashNumberRaw
+                                : deliveryConfig.nagadNumberRaw
+                            )
+                          }
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs ${
+                            copiedNumber
+                              ? 'bg-emerald-600 text-white'
+                              : formData.paymentMethod === 'bkash'
+                              ? 'bg-[#E2136E] text-white hover:bg-[#C2105C]'
+                              : 'bg-[#F7941D] text-white hover:bg-[#D97706]'
+                          }`}
+                        >
+                          {copiedNumber ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedNumber ? 'কপি হয়েছে!' : 'নম্বর কপি করুন'}</span>
+                        </button>
+                      </div>
+
+                      {/* Step-by-Step Instructions */}
+                      <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-700 leading-relaxed font-medium">
+                        <li>
+                          আপনার {formData.paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'} অ্যাপে প্রবেশ করে{' '}
+                          <strong>Send Money</strong> অপশন নির্বাচন করুন।
+                        </li>
+                        <li>
+                          উপরে প্রদর্শিত নম্বরে সর্বমোট <strong>৳{toBanglaNum(total)}</strong> টাকা পাঠান।
+                        </li>
+                        <li>
+                          লেনদেন সফল হলে প্রাপ্ত <strong>TrxID (ট্রানজেকশন আইডি)</strong> নিচের বক্সে লিখে অর্ডার
+                          কনফার্ম করুন।
+                        </li>
+                      </ol>
+
+                      {/* Form Inputs for Sender Phone & TrxID */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-black/10">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            প্রেরক {formData.paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'} নম্বর *
+                          </label>
+                          <input
+                            type="tel"
+                            value={formData.paymentSenderNumber}
+                            onChange={(e) =>
+                              setFormData({ ...formData, paymentSenderNumber: e.target.value })
+                            }
+                            placeholder={formData.phone || '01XXXXXXXXX'}
+                            className="w-full px-3 py-2 rounded-xl border border-black/15 bg-white text-xs text-slate-900 font-mono outline-none focus:border-[#016831] focus:ring-1 focus:ring-[#016831]"
+                          />
+                          <span className="text-[10px] text-slate-500 mt-0.5 block">
+                            (যে নম্বর থেকে টাকা পাঠিয়েছেন)
+                          </span>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            ট্রানজেকশন আইডি (TrxID) *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.paymentTrxId}
+                            onChange={(e) =>
+                              setFormData({ ...formData, paymentTrxId: e.target.value.toUpperCase() })
+                            }
+                            placeholder="যেমন: 9J4K2L8M"
+                            className="w-full px-3 py-2 rounded-xl border border-black/15 bg-white text-xs font-mono font-bold text-slate-900 tracking-wider uppercase outline-none focus:border-[#016831] focus:ring-1 focus:ring-[#016831]"
+                          />
+                          <span className="text-[10px] text-slate-500 mt-0.5 block">
+                            (SMS বা অ্যাপ স্টেটমেন্ট থেকে TrxID দিন)
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

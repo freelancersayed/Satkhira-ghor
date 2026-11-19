@@ -51,6 +51,8 @@ import {
   Loader2,
   Phone,
   MessageSquare,
+  ShoppingCart,
+  Copy,
 } from 'lucide-react';
 
 import { useAuthStore } from '@/store/authStore';
@@ -68,6 +70,7 @@ import ProductImageGalleryManager from '@/components/admin/ProductImageGalleryMa
 import AdminCategoriesView from '@/components/admin/AdminCategoriesView';
 import AdminFlashSaleView from '@/components/admin/AdminFlashSaleView';
 import AdminThemeView from '@/components/admin/AdminThemeView';
+import IncompleteOrdersView from '@/components/admin/IncompleteOrdersView';
 import {
   initAudioOnUserGesture,
   playCashRegisterSound,
@@ -169,6 +172,7 @@ export default function AdminDashboardPage() {
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [printingOrder, setPrintingOrder] = useState(null);
   const [bookingCourierLoading, setBookingCourierLoading] = useState(false);
+  const [copiedTrx, setCopiedTrx] = useState(false);
 
   // Reviews state
   const [adminReviews, setAdminReviews] = useState([]);
@@ -1025,6 +1029,18 @@ export default function AdminDashboardPage() {
             </button>
 
             <button
+              onClick={() => setActiveTab('incomplete-orders')}
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                activeTab === 'incomplete-orders'
+                  ? 'bg-[#016831] text-white shadow-sm'
+                  : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
+              }`}
+            >
+              <ShoppingCart className="w-4 h-4 text-amber-500" />
+              <span>অসম্পূর্ণ অর্ডার</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('products')}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 activeTab === 'products'
@@ -1383,6 +1399,24 @@ export default function AdminDashboardPage() {
         {/* ===================== TAB 2: ORDERS MANAGEMENT ===================== */}
         {activeTab === 'orders' && (
           <div className="space-y-4">
+            {/* Orders Sub-navigation Switcher */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveTab('orders')}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#016831] text-white shadow-xs cursor-pointer"
+              >
+                সক্রিয় অর্ডার সমূহ ({orders.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('incomplete-orders')}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <ShoppingCart className="w-3.5 h-3.5 text-amber-600" />
+                <span>অসম্পূর্ণ / ড্রপ-অফ অর্ডার ম্যানেজমেন্ট</span>
+              </button>
+            </div>
             {/* Filter and Search Bar */}
             <div className="bg-white p-4 rounded-2xl border border-[#E8E2D5] shadow-sm flex flex-col gap-3">
               <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
@@ -1601,23 +1635,44 @@ export default function AdminDashboardPage() {
                               <div className="font-bold text-[#016831] text-sm">
                                 ৳{order.totalAmount}
                               </div>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleUpdatePaymentStatus(
-                                    order._id,
-                                    order.paymentStatus === 'paid' ? 'unpaid' : 'paid'
-                                  )
-                                }
-                                title="পেমেন্ট স্ট্যাটাস টগল করতে ক্লিক করুন"
-                                className={`mt-0.5 inline-flex items-center gap-1 font-bold text-[10px] px-1.5 py-0.5 rounded cursor-pointer border transition-colors ${
-                                  order.paymentStatus === 'paid'
-                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200'
-                                    : 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
-                                }`}
-                              >
-                                {order.paymentStatus === 'paid' ? '✓ পরিশোধিত' : '⏳ বকেয়া (COD)'}
-                              </button>
+                              <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleUpdatePaymentStatus(
+                                      order._id,
+                                      order.paymentStatus === 'paid' ? 'unpaid' : 'paid'
+                                    )
+                                  }
+                                  title="পেমেন্ট স্ট্যাটাস পরিবর্তন করতে ক্লিক করুন"
+                                  className={`inline-flex items-center gap-1 font-bold text-[10px] px-1.5 py-0.5 rounded cursor-pointer border transition-colors ${
+                                    order.paymentStatus === 'paid'
+                                      ? 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200'
+                                      : 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
+                                  }`}
+                                >
+                                  {order.paymentStatus === 'paid' ? '✓ পেইড' : '⏳ বকেয়া'}
+                                </button>
+                                {order.paymentMethod === 'bkash' && (
+                                  <span className="font-bold text-[9px] bg-pink-100 text-[#E2136E] px-1.5 py-0.2 rounded border border-pink-200">
+                                    bKash
+                                  </span>
+                                )}
+                                {order.paymentMethod === 'nagad' && (
+                                  <span className="font-bold text-[9px] bg-orange-100 text-[#C2410C] px-1.5 py-0.2 rounded border border-orange-200">
+                                    নগদ
+                                  </span>
+                                )}
+                              </div>
+                              {order.paymentDetails?.transactionId && (
+                                <div
+                                  className="mt-1 font-mono text-[10px] font-bold text-slate-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 flex items-center gap-1 w-fit"
+                                  title={`প্রেরক নম্বর: ${order.paymentDetails.senderNumber || order.customer?.phone || ''}`}
+                                >
+                                  <span className="text-amber-800 font-sans">Trx:</span>
+                                  <span className="text-slate-900">{order.paymentDetails.transactionId}</span>
+                                </div>
+                              )}
                             </td>
 
                             {/* 7. Order Status Dropdown */}
@@ -1693,6 +1748,21 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ===================== TAB 2.5: INCOMPLETE ORDERS (ABANDONED CARTS) ===================== */}
+        {activeTab === 'incomplete-orders' && (
+          <IncompleteOrdersView
+            showNotification={showNotification}
+            onOrderCreated={(newOrder) => {
+              fetchOrders();
+              fetchStats();
+              setActiveTab('orders');
+              if (newOrder) {
+                setSelectedOrderDetails(newOrder);
+              }
+            }}
+          />
         )}
 
         {/* ===================== TAB 3: PRODUCTS & INVENTORY CRUD ===================== */}
@@ -2948,8 +3018,100 @@ export default function AdminDashboardPage() {
                       <strong>গ্রাহকের নোট:</strong> {selectedOrderDetails.customer.notes}
                     </div>
                   )}
-                  <div><strong>পেমেন্ট মাধ্যম:</strong> {selectedOrderDetails.paymentMethod === 'cod' ? 'ক্যাশ অন ডেলিভারি (COD)' : selectedOrderDetails.paymentMethod}</div>
                 </div>
+              </div>
+
+              {/* Payment Details & TrxID Verification Box */}
+              <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-[#E8E2D5] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-[#016831]" />
+                    <span className="font-bold text-xs text-slate-900">পেমেন্ট ও ভেরিফিকেশন তথ্য</span>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      selectedOrderDetails.paymentStatus === 'paid'
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                        : 'bg-amber-100 text-amber-800 border-amber-300'
+                    }`}
+                  >
+                    {selectedOrderDetails.paymentStatus === 'paid' ? '✓ পরিশোধিত (PAID)' : '⏳ বকেয়া (UNPAID)'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">পেমেন্ট মাধ্যম:</span>
+                    <div className="mt-0.5">
+                      {selectedOrderDetails.paymentMethod === 'bkash' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-50 text-[#E2136E] border border-pink-200 font-bold text-xs">
+                          বিকাশ (bKash Send Money)
+                        </span>
+                      ) : selectedOrderDetails.paymentMethod === 'nagad' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-50 text-[#C2410C] border border-orange-200 font-bold text-xs">
+                          নগদ (Nagad Send Money)
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 font-bold text-xs">
+                          ক্যাশ অন ডেলিভারি (COD)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">মোট প্রদেয় বিল:</span>
+                    <span className="font-black text-sm text-[#016831] mt-0.5 block">
+                      ৳{selectedOrderDetails.totalAmount}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Mobile Banking TrxID & Sender Details */}
+                {(selectedOrderDetails.paymentMethod === 'bkash' ||
+                  selectedOrderDetails.paymentMethod === 'nagad' ||
+                  selectedOrderDetails.paymentDetails?.transactionId) && (
+                  <div className="mt-2 p-3 bg-white rounded-xl border border-amber-200 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className="text-slate-500">ট্রানজেকশন আইডি (TrxID):</span>
+                        <span className="font-mono font-black text-amber-950 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 text-xs tracking-wider">
+                          {selectedOrderDetails.paymentDetails?.transactionId || 'দেয়া হয়নি'}
+                        </span>
+                      </div>
+                      {selectedOrderDetails.paymentDetails?.transactionId && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                              navigator.clipboard.writeText(selectedOrderDetails.paymentDetails.transactionId);
+                              setCopiedTrx(true);
+                              setTimeout(() => setCopiedTrx(false), 2000);
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[10px] transition-colors cursor-pointer"
+                        >
+                          {copiedTrx ? <Check className="w-3 h-3 text-emerald-700" /> : <Copy className="w-3 h-3" />}
+                          <span>{copiedTrx ? 'কপি হয়েছে' : 'TrxID কপি করুন'}</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-slate-600">
+                      <div>
+                        <span>প্রেরক নম্বর: </span>
+                        <strong className="font-mono text-slate-900">
+                          {selectedOrderDetails.paymentDetails?.senderNumber || selectedOrderDetails.customer?.phone || 'অজানা'}
+                        </strong>
+                      </div>
+                      {selectedOrderDetails.paymentDetails?.submittedAt && (
+                        <div className="text-[10px] text-slate-400">
+                          দাখিল: {new Date(selectedOrderDetails.paymentDetails.submittedAt).toLocaleTimeString('bn-BD')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Status and Payment Controls */}
