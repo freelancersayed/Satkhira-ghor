@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { deliveryConfig } from '@/lib/deliveryConfig';
+import AgentAvatar from './AgentAvatar';
 
 export default function CustomerAIChatWindow({
   isOpen,
@@ -188,8 +189,7 @@ export default function CustomerAIChatWindow({
         <div className="px-4 py-3 sm:py-3.5 bg-gradient-to-r from-[#014D24] via-[#016831] to-[#014D24] text-white flex items-center justify-between shadow-xs flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="relative w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 shadow-xs">
-              <Sparkles className="w-5 h-5 text-[#F59E0B]" />
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#016831] animate-pulse" />
+              <AgentAvatar className="w-7 h-7" glow={true} />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -255,7 +255,7 @@ export default function CustomerAIChatWindow({
                     </>
                   ) : (
                     <>
-                      <Bot className="w-3.5 h-3.5 text-[#016831]" />
+                      <AgentAvatar className="w-4 h-4" glow={false} />
                       <span>এআই শপিং অ্যাসিস্ট্যান্ট</span>
                     </>
                   )}

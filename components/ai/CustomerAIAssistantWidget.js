@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { Sparkles, X, ArrowRight } from 'lucide-react';
+import { Sparkles, X, ArrowRight, MessageCircle } from 'lucide-react';
 import CustomerAIChatWindow from './CustomerAIChatWindow';
+import AgentAvatar from './AgentAvatar';
 
 export default function CustomerAIAssistantWidget() {
   const pathname = usePathname();
@@ -108,7 +109,7 @@ export default function CustomerAIAssistantWidget() {
     };
   }, [pathname]);
 
-  // ── FEATURE 1: SCROLL-TO-HIDE (স্ক্রল করলেই বাবল স্বয়ংক্রিয়ভাবে লুকিয়ে ফেলা) ──
+  // ── SCROLL-TO-HIDE (স্ক্রল করলেই বাবল স্বয়ংক্রিয়ভাবে লুকিয়ে ফেলা) ──
   useEffect(() => {
     if (!showSpeechBubble) return;
 
@@ -131,7 +132,7 @@ export default function CustomerAIAssistantWidget() {
     };
   }, [showSpeechBubble]);
 
-  // ── FEATURE 2: AUTO-DISMISS TIMER (মোবাইলে ৪.২ সেকেন্ড, ডেস্কটপে ৬.৫ সেকেন্ড পর ফেড আউট) ──
+  // ── AUTO-DISMISS TIMER (মোবাইলে ৪.২ সেকেন্ড, ডেস্কটপে ৬.৫ সেকেন্ড পর ফেড আউট) ──
   useEffect(() => {
     if (!showSpeechBubble) return;
 
@@ -189,8 +190,15 @@ export default function CustomerAIAssistantWidget() {
 
   return (
     <>
-      {/* Floating Trigger Badge & Contextual Speech Bubble */}
-      <div className="fixed bottom-[72px] sm:bottom-6 right-3 sm:right-6 z-40 flex flex-col items-end pointer-events-none select-none">
+      {/* 
+        ═══════════════════════════════════════════════════════════════════════
+        Floating Trigger Badge & Contextual Speech Bubble
+        Position:
+        - Mobile: bottom-[68px] right-3 (Cleanly sits right above MobileBottomNav, hugging corner)
+        - Desktop: bottom-6 right-6
+        ═══════════════════════════════════════════════════════════════════════
+      */}
+      <div className="fixed bottom-[68px] sm:bottom-6 right-3 sm:right-6 z-40 flex flex-col items-end pointer-events-none select-none">
         {/* Floating Contextual / First-Time Speech Bubble with Smooth Fade/Slide */}
         {showSpeechBubble && !isChatOpen && (
           <div
@@ -198,7 +206,7 @@ export default function CustomerAIAssistantWidget() {
             onMouseLeave={handleBubbleMouseLeave}
             className="pointer-events-auto mb-2 max-w-[280px] sm:max-w-[310px] w-auto bg-white/95 backdrop-blur-md p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl border border-emerald-500/30 text-xs text-slate-800 transition-all duration-300 ease-out transform animate-slideUp relative"
           >
-            {/* Close Bubble Button (Comfortable touch target) */}
+            {/* Close Bubble Button */}
             <button
               type="button"
               onClick={handleDismissBubble}
@@ -247,12 +255,19 @@ export default function CustomerAIAssistantWidget() {
               <ArrowRight className="w-3.5 h-3.5 text-[#FAB116]" />
             </button>
 
-            {/* Bubble Tail pointing down to trigger button */}
-            <div className="absolute -bottom-1.5 right-4 sm:right-6 w-3 h-3 bg-white/95 border-r border-b border-emerald-500/30 transform rotate-45" />
+            {/* Bubble Tail pointing down to agent avatar */}
+            <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-white/95 border-r border-b border-emerald-500/30 transform rotate-45" />
           </div>
         )}
 
-        {/* Floating Action Button (Compact circle on mobile, expanded pill on desktop) */}
+        {/* 
+          ═════════════════════════════════════════════════════════════════════
+          AI AGENT CAPSULE TRIGGER (স্পষ্ট এজেন্ট আকৃতি ও ফ্রেন্ডলি মাইক্রো-টেক্সট)
+          - Headset Agent Avatar + Glowing Online Indicator
+          - Mobile: "কোন হেল্প লাগলে বলো 👋" (কমপ্যাক্ট, মাত্র ৪২px হাইট, নো অবস্ট্রাকশন)
+          - Desktop: "কীভাবে সহযোগিতা করতে পারি? 🌿" (প্রিমিয়াম কনসালট্যান্ট লুক)
+          ═════════════════════════════════════════════════════════════════════
+        */}
         {!isChatOpen && (
           <button
             type="button"
@@ -260,28 +275,47 @@ export default function CustomerAIAssistantWidget() {
               handleDismissBubble();
               setIsChatOpen(true);
             }}
-            className="pointer-events-auto relative group flex items-center gap-2 p-2.5 sm:px-4 sm:py-3 rounded-full bg-gradient-to-r from-[#014D24] via-[#016831] to-[#014D24] text-white shadow-xl hover:shadow-2xl active:scale-90 sm:hover:scale-105 transition-all duration-300 cursor-pointer border-2 border-emerald-400/40"
-            title="সাতক্ষীরা ঘর এআই শপিং অ্যাসিস্ট্যান্ট"
+            className="pointer-events-auto relative group flex items-center gap-2 pl-2 pr-3 sm:pl-2.5 sm:pr-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-[#014D24] via-[#016831] to-[#014D24] text-white shadow-xl hover:shadow-2xl active:scale-95 sm:hover:scale-105 transition-all duration-300 cursor-pointer border-2 border-[#FAB116]/80 hover:border-[#FAB116] ring-2 ring-emerald-500/20"
+            title="সাতক্ষীরা ঘর এআই শপিং অ্যাসিস্ট্যান্ট - হেল্প নিন"
             aria-label="সাতক্ষীরা ঘর এআই শপিং অ্যাসিস্ট্যান্ট খুলুন"
           >
-            {/* Glowing Aura Ring */}
-            <span className="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping opacity-50" />
+            {/* Subtle Aura Pulse */}
+            <span className="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping opacity-30" />
 
-            {/* AI Icon with Pulse */}
-            <div className="relative flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-[#F59E0B] animate-pulse" />
-              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-[#016831]" />
+            {/* Agent Avatar with Headset & Glowing Online Indicator */}
+            <div className="relative flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-emerald-800 to-[#014D24] border border-amber-300/40 flex items-center justify-center shadow-inner">
+              <AgentAvatar className="w-6 h-6 sm:w-6.5 sm:h-6.5" glow={true} />
             </div>
 
-            {/* Desktop Label (Hidden on mobile for ultra-clean display) */}
-            <div className="hidden sm:flex flex-col items-start text-left pr-1">
-              <span className="text-xs font-black tracking-wide flex items-center gap-1.5">
-                <span>এআই অ্যাসিস্ট্যান্ট</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FAB116] animate-pulse" />
+            {/* ── Mobile Microcopy: "কোন হেল্প লাগলে বলো 👋" ── */}
+            <div className="flex sm:hidden flex-col items-start text-left leading-none">
+              <span className="text-[11px] font-black tracking-tight text-white flex items-center gap-1">
+                <span>কোন হেল্প লাগলে বলো</span>
+                <span className="text-xs">👋</span>
               </span>
-              <span className="text-[9px] text-emerald-200/90 font-medium">
-                লাইভ শপিং কনসালট্যান্ট
+              <span className="text-[8.5px] text-[#FAB116] font-bold mt-0.5 flex items-center gap-1">
+                <span>এআই এজেন্ট</span>
+                <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-emerald-200/90 font-medium">অনলাইন</span>
               </span>
+            </div>
+
+            {/* ── Desktop Microcopy: "কীভাবে সহযোগিতা করতে পারি? 🌿" ── */}
+            <div className="hidden sm:flex flex-col items-start text-left leading-none">
+              <span className="text-xs font-black tracking-wide text-white flex items-center gap-1.5 drop-shadow-xs">
+                <span>কীভাবে সহযোগিতা করতে পারি?</span>
+                <span className="text-xs">🌿</span>
+              </span>
+              <span className="text-[9.5px] text-[#FAB116] font-bold mt-0.5 flex items-center gap-1.5">
+                <span>সাতক্ষীরা ঘর এআই শপিং গাইড</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-emerald-200/90 font-medium">২৪/৭ লাইভ</span>
+              </span>
+            </div>
+
+            {/* Desktop Sparkle Indicator */}
+            <div className="hidden sm:flex items-center justify-center pl-1 text-[#FAB116] group-hover:translate-x-0.5 transition-transform">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
             </div>
           </button>
         )}
