@@ -71,6 +71,7 @@ import AdminCategoriesView from '@/components/admin/AdminCategoriesView';
 import AdminFlashSaleView from '@/components/admin/AdminFlashSaleView';
 import AdminThemeView from '@/components/admin/AdminThemeView';
 import IncompleteOrdersView from '@/components/admin/IncompleteOrdersView';
+import AdminAICopilotModal from '@/components/admin/AdminAICopilotModal';
 import {
   initAudioOnUserGesture,
   playCashRegisterSound,
@@ -103,6 +104,7 @@ export default function AdminDashboardPage() {
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [aiCopilotOpen, setAiCopilotOpen] = useState(false);
   const [categoriesList, setCategoriesList] = useState([]);
 
   // Inline Quick-Add Category state inside Product Modal
@@ -1196,6 +1198,17 @@ export default function AdminDashboardPage() {
                 >
                   <Plus className="w-4 h-4 text-slate-950" />
                   <span>নতুন পণ্য</span>
+                </button>
+
+                {/* Autonomous AI Co-Pilot Button */}
+                <button
+                  type="button"
+                  onClick={() => setAiCopilotOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#014D24] to-[#016831] hover:from-emerald-900 hover:to-[#014D24] text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm hover:scale-[1.02] cursor-pointer border border-emerald-500/30"
+                  title="অটোনোমাস এআই কো-পাইলট খুলুন (অটো প্রডাক্ট মেকার ও অ্যাসিস্ট্যান্ট)"
+                >
+                  <Sparkles className="w-4 h-4 text-[#F59E0B] animate-pulse" />
+                  <span>AI কো-পাইলট</span>
                 </button>
               </>
             )}
@@ -3213,6 +3226,31 @@ export default function AdminDashboardPage() {
             fetchStats();
           }}
         />
+
+        {/* ===================== AUTONOMOUS AI COPILOT DRAWER ===================== */}
+        <AdminAICopilotModal
+          isOpen={aiCopilotOpen}
+          onClose={() => setAiCopilotOpen(false)}
+          onRefreshData={() => {
+            fetchProducts();
+            fetchOrders();
+            fetchStats();
+            fetchCategories();
+          }}
+        />
+
+        {/* Floating Quick Action Button for AI Co-Pilot */}
+        <div className="fixed bottom-6 right-6 z-40">
+          <button
+            type="button"
+            onClick={() => setAiCopilotOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#014D24] to-[#016831] hover:from-emerald-900 hover:to-[#014D24] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all cursor-pointer border border-emerald-400/40 font-bold text-xs"
+            title="এআই কো-পাইলটের সাথে কথা বলুন"
+          >
+            <Sparkles className="w-4 h-4 text-[#F59E0B] animate-pulse" />
+            <span>AI কো-পাইলট</span>
+          </button>
+        </div>
       </div>
     </div>
   );

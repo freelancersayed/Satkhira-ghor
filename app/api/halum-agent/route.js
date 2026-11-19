@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { deliveryConfig } from '@/lib/deliveryConfig';
+import { executeGeminiWithTools } from '@/lib/ai/geminiClient';
+import {
+  storefrontToolDeclarations,
+  executeStorefrontTool,
+} from '@/lib/ai/storefrontTools';
 
 export const dynamic = 'force-dynamic';
 
@@ -364,46 +369,51 @@ export async function POST(request) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Gemini LLM Wrapper with Dynamic Live Catalog
+// Gemini LLM Wrapper with Autonomous Database Tool Calling
 // ─────────────────────────────────────────────────────────────
 async function queryGeminiAgent(userPrompt, apiKey, liveProducts = []) {
-  const catalogSummary = liveProducts.slice(0, 8).map((p) =>
-    `- ${p.name} (৳${p.price} / ${p.unit}) [Stock: ${p.stock > 0 ? 'In Stock' : 'Out of Stock'}]`
-  ).join('\n');
+  const systemInstruction = `You are "সাতক্ষীরা ঘর এআই শপিং গাইড" (Satkhira Ghor AI Shopping Consultant & Assistant) for satkhiraghor.com.
+You live and represent Satkhira & Sundarbans natural organic foods.
+Your tone is warm, polite, enthusiastic, and authentic in pure Bengali (বাংলা).
+Store Highlights:
+- সুন্দরবনের প্রাকৃতিক কাঁচা মধু (খলিশা, কেওড়া)
+- ঐতিহ্যবাহী বিলোনা গাওয়া ঘি
+- কাঠের ঘানি ভাঙা সরিষার তেল ও কালোজিরা তেল
+- ফ্রি ডেলিভারি ৳${deliveryConfig.freeDeliveryThreshold}+ অর্ডারে সারা দেশে।
+- ডেলিভারি চার্জ: ঢাকা ও সাতক্ষীরা ৳${deliveryConfig.insideDhaka}, বাইরে ৳${deliveryConfig.outsideDhaka}।
+- ক্যাশ অন ডেলিভারি, বিকাশ ও নগদ অনলাইন পেমেন্ট সুবিধা।
 
-  const systemInstruction = `You are হালুম মামা (Halum Mama), the beloved Royal Bengal Tiger chief taste officer and shopping guide of "সাতক্ষীরা ঘর" (satkhiraghor.com).
-You live in the Sundarbans forest of Satkhira, Bangladesh. You love pure honey, bilona ghee, wood-pressed mustard oil, and authentic food.
-Your tone is warm, witty, enthusiastic, and playful in Bengali. Start messages with friendly tiger sounds like "হালুম!".
-Live Store Catalog:
-${catalogSummary || '- সুন্দরবনের খাঁটি মধু\n- ঐতিহ্যবাহী গাওয়া ঘি\n- ঘানি ভাঙা সরিষার তেল'}
+Instructions:
+1. Always use available tools ("search_catalog", "track_customer_order", "get_store_policy_and_delivery") when the customer asks about products, stock, prices, or orders.
+2. Ground your answers in real database information. Keep responses concise, helpful, and under 3-4 sentences.`;
 
-Store Policies:
-- Free delivery on orders over ৳${deliveryConfig.freeDeliveryThreshold}.
-- Inside Dhaka & Satkhira delivery fee: ৳${deliveryConfig.insideDhaka}, outside: ৳${deliveryConfig.outsideDhaka}.
-- Cash on delivery all over Bangladesh.
-- Customer support phone: ${deliveryConfig.supportPhone}.
-Always respond in cheerful Bengali. Keep responses under 3 sentences.`;
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-      systemInstruction: { parts: [{ text: systemInstruction }] },
-    }),
+  const result = await executeGeminiWithTools({
+    systemInstruction,
+    userMessage: userPrompt,
+    tools: storefrontToolDeclarations,
+    toolDispatcher: executeStorefrontTool,
+    maxTurns: 3,
   });
 
-  if (!res.ok) return null;
-  const data = await res.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) return null;
+  if (!result || !result.text) return null;
+
+  let products = [];
+  if (Array.isArray(result.executedTools)) {
+    for (const t of result.executedTools) {
+      if (t.name === 'search_catalog' && t.result?.products) {
+        products.push(...t.result.products);
+      }
+    }
+  }
+
+  if (products.length === 0) {
+    products = getTopProducts(liveProducts, 2);
+  }
 
   return {
-    reply: text.trim(),
-    products: getTopProducts(liveProducts, 2),
-    quickReplies: ['🍯 খাঁটি মধু অর্ডার করব', '🎁 কম্বো প্যাক দেখতে চাই', '🚚 ফ্রি ডেলিভারি'],
+    reply: result.text.trim(),
+    products: products.slice(0, 3),
+    quickReplies: ['🍯 খাঁটি মধু অর্ডার করব', '🧈 গাওয়া ঘি দেখতে চাই', '🚚 ফ্রি ডেলিভারি অফার'],
     characterState: 'talking',
   };
 }
