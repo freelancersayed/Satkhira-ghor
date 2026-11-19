@@ -64,20 +64,25 @@ export async function POST(request) {
     // ── 1. TRY CLOUDINARY UPLOAD (If configured) ──────────────────────
     if (useCloudinary) {
       try {
-        const uploadResult = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            {
-              folder: 'satkhira-ghor',
-              resource_type: 'image',
-              transformation: [{ quality: 'auto', fetch_format: 'auto' }],
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          stream.end(buffer);
-        });
+        const uploadResult = await Promise.race([
+          new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+              {
+                folder: 'satkhira-ghor',
+                resource_type: 'image',
+                transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+              },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            );
+            stream.end(buffer);
+          }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Cloudinary upload timeout (3.5s)')), 3500)
+          ),
+        ]);
 
         return NextResponse.json({
           success: true,

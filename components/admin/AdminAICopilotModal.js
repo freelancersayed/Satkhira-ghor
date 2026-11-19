@@ -49,8 +49,8 @@ export default function AdminAICopilotModal({ isOpen, onClose, onRefreshData }) 
     }
   }, [isOpen, messages]);
 
-  // Process chosen image file
-  const processImageFile = (file) => {
+  // Process and auto-compress chosen image file
+  const processImageFile = async (file) => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
@@ -58,29 +58,97 @@ export default function AdminAICopilotModal({ isOpen, onClose, onRefreshData }) 
       return;
     }
 
-    if (file.size > 20 * 1024 * 1024) {
-      alert('ছবির সাইজ সর্বোচ্চ ২০MB হতে পারবে।');
+    if (file.size > 25 * 1024 * 1024) {
+      alert('ছবির সাইজ সর্বোচ্চ ২৫MB হতে পারবে।');
       return;
     }
 
-    const previewUrl = URL.createObjectURL(file);
-    const reader = new FileReader();
+    try {
+      const compressed = await compressAndPrepareImage(file, 1200, 0.82);
+      if (compressed) {
+        setSelectedImage(compressed);
+        setTimeout(() => inputRef.current?.focus(), 100);
+      }
+    } catch (err) {
+      console.warn('Image compression fallback:', err);
+    }
+  };
 
-    reader.onload = () => {
-      const result = reader.result;
-      const base64 = typeof result === 'string' ? result.split(',')[1] : '';
-      setSelectedImage({
-        file,
-        previewUrl,
-        base64,
-        mimeType: file.type || 'image/jpeg',
-        name: file.name,
-        size: file.size,
-      });
-      setTimeout(() => inputRef.current?.focus(), 100);
-    };
+  const compressAndPrepareImage = (file, maxDimension = 1200, quality = 0.82) => {
+    return new Promise((resolve) => {
+      if (!file || typeof window === 'undefined') {
+        return resolve(null);
+      }
 
-    reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new window.Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const mimeType = 'image/jpeg';
+          const dataUrl = canvas.toDataURL(mimeType, quality);
+          const base64 = dataUrl.split(',')[1];
+
+          canvas.toBlob(
+            (blob) => {
+              const finalBlob = blob || file;
+              const compressedFile = new File(
+                [finalBlob],
+                (file.name || 'product').replace(/\.[^/.]+$/, '') + '.jpg',
+                { type: mimeType, lastModified: Date.now() }
+              );
+
+              resolve({
+                file: compressedFile,
+                previewUrl: dataUrl,
+                base64,
+                mimeType,
+                name: file.name,
+                originalSize: file.size,
+                compressedSize: finalBlob.size,
+              });
+            },
+            mimeType,
+            quality
+          );
+        };
+
+        img.onerror = () => {
+          const rawRes = e.target?.result;
+          const base64 = typeof rawRes === 'string' ? rawRes.split(',')[1] : '';
+          resolve({
+            file,
+            previewUrl: URL.createObjectURL(file),
+            base64,
+            mimeType: file.type || 'image/jpeg',
+            name: file.name,
+            originalSize: file.size,
+            compressedSize: file.size,
+          });
+        };
+
+        img.src = e.target?.result;
+      };
+
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleFileInputChange = (e) => {
@@ -528,7 +596,7 @@ export default function AdminAICopilotModal({ isOpen, onClose, onRefreshData }) 
                   {selectedImage.name}
                 </p>
                 <p className="text-[10px] text-emerald-700 font-medium">
-                  {(selectedImage.size / 1024).toFixed(0)} KB • ছবির পণ্যটি স্বয়ংক্রিয়ভাবে তৈরি হবে
+                  {(selectedImage.compressedSize ? selectedImage.compressedSize / 1024 : selectedImage.size / 1024).toFixed(0)} KB • ছবির পণ্যটি স্বয়ংক্রিয়ভাবে অপ্টিমাইজড
                 </p>
               </div>
             </div>
