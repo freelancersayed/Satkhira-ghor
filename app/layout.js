@@ -10,7 +10,7 @@ import CartDrawer from '@/components/common/CartDrawer';
 import MobileBottomNav from '@/components/common/MobileBottomNav';
 import AddToCartToast from '@/components/common/AddToCartToast';
 import DynamicThemeInjector from '@/components/common/DynamicThemeInjector';
-import HalumAssistantWidget from '@/components/halum/HalumAssistantWidget';
+import CustomerAIAssistantWidget from '@/components/ai/CustomerAIAssistantWidget';
 import { getSavedTheme, generateThemeCSS } from '@/lib/themeServer';
 
 const hindSiliguri = Hind_Siliguri({
@@ -93,7 +93,7 @@ export default async function RootLayout({ children }) {
         <CartDrawer />
         <AddToCartToast />
         <MobileBottomNav />
-        <HalumAssistantWidget />
+        <CustomerAIAssistantWidget />
       </body>
     </html>
   );
