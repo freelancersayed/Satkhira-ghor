@@ -6,6 +6,7 @@ import {
 } from '@/lib/ai/storefrontTools';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 const STOREFRONT_SYSTEM_INSTRUCTION = `You are "সাতক্ষীরা ঘর এআই শপিং অ্যাসিস্ট্যান্ট" (Satkhira Ghor AI Shopping Consultant), the official digital shopping assistant for satkhiraghor.com.
 Satkhira Ghor is Bangladesh's most trusted brand for 100% natural, raw, and authentic organic foods sourced from the Sundarbans and Satkhira coastal region.
@@ -93,6 +94,7 @@ export async function POST(request) {
           'সালামু আলাইকুম! আমাদের এআই সহকারী মুহূর্তে সার্ভার সংযোগ পুনর্গঠন করছে। সুন্দরবনের খাঁটি মধু ও গাওয়া ঘি দেখতে নিচে বাটনে ট্যাপ করুন অথবা আমাদের হটলাইনে কল দিন।',
         products: [],
         quickReplies: ['🍯 খাঁটি মধু', '🧈 গাওয়া ঘি', '📞 হেল্পলাইন'],
+        error: error.message || 'Unknown error',
       },
       { status: 200 }
     );

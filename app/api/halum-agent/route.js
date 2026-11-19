@@ -9,6 +9,7 @@ import {
 } from '@/lib/ai/storefrontTools';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 // ─────────────────────────────────────────────────────────────
 // Live Dynamic Product Cache (60s TTL for Real-time DB Sync)

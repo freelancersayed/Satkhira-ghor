@@ -4,6 +4,7 @@ import { executeGeminiWithTools } from '@/lib/ai/geminiClient';
 import { adminToolDeclarations, executeAdminTool } from '@/lib/ai/adminTools';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 const ADMIN_SYSTEM_INSTRUCTION = `You are "সাতক্ষীরা ঘর অ্যাডমিন অটোনোমাস কো-পাইলট" (Satkhira Ghor Admin Autonomous AI Co-Pilot), an intelligent, highly capable executive e-commerce operations manager.
 You work inside the Satkhira Ghor Admin Dashboard and possess authorized database manipulation tools.
