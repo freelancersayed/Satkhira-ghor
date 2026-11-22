@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -25,6 +25,7 @@ import {
   Lock,
   Copy,
 } from 'lucide-react';
+import { getAllDivision, getDistricts, getUpazilas } from 'bd-divisions-to-unions';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { deliveryConfig } from '@/lib/deliveryConfig';
@@ -53,6 +54,9 @@ export default function CartPage() {
     name: '',
     phone: '',
     email: '',
+    division: 'খুলনা',
+    district: 'সাতক্ষীরা',
+    upazila: '',
     address: '',
     city: 'সাতক্ষীরা',
     paymentMethod: 'cod',
@@ -60,7 +64,112 @@ export default function CartPage() {
     paymentTrxId: '',
     notes: '',
   });
+
+  // State for division/district codes from bd-divisions-to-unions
+  const [selectedDivisionCode, setSelectedDivisionCode] = useState('40'); // '40' = খুলনা
+  const [selectedDistrictCode, setSelectedDistrictCode] = useState('87'); // '87' = সাতক্ষীরা
+  const [selectedUpazilaCode, setSelectedUpazilaCode] = useState('');
   const [copiedNumber, setCopiedNumber] = useState(false);
+
+  // Address Cascading Data Hooks
+  const allDivisions = useMemo(() => {
+    try {
+      return getAllDivision() || [];
+    } catch (e) {
+      return [];
+    }
+  }, []);
+
+  const availableDistricts = useMemo(() => {
+    if (!selectedDivisionCode) return [];
+    try {
+      return getDistricts(selectedDivisionCode) || [];
+    } catch (e) {
+      return [];
+    }
+  }, [selectedDivisionCode]);
+
+  const availableUpazilas = useMemo(() => {
+    if (!selectedDistrictCode) return [];
+    try {
+      return getUpazilas(selectedDistrictCode) || [];
+    } catch (e) {
+      return [];
+    }
+  }, [selectedDistrictCode]);
+
+  // Sync codes when user profile loads or when formData division/district changes
+  useEffect(() => {
+    if (formData.division && allDivisions.length > 0) {
+      const match = allDivisions.find((d) => d.title === formData.division || d.value === formData.division);
+      if (match && match.value !== selectedDivisionCode) {
+        setSelectedDivisionCode(match.value);
+      }
+    }
+  }, [formData.division, allDivisions, selectedDivisionCode]);
+
+  useEffect(() => {
+    if (formData.district && availableDistricts.length > 0) {
+      const match = availableDistricts.find((d) => d.title === formData.district || d.value === formData.district);
+      if (match && match.value !== selectedDistrictCode) {
+        setSelectedDistrictCode(match.value);
+      }
+    }
+  }, [formData.district, availableDistricts, selectedDistrictCode]);
+
+  useEffect(() => {
+    if (formData.upazila && availableUpazilas.length > 0) {
+      const match = availableUpazilas.find((u) => u.title === formData.upazila || u.value === formData.upazila);
+      if (match && match.value !== selectedUpazilaCode) {
+        setSelectedUpazilaCode(match.value);
+      }
+    }
+  }, [formData.upazila, availableUpazilas, selectedUpazilaCode]);
+
+  const handleDivisionChange = (code) => {
+    setSelectedDivisionCode(code);
+    const div = allDivisions.find((d) => d.value === code);
+    const divTitle = div ? div.title : '';
+
+    setSelectedDistrictCode('');
+    setSelectedUpazilaCode('');
+
+    setFormData((prev) => ({
+      ...prev,
+      division: divTitle,
+      district: '',
+      upazila: '',
+      city: divTitle === 'খুলনা' ? prev.city : 'সাতক্ষীরার বাইরে',
+    }));
+  };
+
+  const handleDistrictChange = (code) => {
+    setSelectedDistrictCode(code);
+    const dist = availableDistricts.find((d) => d.value === code);
+    const distTitle = dist ? dist.title : '';
+
+    setSelectedUpazilaCode('');
+    const isSatkhira = distTitle.includes('সাতক্ষীরা');
+    const newCity = isSatkhira ? 'সাতক্ষীরা' : 'সাতক্ষীরার বাইরে';
+
+    setFormData((prev) => ({
+      ...prev,
+      district: distTitle,
+      upazila: '',
+      city: newCity,
+    }));
+  };
+
+  const handleUpazilaChange = (code) => {
+    setSelectedUpazilaCode(code);
+    const upa = availableUpazilas.find((u) => u.value === code);
+    const upaTitle = upa ? upa.title : '';
+
+    setFormData((prev) => ({
+      ...prev,
+      upazila: upaTitle,
+    }));
+  };
 
   const handleCopyPaymentNumber = (num) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -87,6 +196,9 @@ export default function CartPage() {
         phone: user.phone || prev.phone,
         email: user.email || prev.email,
         address: user.address || prev.address,
+        division: user.division || prev.division || 'খুলনা',
+        district: user.district || prev.district || 'সাতক্ষীরা',
+        upazila: user.upazila || prev.upazila || '',
         city: user.city || prev.city || 'সাতক্ষীরা',
       }));
     }
@@ -101,7 +213,10 @@ export default function CartPage() {
     if (cleanPhone.length < 11) return;
 
     const timer = setTimeout(() => {
-      const isInside = formData.city === 'সাতক্ষীরা' || formData.city === 'সাতক্ষীরার ভেতরে' || formData.city === 'ঢাকা';
+      const isInside =
+        (formData.district && formData.district.includes('সাতক্ষীরা')) ||
+        formData.city === 'সাতক্ষীরা' ||
+        formData.city === 'সাতক্ষীরার ভেতরে';
       fetch('/api/cart/abandoned', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -118,7 +233,7 @@ export default function CartPage() {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [formData.phone, formData.name, formData.address, formData.city, items, discount, mounted, orderPlaced, getTotalPrice]);
+  }, [formData.phone, formData.name, formData.address, formData.city, formData.district, items, discount, mounted, orderPlaced, getTotalPrice]);
 
   if (!mounted) {
     return (
@@ -131,7 +246,10 @@ export default function CartPage() {
 
   const subtotal = getTotalPrice();
   const isFreeDelivery = subtotal >= deliveryConfig.freeDeliveryThreshold && subtotal > 0;
-  const isInsideSatkhira = formData.city === 'সাতক্ষীরা' || formData.city === 'সাতক্ষীরার ভেতরে' || formData.city === 'ঢাকা';
+  const isInsideSatkhira =
+    (formData.district && formData.district.includes('সাতক্ষীরা')) ||
+    formData.city === 'সাতক্ষীরা' ||
+    formData.city === 'সাতক্ষীরার ভেতরে';
   const deliveryCharge = isFreeDelivery
     ? 0
     : isInsideSatkhira
@@ -187,8 +305,28 @@ export default function CartPage() {
     e.preventDefault();
     setOrderError('');
 
-    if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
-      setOrderError('অনুগ্রহ করে আপনার নাম, মোবাইল নম্বর এবং সম্পূর্ণ ডেলিভারি ঠিকানা প্রদান করুন।');
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      setOrderError('অনুগ্রহ করে আপনার নাম এবং মোবাইল নম্বর প্রদান করুন।');
+      return;
+    }
+
+    if (!formData.division) {
+      setOrderError('অনুগ্রহ করে আপনার বিভাগ নির্বাচন করুন।');
+      return;
+    }
+
+    if (!formData.district) {
+      setOrderError('অনুগ্রহ করে আপনার জেলা নির্বাচন করুন।');
+      return;
+    }
+
+    if (!formData.upazila) {
+      setOrderError('অনুগ্রহ করে আপনার উপজেলা বা থানা নির্বাচন করুন।');
+      return;
+    }
+
+    if (!formData.address.trim()) {
+      setOrderError('অনুগ্রহ করে আপনার সুনির্দিষ্ট ঠিকানা (বাসা/রোড/পাড়া/গ্রাম) লিখুন।');
       return;
     }
 
@@ -223,7 +361,10 @@ export default function CartPage() {
           customer: {
             ...formData,
             phone: cleanPhone,
-            city: formData.city || 'ঢাকা',
+            division: formData.division,
+            district: formData.district,
+            upazila: formData.upazila,
+            city: isInsideSatkhira ? 'সাতক্ষীরা' : 'সাতক্ষীরার বাইরে',
           },
           items,
           couponCode: discount > 0 ? couponCode.trim() : undefined,
@@ -581,67 +722,163 @@ export default function CartPage() {
                       </p>
                     </div>
 
-                    {/* Delivery Area Selection (Inside vs Outside Satkhira) */}
-                    <div>
-                      <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                        ডেলিভারি এরিয়া নির্বাচন করুন <span className="text-red-500">*</span>
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {/* Inside Satkhira */}
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, city: 'সাতক্ষীরা' })}
-                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${isInsideSatkhira
-                            ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
-                            : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                            }`}
+                    {/* Cascading Bangladesh Address Selection: Division -> District -> Upazila */}
+                    <div className="space-y-3 p-3.5 bg-stone-50/80 rounded-2xl border border-[#E8E2D5]">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-[#016831]" />
+                          <span>ডেলিভারি এলাকা ও ঠিকানা</span>
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <span className="text-[10px] text-stone-500 bg-white px-2 py-0.5 rounded-full border border-stone-200">
+                          বিভাগ ➔ জেলা ➔ উপজেলা
+                        </span>
+                      </div>
+
+                      {/* 3 Cascading Dropdowns */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {/* 1. Division Dropdown */}
+                        <div>
+                          <label className="block text-[11px] font-semibold text-stone-600 mb-1">
+                            বিভাগ <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <select
+                              required
+                              value={selectedDivisionCode}
+                              onChange={(e) => handleDivisionChange(e.target.value)}
+                              className="w-full px-3 py-2 pr-8 rounded-xl border border-[#E8E2D5] bg-white text-xs sm:text-sm text-stone-800 focus:outline-none focus:border-[#016831] focus:ring-1 focus:ring-[#016831] transition-all appearance-none cursor-pointer font-medium"
+                            >
+                              <option value="">বিভাগ বাছুন</option>
+                              {allDivisions.map((div) => (
+                                <option key={div.value} value={div.value}>
+                                  {div.title}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown className="w-4 h-4 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        {/* 2. District Dropdown */}
+                        <div>
+                          <label className="block text-[11px] font-semibold text-stone-600 mb-1">
+                            জেলা <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <select
+                              required
+                              disabled={!selectedDivisionCode}
+                              value={selectedDistrictCode}
+                              onChange={(e) => handleDistrictChange(e.target.value)}
+                              className={`w-full px-3 py-2 pr-8 rounded-xl border bg-white text-xs sm:text-sm text-stone-800 focus:outline-none focus:border-[#016831] focus:ring-1 focus:ring-[#016831] transition-all appearance-none cursor-pointer font-medium ${
+                                !selectedDivisionCode
+                                  ? 'opacity-50 cursor-not-allowed bg-stone-100 border-[#E8E2D5]'
+                                  : 'border-[#E8E2D5]'
+                              }`}
+                            >
+                              <option value="">
+                                {selectedDivisionCode ? 'জেলা বাছুন' : 'আগে বিভাগ বাছুন'}
+                              </option>
+                              {availableDistricts.map((dist) => (
+                                <option key={dist.value} value={dist.value}>
+                                  {dist.title}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown className="w-4 h-4 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        {/* 3. Upazila Dropdown */}
+                        <div>
+                          <label className="block text-[11px] font-semibold text-stone-600 mb-1">
+                            উপজেলা / থানা <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <select
+                              required
+                              disabled={!selectedDistrictCode}
+                              value={selectedUpazilaCode}
+                              onChange={(e) => handleUpazilaChange(e.target.value)}
+                              className={`w-full px-3 py-2 pr-8 rounded-xl border bg-white text-xs sm:text-sm text-stone-800 focus:outline-none focus:border-[#016831] focus:ring-1 focus:ring-[#016831] transition-all appearance-none cursor-pointer font-medium ${
+                                !selectedDistrictCode
+                                  ? 'opacity-50 cursor-not-allowed bg-stone-100 border-[#E8E2D5]'
+                                  : 'border-[#E8E2D5]'
+                              }`}
+                            >
+                              <option value="">
+                                {selectedDistrictCode ? 'উপজেলা/থানা বাছুন' : 'আগে জেলা বাছুন'}
+                              </option>
+                              {availableUpazilas.map((upa) => (
+                                <option key={upa.value} value={upa.value}>
+                                  {upa.title}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown className="w-4 h-4 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Delivery Charge Status Indicator Cards */}
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        {/* Inside Satkhira Card */}
+                        <div
+                          className={`p-2.5 rounded-xl border text-left transition-all ${
+                            isInsideSatkhira
+                              ? 'border-[#016831] bg-emerald-50/90 ring-1 ring-[#016831] shadow-xs'
+                              : 'border-[#E8E2D5] bg-white opacity-60'
+                          }`}
                         >
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-stone-800">সাতক্ষীরার ভেতরে</span>
                             {isInsideSatkhira && <Check className="w-3.5 h-3.5 text-[#016831]" />}
                           </div>
-                          <div className="text-[11px] font-semibold text-[#016831] mt-0.5">
+                          <div className="text-[11px] font-bold text-[#016831] mt-0.5">
                             {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(deliveryConfig.insideSatkhira || 70)}`}
                           </div>
                           <span className="text-[10px] text-stone-500 block">হোম ডেলিভারি (২৪ ঘণ্টা)</span>
-                        </button>
+                        </div>
 
-                        {/* Outside Satkhira */}
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, city: 'সাতক্ষীরার বাইরে' })}
-                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${!isInsideSatkhira
-                            ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
-                            : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                            }`}
+                        {/* Outside Satkhira Card */}
+                        <div
+                          className={`p-2.5 rounded-xl border text-left transition-all ${
+                            !isInsideSatkhira
+                              ? 'border-[#016831] bg-emerald-50/90 ring-1 ring-[#016831] shadow-xs'
+                              : 'border-[#E8E2D5] bg-white opacity-60'
+                          }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-stone-800">সাতক্ষীরার বাইরে</span>
+                            <span className="text-xs font-bold text-stone-800">সাতক্ষীরার বাইরে (সারাদেশ)</span>
                             {!isInsideSatkhira && <Check className="w-3.5 h-3.5 text-[#016831]" />}
                           </div>
-                          <div className="text-[11px] font-semibold text-[#016831] mt-0.5">
+                          <div className="text-[11px] font-bold text-[#016831] mt-0.5">
                             {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(deliveryConfig.outsideSatkhira || 120)}`}
                           </div>
-                          <span className="text-[10px] text-stone-500 block">কুরিয়ার (২-৩ দিন)</span>
-                        </button>
+                          <span className="text-[10px] text-stone-500 block">কুরিয়ার ডেলিভারি (২-৩ দিন)</span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Full Address */}
+                    {/* Detailed Street Address */}
                     <div>
                       <label className="block text-xs font-bold text-stone-700 mb-1">
-                        সম্পূর্ণ ডেলিভারি ঠিকানা <span className="text-red-500">*</span>
+                        সুনির্দিষ্ট ঠিকানা (বাসা নং, রোড নং বা এলাকা/গ্রাম) <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         required
                         rows={2}
-                        placeholder="বাসা/রোড নং, এলাকা/গ্রাম, থানা ও জেলা..."
+                        placeholder="যেমন: বাসা #৪৫, রোড #৩, থানা মোড়, কাটিয়া..."
                         value={formData.address}
                         onChange={(e) =>
                           setFormData({ ...formData, address: e.target.value })
                         }
                         className="w-full px-3.5 py-2 rounded-xl border border-[#E8E2D5] bg-[#FAF8F5] text-xs sm:text-sm text-stone-800 focus:outline-none focus:border-[#016831] focus:bg-white transition-all resize-none"
                       />
+                      <p className="text-[10px] text-stone-500 mt-1">
+                        কুরিয়ার ডেলিভারি ম্যান যাতে সহজে আপনার ঠিকানায় পৌঁছাতে পারে তাই বিস্তারিত লিখুন।
+                      </p>
                     </div>
 
                     {/* Optional Note / Instruction Toggle */}

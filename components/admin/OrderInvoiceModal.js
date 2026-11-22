@@ -203,7 +203,7 @@ export default function OrderInvoiceModal({ order, onClose }) {
                 <div>
                   <span className="text-[10px] text-gray-500">ডেলিভারি ঠিকানা:</span>
                   <p className="font-semibold text-xs text-gray-800 leading-relaxed">
-                    {order.customer?.address}, {order.customer?.city}
+                    {[order.customer?.address, order.customer?.upazila, order.customer?.district, order.customer?.division].filter(Boolean).join(', ') || `${order.customer?.address}, ${order.customer?.city}`}
                   </p>
                 </div>
 
@@ -375,7 +375,7 @@ export default function OrderInvoiceModal({ order, onClose }) {
                   📞 {order.customer?.phone}
                 </div>
                 <div className="text-xs font-semibold text-slate-800 leading-snug">
-                  📍 {order.customer?.address}, {order.customer?.city}
+                  📍 {[order.customer?.address, order.customer?.upazila, order.customer?.district, order.customer?.division].filter(Boolean).join(', ') || `${order.customer?.address}, ${order.customer?.city}`}
                 </div>
                 {order.customer?.notes && (
                   <div className="text-[10px] text-slate-600 italic pt-1 border-t border-slate-300">

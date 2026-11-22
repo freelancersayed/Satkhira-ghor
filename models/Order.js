@@ -60,6 +60,21 @@ const OrderSchema = new mongoose.Schema(
         default: '',
         index: true,
       },
+      division: {
+        type: String,
+        default: '',
+        trim: true,
+      },
+      district: {
+        type: String,
+        default: '',
+        trim: true,
+      },
+      upazila: {
+        type: String,
+        default: '',
+        trim: true,
+      },
       address: {
         type: String,
         required: [true, 'ডেলিভারি ঠিকানা প্রদান করুন'],
@@ -67,7 +82,7 @@ const OrderSchema = new mongoose.Schema(
       },
       city: {
         type: String,
-        default: 'ঢাকা',
+        default: 'সাতক্ষীরা',
         trim: true,
       },
       notes: {

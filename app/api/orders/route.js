@@ -197,12 +197,13 @@ export async function POST(request) {
     // 6. Server-Side Authoritative Delivery Fee Engine
     const isFreeDelivery = subtotalAfterDiscount >= deliveryConfig.freeDeliveryThreshold && subtotalAfterDiscount > 0;
     const customerCity = (customer.city || 'সাতক্ষীরা').trim();
+    const customerDistrict = (customer.district || '').trim();
     const isInsideSatkhira =
+      customerDistrict.includes('সাতক্ষীরা') ||
       customerCity === 'সাতক্ষীরা' ||
       customerCity === 'সাতক্ষীরার ভেতরে' ||
       customerCity.toLowerCase().includes('satkhira') ||
-      customerCity.includes('সাতক্ষীরা') ||
-      customerCity === 'ঢাকা';
+      customerCity.includes('সাতক্ষীরা');
 
     const verifiedDeliveryFee = isFreeDelivery
       ? 0
@@ -237,6 +238,9 @@ export async function POST(request) {
         name: customer.name.trim(),
         phone: cleanPhone,
         email: customer.email ? customer.email.trim() : (session?.email || ''),
+        division: customer.division ? customer.division.trim() : '',
+        district: customer.district ? customer.district.trim() : '',
+        upazila: customer.upazila ? customer.upazila.trim() : '',
         address: customer.address.trim(),
         city: customerCity,
         notes: customer.notes || '',
