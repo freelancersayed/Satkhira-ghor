@@ -28,7 +28,8 @@ import {
 import { getAllDivision, getDistricts, getUpazilas } from 'bd-divisions-to-unions';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
-import { deliveryConfig } from '@/lib/deliveryConfig';
+import { deliveryConfig, getMergedDeliveryConfig } from '@/lib/deliveryConfig';
+import { useSiteContentStore } from '@/store/siteContentStore';
 
 const toBanglaNum = (num) => {
   const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
@@ -48,6 +49,16 @@ export default function CartPage() {
   const [showNotes, setShowNotes] = useState(false);
 
   const { user } = useAuthStore();
+  const { content, fetchContent } = useSiteContentStore();
+
+  const activeDeliveryConfig = useMemo(
+    () => getMergedDeliveryConfig(content?.settings),
+    [content?.settings]
+  );
+
+  useEffect(() => {
+    fetchContent();
+  }, [fetchContent]);
 
   // Form states with Satkhira as default delivery region
   const [formData, setFormData] = useState({
@@ -226,14 +237,14 @@ export default function CartPage() {
             phone: cleanPhone,
           },
           items,
-          cartTotal: Math.max(0, getTotalPrice() - discount + (isInside ? (deliveryConfig.insideSatkhira || 70) : (deliveryConfig.outsideSatkhira || 120))),
+          cartTotal: Math.max(0, getTotalPrice() - discount + (isInside ? (activeDeliveryConfig.insideSatkhira || 70) : (activeDeliveryConfig.outsideSatkhira || 120))),
           step: formData.address?.trim() ? 'address_entered' : 'checkout_initiated',
         }),
       }).catch(() => { });
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [formData.phone, formData.name, formData.address, formData.city, formData.district, items, discount, mounted, orderPlaced, getTotalPrice]);
+  }, [formData.phone, formData.name, formData.address, formData.city, formData.district, items, discount, mounted, orderPlaced, getTotalPrice, activeDeliveryConfig]);
 
   if (!mounted) {
     return (
@@ -245,7 +256,7 @@ export default function CartPage() {
   }
 
   const subtotal = getTotalPrice();
-  const isFreeDelivery = subtotal >= deliveryConfig.freeDeliveryThreshold && subtotal > 0;
+  const isFreeDelivery = subtotal >= activeDeliveryConfig.freeDeliveryThreshold && subtotal > 0;
   const isInsideSatkhira =
     (formData.district && formData.district.includes('সাতক্ষীরা')) ||
     formData.city === 'সাতক্ষীরা' ||
@@ -253,10 +264,10 @@ export default function CartPage() {
   const deliveryCharge = isFreeDelivery
     ? 0
     : isInsideSatkhira
-      ? (deliveryConfig.insideSatkhira || 70)
-      : (deliveryConfig.outsideSatkhira || 120);
+      ? (activeDeliveryConfig.insideSatkhira || 70)
+      : (activeDeliveryConfig.outsideSatkhira || 120);
   const total = Math.max(0, subtotal - discount + deliveryCharge);
-  const remainingForFree = Math.max(0, deliveryConfig.freeDeliveryThreshold - subtotal);
+  const remainingForFree = Math.max(0, activeDeliveryConfig.freeDeliveryThreshold - subtotal);
 
   // Apply Coupon Logic
   const handleApplyCoupon = async (codeToApply) => {
@@ -503,10 +514,10 @@ export default function CartPage() {
           <div className="text-[11px] text-stone-500 pt-1">
             যেকোনো প্রয়োজনে কল করুন:{' '}
             <a
-              href={`tel:${deliveryConfig.supportPhoneRaw}`}
+              href={`tel:${activeDeliveryConfig.supportPhoneRaw}`}
               className="font-bold text-[#016831] hover:underline"
             >
-              {deliveryConfig.supportPhone}
+              {activeDeliveryConfig.supportPhone}
             </a>
           </div>
         </div>
@@ -836,7 +847,7 @@ export default function CartPage() {
                             {isInsideSatkhira && <Check className="w-3.5 h-3.5 text-[#016831]" />}
                           </div>
                           <div className="text-[11px] font-bold text-[#016831] mt-0.5">
-                            {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(deliveryConfig.insideSatkhira || 70)}`}
+                            {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(activeDeliveryConfig.insideSatkhira || 70)}`}
                           </div>
                           <span className="text-[10px] text-stone-500 block">হোম ডেলিভারি (২৪ ঘণ্টা)</span>
                         </div>
@@ -854,7 +865,7 @@ export default function CartPage() {
                             {!isInsideSatkhira && <Check className="w-3.5 h-3.5 text-[#016831]" />}
                           </div>
                           <div className="text-[11px] font-bold text-[#016831] mt-0.5">
-                            {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(deliveryConfig.outsideSatkhira || 120)}`}
+                            {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(activeDeliveryConfig.outsideSatkhira || 120)}`}
                           </div>
                           <span className="text-[10px] text-stone-500 block">কুরিয়ার ডেলিভারি (২-৩ দিন)</span>
                         </div>
@@ -1043,12 +1054,12 @@ export default function CartPage() {
                       <div className="bg-white p-3 rounded-xl border border-black/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-2xs">
                         <div>
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                            আমাদের {formData.paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'} ব্যক্তিগত নম্বর (Send Money):
+                            আমাদের {formData.paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'} নম্বর ({formData.paymentMethod === 'bkash' ? activeDeliveryConfig.bkashType : activeDeliveryConfig.nagadType}):
                           </span>
                           <span className="text-base font-black font-mono tracking-wider text-slate-900">
                             {formData.paymentMethod === 'bkash'
-                              ? deliveryConfig.bkashNumber
-                              : deliveryConfig.nagadNumber}
+                              ? activeDeliveryConfig.bkashNumber
+                              : activeDeliveryConfig.nagadNumber}
                           </span>
                         </div>
                         <button
@@ -1056,8 +1067,8 @@ export default function CartPage() {
                           onClick={() =>
                             handleCopyPaymentNumber(
                               formData.paymentMethod === 'bkash'
-                                ? deliveryConfig.bkashNumberRaw
-                                : deliveryConfig.nagadNumberRaw
+                                ? activeDeliveryConfig.bkashNumberRaw
+                                : activeDeliveryConfig.nagadNumberRaw
                             )
                           }
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs ${copiedNumber
@@ -1344,10 +1355,10 @@ export default function CartPage() {
                     <span className="text-stone-700 font-medium">ফোনে অর্ডার করতে চান?</span>
                   </div>
                   <a
-                    href={`tel:${deliveryConfig.supportPhoneRaw}`}
+                    href={`tel:${activeDeliveryConfig.supportPhoneRaw}`}
                     className="font-bold text-[#016831] hover:underline"
                   >
-                    {deliveryConfig.supportPhone}
+                    {activeDeliveryConfig.supportPhone}
                   </a>
                 </div>
               </div>

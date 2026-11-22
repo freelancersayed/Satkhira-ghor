@@ -77,6 +77,34 @@ const defaultContent = {
     textHover: '#02833E',
     buttonHoverBg: '#014D24',
   },
+  settings: {
+    // Payment Numbers
+    bkashNumber: '০১৯০৮-৯৪৫১৪৫',
+    bkashType: 'Send Money (Personal)',
+    nagadNumber: '০১৯০৮-৯৪৫১৪৫',
+    nagadType: 'Send Money (Personal)',
+    rocketNumber: '',
+
+    // Contact & Helpline
+    helpline: '০১৯০৮-৯৪৫১৪৫',
+    whatsapp: '01908945145',
+    email: 'satkhiraghor@gmail.com',
+    supportTime: 'সকাল ৯:০০ - রাত ১০:০০',
+
+    // Delivery & Free Shipping Offer
+    freeDeliveryThreshold: 1500,
+    insideSatkhiraCharge: 70,
+    outsideSatkhiraCharge: 120,
+
+    // Store Info & Social
+    storeAddress: 'শ্যামনগর রোড, সাতক্ষীরা সদর, খুলনা বিভাগ, বাংলাদেশ',
+    facebookUrl: 'https://facebook.com',
+    youtubeUrl: 'https://youtube.com',
+
+    // Announcement
+    topNotice:
+      'সুন্দরবনের খাঁটি মধু ও সাতক্ষীরার খাঁটি গাওয়া ঘিয়ে সারাদেশে ফ্রি ক্যাশ অন ডেলিভারি (১৫০০ টাকার অর্ডারে)',
+  },
 };
 
 // Preload cached content and theme from storage if in browser

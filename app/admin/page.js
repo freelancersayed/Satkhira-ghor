@@ -53,6 +53,7 @@ import {
   MessageSquare,
   ShoppingCart,
   Copy,
+  Settings,
 } from 'lucide-react';
 
 import { useAuthStore } from '@/store/authStore';
@@ -70,6 +71,7 @@ import ProductImageGalleryManager from '@/components/admin/ProductImageGalleryMa
 import AdminCategoriesView from '@/components/admin/AdminCategoriesView';
 import AdminFlashSaleView from '@/components/admin/AdminFlashSaleView';
 import AdminThemeView from '@/components/admin/AdminThemeView';
+import AdminSettingsView from '@/components/admin/AdminSettingsView';
 import IncompleteOrdersView from '@/components/admin/IncompleteOrdersView';
 import AdminAICopilotModal from '@/components/admin/AdminAICopilotModal';
 import {
@@ -1153,6 +1155,21 @@ export default function AdminDashboardPage() {
               </button>
             )}
 
+            {/* RBAC: Website & Store Settings */}
+            {isManagerOrAdmin && (
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  activeTab === 'settings'
+                    ? 'bg-[#016831] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-[#016831] hover:bg-emerald-50/50'
+                }`}
+              >
+                <Settings className="w-4 h-4 text-[#FAB116]" />
+                <span>ওয়েবসাইট সেটিংস</span>
+              </button>
+            )}
+
             <button
               onClick={() => setActiveTab('reviews')}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
@@ -2078,6 +2095,11 @@ export default function AdminDashboardPage() {
         {/* ===================== TAB 10: DYNAMIC THEME & COLOR PICKER ===================== */}
         {activeTab === 'theme' && isManagerOrAdmin && (
           <AdminThemeView showNotification={showNotification} />
+        )}
+
+        {/* ===================== TAB 11: WEBSITE & STORE SETTINGS ===================== */}
+        {activeTab === 'settings' && isManagerOrAdmin && (
+          <AdminSettingsView showNotification={showNotification} />
         )}
 
         {/* ===================== PRODUCT CREATE / EDIT MODAL ===================== */}

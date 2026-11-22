@@ -614,11 +614,11 @@ export default function Header() {
                 {/* Quick Call Helpline */}
                 <div className="pt-3 border-t border-[#E8E2D5] space-y-2">
                   <a
-                    href={`tel:${cleanTelNumber(hero.helpline)}`}
+                    href={`tel:${cleanTelNumber(content?.settings?.helpline || hero.helpline)}`}
                     className="flex items-center justify-center gap-2 p-3 rounded-2xl bg-[#EBF7F0] text-[#016831] border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition-colors"
                   >
                     <PhoneCall className="w-4 h-4 text-[#016831]" />
-                    <span>হেল্পলাইন: {hero.helpline || '০১৭১২-৩৪৫৬৭৮'}</span>
+                    <span>হেল্পলাইন: {content?.settings?.helpline || hero.helpline || '০১৯০৮-৯৪৫১৪৫'}</span>
                   </a>
                 </div>
               </div>

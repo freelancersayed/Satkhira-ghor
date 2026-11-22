@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -21,7 +21,8 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
-import { deliveryConfig } from '@/lib/deliveryConfig';
+import { useSiteContentStore } from '@/store/siteContentStore';
+import { deliveryConfig, getMergedDeliveryConfig } from '@/lib/deliveryConfig';
 import AgentAvatar from './AgentAvatar';
 
 export default function CustomerAIChatWindow({
@@ -30,6 +31,11 @@ export default function CustomerAIChatWindow({
   pathname = '/',
   initialQuery = null,
 }) {
+  const { content } = useSiteContentStore();
+  const activeConfig = useMemo(
+    () => getMergedDeliveryConfig(content?.settings),
+    [content?.settings]
+  );
   const [messages, setMessages] = useState([
     {
       id: 'welcome-storefront-ai',
@@ -131,7 +137,7 @@ export default function CustomerAIChatWindow({
         {
           id: `ai-err-${Date.now()}`,
           sender: 'ai',
-          text: `একটু নেটওয়ার্ক জ্যাম হয়েছে! সরাসরি কথা বলতে আমাদের হটলাইন ${deliveryConfig.supportPhone}-এ কল বা হোয়াটসঅ্যাপ করতে পারেন।`,
+          text: `একটু নেটওয়ার্ক জ্যাম হয়েছে! সরাসরি কথা বলতে আমাদের হটলাইন ${activeConfig.supportPhone}-এ কল বা হোয়াটসঅ্যাপ করতে পারেন।`,
           isFallback: true,
           quickReplies: ['🍯 খাঁটি মধু দেখান', '🧈 গাওয়া ঘি', '📞 হেল্পলাইন'],
           timestamp: new Date(),
@@ -209,7 +215,7 @@ export default function CustomerAIChatWindow({
           <div className="flex items-center gap-1.5">
             {/* WhatsApp Handoff Button */}
             <a
-              href={deliveryConfig.supportWhatsApp}
+              href={activeConfig.supportWhatsApp}
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white transition-all shadow-2xs"

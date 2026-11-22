@@ -157,15 +157,25 @@ export default function Footer() {
             <ul className="space-y-2.5 text-xs text-[#FDFBF7]/80">
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-[#F59E0B] flex-shrink-0 mt-0.5" />
-                <span>শ্যামনগর রোড, সাতক্ষীরা সদর, খুলনা বিভাগ, বাংলাদেশ</span>
+                <span>{content?.settings?.storeAddress || 'শ্যামনগর রোড, সাতক্ষীরা সদর, খুলনা বিভাগ, বাংলাদেশ'}</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#F59E0B] flex-shrink-0" />
-                <span>+৮৮ ০১৯০৮৯৪৫১৪৫</span>
+                <a
+                  href={`tel:${(content?.settings?.helpline || '০১৯০৮-৯৪৫১৪৫').replace(/[^\d+]/g, '')}`}
+                  className="hover:text-white transition-colors"
+                >
+                  {content?.settings?.helpline || '+৮৮ ০১৯০৮৯৪৫১৪৫'}
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#F59E0B] flex-shrink-0" />
-                <span>support@satkhiraghor.com</span>
+                <a
+                  href={`mailto:${content?.settings?.email || 'satkhiraghor@gmail.com'}`}
+                  className="hover:text-white transition-colors"
+                >
+                  {content?.settings?.email || 'satkhiraghor@gmail.com'}
+                </a>
               </li>
             </ul>
           </div>

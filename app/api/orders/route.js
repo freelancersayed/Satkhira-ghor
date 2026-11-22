@@ -5,6 +5,7 @@ import Order from '@/models/Order';
 import Product from '@/models/Product';
 import Coupon from '@/models/Coupon';
 import AbandonedCart from '@/models/AbandonedCart';
+import SiteContent from '@/models/SiteContent';
 import { getSessionUser, requireStaffOrAdmin } from '@/lib/auth';
 import { extractClientIp, getIpGeoInfo } from '@/lib/geo';
 import { checkCourierHistoryAndFraud } from '@/lib/courierFraudCheck';
@@ -194,8 +195,32 @@ export async function POST(request) {
     verifiedDiscount = Math.min(verifiedDiscount, verifiedSubtotal);
     const subtotalAfterDiscount = Math.max(0, verifiedSubtotal - verifiedDiscount);
 
-    // 6. Server-Side Authoritative Delivery Fee Engine
-    const isFreeDelivery = subtotalAfterDiscount >= deliveryConfig.freeDeliveryThreshold && subtotalAfterDiscount > 0;
+    // 6. Server-Side Authoritative Delivery Fee Engine (Dynamic Admin Settings Aware)
+    let dynamicThreshold = deliveryConfig.freeDeliveryThreshold;
+    let dynamicInside = deliveryConfig.insideSatkhira || 70;
+    let dynamicOutside = deliveryConfig.outsideSatkhira || 120;
+
+    try {
+      const settingsDoc = await SiteContent.findOne({ key: 'settings' }).lean();
+      if (settingsDoc && settingsDoc.data) {
+        if (settingsDoc.data.freeDeliveryThreshold !== undefined && settingsDoc.data.freeDeliveryThreshold !== '') {
+          const parsed = Number(settingsDoc.data.freeDeliveryThreshold);
+          if (!isNaN(parsed)) dynamicThreshold = parsed;
+        }
+        if (settingsDoc.data.insideSatkhiraCharge !== undefined && settingsDoc.data.insideSatkhiraCharge !== '') {
+          const parsed = Number(settingsDoc.data.insideSatkhiraCharge);
+          if (!isNaN(parsed)) dynamicInside = parsed;
+        }
+        if (settingsDoc.data.outsideSatkhiraCharge !== undefined && settingsDoc.data.outsideSatkhiraCharge !== '') {
+          const parsed = Number(settingsDoc.data.outsideSatkhiraCharge);
+          if (!isNaN(parsed)) dynamicOutside = parsed;
+        }
+      }
+    } catch (e) {
+      // fallback to deliveryConfig
+    }
+
+    const isFreeDelivery = subtotalAfterDiscount >= dynamicThreshold && subtotalAfterDiscount > 0;
     const customerCity = (customer.city || 'সাতক্ষীরা').trim();
     const customerDistrict = (customer.district || '').trim();
     const isInsideSatkhira =
@@ -208,8 +233,8 @@ export async function POST(request) {
     const verifiedDeliveryFee = isFreeDelivery
       ? 0
       : isInsideSatkhira
-        ? (deliveryConfig.insideSatkhira || 70)
-        : (deliveryConfig.outsideSatkhira || 120);
+        ? dynamicInside
+        : dynamicOutside;
 
     const totalAmount = subtotalAfterDiscount + verifiedDeliveryFee;
 
