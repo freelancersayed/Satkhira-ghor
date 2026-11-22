@@ -4,9 +4,13 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShieldCheck, Truck, Sparkles, MapPin, Phone, Mail, Award } from 'lucide-react';
+import { useSiteContentStore } from '@/store/siteContentStore';
 
 export default function Footer() {
   const pathname = usePathname();
+  const { content } = useSiteContentStore();
+  const brandLogo = content?.brand?.logo || '/assets/logo-1.png';
+  const brandName = content?.brand?.name || 'সাতক্ষীরা ঘর';
 
   // Hide footer on checkout, cart, and admin pages
   if (pathname === '/cart' || pathname === '/checkout' || pathname?.startsWith('/admin')) {
@@ -24,7 +28,7 @@ export default function Footer() {
             </div>
             <div>
               <h4 className="font-bold text-white text-sm">১০০% প্রাকৃতিক ও খাঁটি</h4>
-              <p className="text-xs text-[#FDFBF7]/70 mt-1">
+              <p className="text-xs text-white mt-1">
                 কোনো কেমিক্যাল, প্রিজারভেটিভ বা ভেজাল নেই। ল্যাব টেস্টে পরীক্ষিত।
               </p>
             </div>
@@ -76,8 +80,8 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-white border border-emerald-500/30 flex items-center justify-center shadow-md overflow-hidden relative flex-shrink-0">
                 <Image
-                  src="/assets/logo-1.png"
-                  alt="সাতক্ষীরা ঘর লোগো"
+                  src={brandLogo}
+                  alt={brandName}
                   fill
                   className="object-contain p-1"
                 />
@@ -96,7 +100,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-3">
-            <h5 className="font-bold text-[#F59E0B] text-sm uppercase tracking-wider">
+            <h5 className="font-bold text-white text-sm uppercase tracking-wider">
               প্রয়োজনীয় লিংক
             </h5>
             <ul className="space-y-2 text-xs text-[#FDFBF7]/80">
@@ -123,7 +127,7 @@ export default function Footer() {
 
           {/* Product Categories */}
           <div className="space-y-3">
-            <h5 className="font-bold text-[#F59E0B] text-sm uppercase tracking-wider">
+            <h5 className="font-bold text-white text-sm uppercase tracking-wider">
               জনপ্রিয় ক্যাটাগরি
             </h5>
             <ul className="space-y-2 text-xs text-[#FDFBF7]/80">
@@ -137,7 +141,7 @@ export default function Footer() {
                 <Link href="/shop?cat=oil" className="hover:text-white transition-colors">ঘানি ভাঙা সরিষার তেল</Link>
               </li>
               <li>
-                <Link href="/shop?cat=sweets" className="hover:text-white transition-colors">সাতক্ষীরার ক্ষীর সন্দেশ</Link>
+                {/* <Link href="/shop?cat=sweets" className="hover:text-white transition-colors">সাতক্ষীরার ক্ষীর সন্দেশ</Link> */}
               </li>
               <li>
                 <Link href="/shop?cat=pickles" className="hover:text-white transition-colors">ঘরোয়া কুল ও আমের আচার</Link>
@@ -147,7 +151,7 @@ export default function Footer() {
 
           {/* Contact Details */}
           <div className="space-y-3">
-            <h5 className="font-bold text-[#F59E0B] text-sm uppercase tracking-wider">
+            <h5 className="font-bold text-white text-sm uppercase tracking-wider">
               যোগাযোগ
             </h5>
             <ul className="space-y-2.5 text-xs text-[#FDFBF7]/80">
@@ -157,7 +161,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#F59E0B] flex-shrink-0" />
-                <span>+৮৮০ ১৭১২-৩৪৫৬৭৮</span>
+                <span>+৮৮ ০১৯০৮৯৪৫১৪৫</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#F59E0B] flex-shrink-0" />

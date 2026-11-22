@@ -65,7 +65,6 @@ export default function CustomerAIAssistantWidget() {
       );
       setBubbleQuickChips([
         '🍯 সেরা মধু কোনটি?',
-        '🧈 গাওয়া ঘি এর দাম',
         '🚚 ফ্রি ডেলিভারি তথ্য',
       ]);
       setBubbleChipQuery('সুন্দরবনের খাঁটি খাবার সম্পর্কে জানতে চাই');

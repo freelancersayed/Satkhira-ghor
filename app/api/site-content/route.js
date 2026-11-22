@@ -97,6 +97,7 @@ export const defaultSiteContent = {
     name: 'সাতক্ষীরা ঘর',
     tagline: 'Satkhira Ghor • Pure & Organic',
     logoChar: 'স',
+    logo: '/assets/logo-1.png',
   },
   theme: {
     primary: '#016831',

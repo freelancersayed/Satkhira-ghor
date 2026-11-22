@@ -328,18 +328,16 @@ export default function AdminAICopilotModal({ isOpen, onClose, onRefreshData }) 
           {messages.map((m) => (
             <div
               key={m.id}
-              className={`flex flex-col ${
-                m.sender === 'user' ? 'items-end' : 'items-start'
-              }`}
+              className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'
+                }`}
             >
               <div
-                className={`max-w-[92%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs ${
-                  m.sender === 'user'
+                className={`max-w-[92%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs ${m.sender === 'user'
                     ? 'bg-[#016831] text-white rounded-br-xs'
                     : m.isError
-                    ? 'bg-red-50 text-red-800 border border-red-200 rounded-bl-xs'
-                    : 'bg-white text-slate-800 border border-[#E8E2D5] rounded-bl-xs'
-                }`}
+                      ? 'bg-red-50 text-red-800 border border-red-200 rounded-bl-xs'
+                      : 'bg-white text-slate-800 border border-[#E8E2D5] rounded-bl-xs'
+                  }`}
               >
                 <div className="flex items-center gap-1.5 mb-1 text-[10px] opacity-70 font-semibold">
                   {m.sender === 'user' ? (
@@ -557,7 +555,8 @@ export default function AdminAICopilotModal({ isOpen, onClose, onRefreshData }) 
               <ImageIcon className="w-3.5 h-3.5" />
               <span>📸 ছবি দিয়ে পণ্য যোগ করো</span>
             </button>
-            <button
+
+            {/* <button
               onClick={() =>
                 handleSend(
                   'সুন্দরবনের খাঁটি পদ্ম মধু ৫০০ গ্রাম দাম ৮৫০ টাকা স্টক ৩০ কেজি যুক্ত করো'
@@ -566,7 +565,8 @@ export default function AdminAICopilotModal({ isOpen, onClose, onRefreshData }) 
               className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-[#016831] border border-emerald-200 text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1"
             >
               <span>➕ পদ্ম মধু যোগ করো</span>
-            </button>
+            </button> */}
+
             <button
               onClick={() => handleSend('আজকের সামগ্রিক সেলস ও স্টক রিপোর্ট দাও')}
               className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1"

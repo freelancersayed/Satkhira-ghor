@@ -18,6 +18,7 @@ import {
   Truck,
   Flame,
   ChevronDown,
+  Palette,
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -55,6 +56,8 @@ export default function Header() {
   const { user, logout, checkAuth } = useAuthStore();
   const { content } = useSiteContentStore();
   const hero = content?.hero || {};
+  const brandLogo = content?.brand?.logo || '/assets/logo-1.png';
+  const brandName = content?.brand?.name || 'সাতক্ষীরা ঘর';
 
   useEffect(() => {
     setMounted(true);
@@ -212,8 +215,8 @@ export default function Header() {
               <Link href="/" className="flex items-center gap-2 group max-w-full">
                 <div className="w-9 h-9 relative flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
                   <Image
-                    src="/assets/logo-1.png"
-                    alt="সাতক্ষীরা ঘর"
+                    src={brandLogo}
+                    alt={brandName}
                     fill
                     priority
                     className="object-contain"
@@ -267,8 +270,8 @@ export default function Header() {
               <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
                 <div className="w-14 h-14 flex items-center justify-center text-[#FAB116] group-hover:scale-105 transition-transform duration-200 overflow-hidden relative flex-shrink-0">
                   <Image
-                    src="/assets/logo-1.png"
-                    alt="সাতক্ষীরা ঘর লোগো"
+                    src={brandLogo}
+                    alt={brandName}
                     fill
                     priority
                     className="object-contain"
@@ -333,14 +336,24 @@ export default function Header() {
                     </div>
 
                     {['admin', 'manager', 'staff'].includes(user.role) && (
-                      <Link
-                        href="/admin"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-amber-700 hover:bg-amber-50 transition-colors"
-                      >
-                        <ShieldCheck className="w-4 h-4 text-amber-600" />
-                        <span>এডমিন ড্যাশবোর্ড</span>
-                      </Link>
+                      <>
+                        <Link
+                          href="/admin"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-amber-700 hover:bg-amber-50 transition-colors"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-amber-600" />
+                          <span>এডমিন ড্যাশবোর্ড</span>
+                        </Link>
+                        <Link
+                          href="/admin?tab=theme"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-50 transition-colors"
+                        >
+                          <Palette className="w-4 h-4 text-emerald-600" />
+                          <span>লোগো ও থিম পরিবর্তন</span>
+                        </Link>
+                      </>
                     )}
 
                     <Link
@@ -455,8 +468,8 @@ export default function Header() {
                 >
                   <div className="w-10 h-10 relative flex-shrink-0">
                     <Image
-                      src="/assets/logo-1.png"
-                      alt="সাতক্ষীরা ঘর"
+                      src={brandLogo}
+                      alt={brandName}
                       fill
                       className="object-contain"
                     />
@@ -497,14 +510,24 @@ export default function Header() {
 
                     <div className="pt-2 border-t border-[#FDE68A]/70 flex flex-col gap-1.5">
                       {['admin', 'manager', 'staff'].includes(user.role) && (
-                        <Link
-                          href="/admin"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-[#016831] text-white shadow-xs"
-                        >
-                          <ShieldCheck className="w-4 h-4 text-[#FAB116]" />
-                          <span>এডমিন ড্যাশবোর্ড</span>
-                        </Link>
+                        <>
+                          <Link
+                            href="/admin"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-[#016831] text-white shadow-xs"
+                          >
+                            <ShieldCheck className="w-4 h-4 text-[#FAB116]" />
+                            <span>এডমিন ড্যাশবোর্ড</span>
+                          </Link>
+                          <Link
+                            href="/admin?tab=theme"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-amber-100/80 text-amber-900 border border-amber-300/60"
+                          >
+                            <Palette className="w-4 h-4 text-[#016831]" />
+                            <span>লোগো ও থিম পরিবর্তন</span>
+                          </Link>
+                        </>
                       )}
                       <Link
                         href="/my-orders"

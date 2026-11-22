@@ -193,7 +193,7 @@ export default function CustomerAIChatWindow({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h3 className="text-sm font-bold text-white leading-tight">
+                <h3 className="text-sm font-bold text-green leading-tight">
                   সাতক্ষীরা ঘর এআই
                 </h3>
                 <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-[#FAB116] text-slate-950 font-mono">
@@ -234,18 +234,16 @@ export default function CustomerAIChatWindow({
           {messages.map((m) => (
             <div
               key={m.id}
-              className={`flex flex-col ${
-                m.sender === 'user' ? 'items-end' : 'items-start'
-              }`}
+              className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'
+                }`}
             >
               <div
-                className={`max-w-[90%] sm:max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs ${
-                  m.sender === 'user'
+                className={`max-w-[90%] sm:max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs ${m.sender === 'user'
                     ? 'bg-[#016831] text-white rounded-br-xs'
                     : m.isFallback
-                    ? 'bg-amber-50 text-amber-950 border border-amber-200 rounded-bl-xs'
-                    : 'bg-white text-slate-800 border border-[#E8E2D5] rounded-bl-xs'
-                }`}
+                      ? 'bg-amber-50 text-amber-950 border border-amber-200 rounded-bl-xs'
+                      : 'bg-white text-slate-800 border border-[#E8E2D5] rounded-bl-xs'
+                  }`}
               >
                 <div className="flex items-center gap-1.5 mb-1 text-[10px] opacity-70 font-semibold">
                   {m.sender === 'user' ? (
@@ -310,11 +308,10 @@ export default function CustomerAIChatWindow({
                             <button
                               type="button"
                               onClick={() => handleAddToCart(prod)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer shadow-xs ${
-                                isAdded
+                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer shadow-xs ${isAdded
                                   ? 'bg-emerald-600 text-white'
                                   : 'bg-[#016831] hover:bg-[#014D24] text-white'
-                              }`}
+                                }`}
                             >
                               {isAdded ? (
                                 <>

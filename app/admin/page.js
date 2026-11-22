@@ -199,6 +199,15 @@ export default function AdminDashboardPage() {
     // Initialize audio context on first user click/interaction
     initAudioOnUserGesture();
 
+    // Support ?tab=theme or other tab deep linking
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam) {
+        setActiveTab(tabParam);
+      }
+    }
+
     const handleCatUpdate = () => fetchCategories();
     if (typeof window !== 'undefined') {
       window.addEventListener('categories:updated', handleCatUpdate);

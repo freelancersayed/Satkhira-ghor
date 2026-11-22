@@ -96,7 +96,7 @@ export default function CartPage() {
   useEffect(() => {
     if (!mounted || orderPlaced || items.length === 0) return;
     const cleanPhone = (formData.phone || '')
-      .replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d))
+      .replace(/[০-৯]/g, (d) => '০১৯০৮৯৪৫১৪৫'.indexOf(d))
       .replace(/[^\d]/g, '');
     if (cleanPhone.length < 11) return;
 
@@ -113,7 +113,7 @@ export default function CartPage() {
           cartTotal: Math.max(0, getTotalPrice() - discount + (formData.city === 'ঢাকা' ? deliveryConfig.insideDhaka : deliveryConfig.outsideDhaka)),
           step: formData.address?.trim() ? 'address_entered' : 'checkout_initiated',
         }),
-      }).catch(() => {});
+      }).catch(() => { });
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -193,7 +193,7 @@ export default function CartPage() {
 
     // Phone number normalization & Bangladeshi mobile validation (supports Bengali numerals)
     const cleanPhone = (formData.phone || '')
-      .replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d))
+      .replace(/[০-৯]/g, (d) => '০১৯০৮৯৪৫১৪৫'.indexOf(d))
       .replace(/[^0-9]/g, '');
 
     if (cleanPhone.length < 11 || !cleanPhone.startsWith('01')) {
@@ -206,8 +206,7 @@ export default function CartPage() {
       const trx = (formData.paymentTrxId || '').trim();
       if (!trx || trx.length < 4) {
         setOrderError(
-          `অনুগ্রহ করে আপনার ${
-            formData.paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'
+          `অনুগ্রহ করে আপনার ${formData.paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'
           } পেমেন্টের সঠিক ট্রানজেকশন আইডি (TrxID) প্রদান করুন।`
         );
         return;
@@ -234,10 +233,10 @@ export default function CartPage() {
           paymentDetails:
             formData.paymentMethod !== 'cod'
               ? {
-                  provider: formData.paymentMethod,
-                  senderNumber: (formData.paymentSenderNumber || cleanPhone).trim(),
-                  transactionId: (formData.paymentTrxId || '').trim().toUpperCase(),
-                }
+                provider: formData.paymentMethod,
+                senderNumber: (formData.paymentSenderNumber || cleanPhone).trim(),
+                transactionId: (formData.paymentTrxId || '').trim().toUpperCase(),
+              }
               : null,
         }),
       });
@@ -322,8 +321,8 @@ export default function CartPage() {
                 {confirmedOrder.paymentMethod === 'cod'
                   ? 'ক্যাশ অন ডেলিভারি (পণ্য পেয়ে টাকা)'
                   : confirmedOrder.paymentMethod === 'bkash'
-                  ? 'বিকাশ অনলাইন পেমেন্ট'
-                  : 'নগদ অনলাইন পেমেন্ট'}
+                    ? 'বিকাশ অনলাইন পেমেন্ট'
+                    : 'নগদ অনলাইন পেমেন্ট'}
               </span>
             </div>
             {confirmedOrder.paymentDetails?.transactionId && (
@@ -592,8 +591,8 @@ export default function CartPage() {
                           type="button"
                           onClick={() => setFormData({ ...formData, city: 'ঢাকা' })}
                           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${isDhaka
-                              ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
-                              : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
+                            ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
+                            : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
                             }`}
                         >
                           <div className="flex items-center justify-between">
@@ -611,8 +610,8 @@ export default function CartPage() {
                           type="button"
                           onClick={() => setFormData({ ...formData, city: 'ঢাকার বাইরে' })}
                           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${!isDhaka
-                              ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
-                              : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
+                            ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
+                            : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
                             }`}
                         >
                           <div className="flex items-center justify-between">
@@ -692,11 +691,10 @@ export default function CartPage() {
                     {/* Cash on Delivery (COD) */}
                     <div
                       onClick={() => setFormData({ ...formData, paymentMethod: 'cod' })}
-                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${
-                        formData.paymentMethod === 'cod'
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${formData.paymentMethod === 'cod'
                           ? 'border-[#016831] bg-emerald-50/90 ring-2 ring-[#016831]'
                           : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-2">
                         <input
@@ -724,11 +722,10 @@ export default function CartPage() {
                     {/* bKash Payment Option */}
                     <div
                       onClick={() => setFormData({ ...formData, paymentMethod: 'bkash' })}
-                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${
-                        formData.paymentMethod === 'bkash'
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${formData.paymentMethod === 'bkash'
                           ? 'border-[#E2136E] bg-pink-50/90 ring-2 ring-[#E2136E]'
                           : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-2">
                         <input
@@ -754,11 +751,10 @@ export default function CartPage() {
                     {/* Nagad Payment Option */}
                     <div
                       onClick={() => setFormData({ ...formData, paymentMethod: 'nagad' })}
-                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${
-                        formData.paymentMethod === 'nagad'
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${formData.paymentMethod === 'nagad'
                           ? 'border-[#F7941D] bg-orange-50/90 ring-2 ring-[#F7941D]'
                           : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-2">
                         <input
@@ -785,11 +781,10 @@ export default function CartPage() {
                   {/* Mobile Banking Instructions & TrxID Input Card */}
                   {(formData.paymentMethod === 'bkash' || formData.paymentMethod === 'nagad') && (
                     <div
-                      className={`p-4 rounded-2xl border text-xs space-y-3 animate-fadeIn ${
-                        formData.paymentMethod === 'bkash'
+                      className={`p-4 rounded-2xl border text-xs space-y-3 animate-fadeIn ${formData.paymentMethod === 'bkash'
                           ? 'bg-pink-50/70 border-pink-200 text-[#831843]'
                           : 'bg-orange-50/70 border-orange-200 text-[#9A3412]'
-                      }`}
+                        }`}
                     >
                       {/* Brand Header */}
                       <div className="flex justify-between items-center pb-2 border-b border-black/10">
@@ -827,13 +822,12 @@ export default function CartPage() {
                                 : deliveryConfig.nagadNumberRaw
                             )
                           }
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs ${
-                            copiedNumber
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs ${copiedNumber
                               ? 'bg-emerald-600 text-white'
                               : formData.paymentMethod === 'bkash'
-                              ? 'bg-[#E2136E] text-white hover:bg-[#C2105C]'
-                              : 'bg-[#F7941D] text-white hover:bg-[#D97706]'
-                          }`}
+                                ? 'bg-[#E2136E] text-white hover:bg-[#C2105C]'
+                                : 'bg-[#F7941D] text-white hover:bg-[#D97706]'
+                            }`}
                         >
                           {copiedNumber ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                           <span>{copiedNumber ? 'কপি হয়েছে!' : 'নম্বর কপি করুন'}</span>

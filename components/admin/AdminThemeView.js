@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import {
   Palette,
   Check,
@@ -12,6 +13,10 @@ import {
   Star,
   CheckCircle2,
   ChevronRight,
+  Upload,
+  Image as ImageIcon,
+  Loader2,
+  Link as LinkIcon,
 } from 'lucide-react';
 import { useSiteContentStore } from '@/store/siteContentStore';
 
@@ -157,6 +162,18 @@ export default function AdminThemeView({ showNotification }) {
   const [saving, setSaving] = useState(false);
   const [activePreset, setActivePreset] = useState(null);
 
+  // ── Brand Logo State & Handlers ──
+  const [brandState, setBrandState] = useState({
+    name: 'সাতক্ষীরা ঘর',
+    tagline: 'Satkhira Ghor • Pure & Organic',
+    logoChar: 'স',
+    logo: '/assets/logo-1.png',
+  });
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [savingBrand, setSavingBrand] = useState(false);
+  const [customLogoUrl, setCustomLogoUrl] = useState('');
+  const fileInputRef = useRef(null);
+
   useEffect(() => {
     fetchContent();
   }, [fetchContent]);
@@ -168,7 +185,106 @@ export default function AdminThemeView({ showNotification }) {
         ...content.theme,
       });
     }
-  }, [content?.theme]);
+    if (content?.brand) {
+      setBrandState((prev) => ({
+        ...prev,
+        ...content.brand,
+      }));
+    }
+  }, [content?.theme, content?.brand]);
+
+  // Handle uploading logo file from browser/phone
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+
+    const isImage =
+      (file.type && file.type.startsWith('image/')) ||
+      /\.(jpe?g|png|webp|gif|avif|heic|heif|bmp|jfif|svg)$/i.test(file.name || '');
+
+    if (!isImage) {
+      if (showNotification) {
+        showNotification('শুধুমাত্র ছবি (PNG, JPG, WEBP, SVG) ফাইল সমর্থনযোগ্য', 'error');
+      }
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      if (showNotification) {
+        showNotification('ছবির সাইজ সর্বোচ্চ ২০MB হতে পারবে', 'error');
+      }
+      return;
+    }
+
+    try {
+      setLogoUploading(true);
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'আপলোড ব্যর্থ হয়েছে');
+
+      const newUrl = data.url;
+      const updatedBrand = { ...brandState, logo: newUrl };
+      setBrandState(updatedBrand);
+
+      // Auto-save brand to database immediately
+      await updateSection('brand', updatedBrand);
+      if (showNotification) {
+        showNotification('নতুন লোগো সফলভাবে আপলোড ও সেভ করা হয়েছে! ওয়েবসাইটে এখন লাইভ 🎉', 'success');
+      }
+    } catch (err) {
+      if (showNotification) {
+        showNotification('লোগো আপলোড ব্যর্থ: ' + err.message, 'error');
+      }
+    } finally {
+      setLogoUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleApplyCustomUrl = async () => {
+    const url = customLogoUrl.trim();
+    if (!url) return;
+    try {
+      setSavingBrand(true);
+      const updatedBrand = { ...brandState, logo: url };
+      setBrandState(updatedBrand);
+      await updateSection('brand', updatedBrand);
+      setCustomLogoUrl('');
+      if (showNotification) {
+        showNotification('লোগো লিংক সফলভাবে সেভ করা হয়েছে! 🎉', 'success');
+      }
+    } catch (err) {
+      if (showNotification) {
+        showNotification('সেভ ব্যর্থ: ' + err.message, 'error');
+      }
+    } finally {
+      setSavingBrand(false);
+    }
+  };
+
+  const handleResetLogo = async () => {
+    if (!confirm('লোগোটি পূর্বের ডিফল্ট (logo-1.png) লোগোতে রিস্টোর করতে চান?')) return;
+    try {
+      setSavingBrand(true);
+      const defaultLogo = '/assets/logo-1.png';
+      const updatedBrand = { ...brandState, logo: defaultLogo };
+      setBrandState(updatedBrand);
+      await updateSection('brand', updatedBrand);
+      if (showNotification) {
+        showNotification('ডিফল্ট লোগো সফলভাবে রিস্টোর হয়েছে!', 'success');
+      }
+    } catch (err) {
+      if (showNotification) {
+        showNotification('রিস্টোর ব্যর্থ: ' + err.message, 'error');
+      }
+    } finally {
+      setSavingBrand(false);
+    }
+  };
 
   const handleColorChange = (key, value) => {
     setThemeState((prev) => {
@@ -268,10 +384,10 @@ export default function AdminThemeView({ showNotification }) {
           </div>
           <div>
             <h2 className="text-xs sm:text-base font-black text-stone-900 leading-tight">
-              কালার ও থিম কন্ট্রোল
+              কালার, থিম ও লোগো কন্ট্রোল
             </h2>
             <p className="text-[10px] text-stone-500 leading-none mt-0.5">
-              লাইভ কাস্টমাইজেশন ও প্রিভিউ
+              লাইভ ব্র্যান্ডিং কাস্টমাইজেশন ও প্রিভিউ
             </p>
           </div>
         </div>
@@ -284,7 +400,7 @@ export default function AdminThemeView({ showNotification }) {
             className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 active:scale-95 text-xs font-bold transition-all"
           >
             <RotateCcw className="w-3 h-3" />
-            <span>ডিফল্ট</span>
+            <span>ডিফল্ট থিম</span>
           </button>
 
           <button
@@ -298,8 +414,167 @@ export default function AdminThemeView({ showNotification }) {
             ) : (
               <Save className="w-3.5 h-3.5 text-[#FAB116]" />
             )}
-            <span>{saving ? 'সেভ হচ্ছে...' : 'সেভ করুন'}</span>
+            <span>{saving ? 'সেভ হচ্ছে...' : 'থিম সেভ করুন'}</span>
           </button>
+        </div>
+      </div>
+
+      {/* ── ১.৫. ব্র্যান্ড লোগো ব্যবস্থাপনা ও ফাইল আপলোডার (Brand Logo Manager) ── */}
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E8E2D5] shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E8E2D5]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#014D24] to-[#016831] text-[#FAB116] flex items-center justify-center font-bold shadow-xs">
+              <ImageIcon className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm sm:text-base font-black text-stone-900 leading-tight flex items-center gap-2">
+                <span>ব্র্যান্ড লোগো আপলোড ও পরিবর্তন</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
+                  হেডার ও ফুটার
+                </span>
+              </h3>
+              <p className="text-[11px] text-stone-500 mt-0.5">
+                কম্পিউটার বা মোবাইল গ্যালারি থেকে সরাসরি নতুন লোগো আপলোড করুন
+              </p>
+            </div>
+          </div>
+
+          {brandState.logo !== '/assets/logo-1.png' && (
+            <button
+              type="button"
+              onClick={handleResetLogo}
+              disabled={savingBrand}
+              className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-600 text-xs font-bold transition-all active:scale-95"
+              title="ডিফল্ট লোগো রিস্টোর করুন"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>ডিফল্ট লোগো রিস্টোর</span>
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+          {/* Left: Active Logo Previews (5 cols) */}
+          <div className="lg:col-span-5 bg-[#FAF9F5] p-3.5 sm:p-4 rounded-2xl border border-stone-200/80 flex flex-col justify-between space-y-3">
+            <div>
+              <span className="text-[11px] font-bold text-stone-700 block mb-2">
+                বর্তমান লোগো প্রিভিউ:
+              </span>
+
+              <div className="grid grid-cols-2 gap-2">
+                {/* 1. Header Dark Green Background Simulation */}
+                <div
+                  className="rounded-xl p-3 flex flex-col items-center justify-center text-center border border-[#016831] relative overflow-hidden shadow-xs min-h-[105px]"
+                  style={{ backgroundColor: themeState.primary || '#014D24' }}
+                >
+                  <span className="text-[9px] font-bold text-emerald-200/90 mb-1.5">
+                    হেডার প্রিভিউ
+                  </span>
+                  <div className="w-14 h-14 relative flex-shrink-0">
+                    <Image
+                      src={brandState.logo || '/assets/logo-1.png'}
+                      alt="লোগো প্রিভিউ"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Light Theme Background Simulation */}
+                <div className="bg-white rounded-xl p-3 flex flex-col items-center justify-center text-center border border-stone-200 relative overflow-hidden shadow-xs min-h-[105px]">
+                  <span className="text-[9px] font-bold text-stone-500 mb-1.5">
+                    সাদা ব্যাকগ্রাউন্ড
+                  </span>
+                  <div className="w-14 h-14 relative flex-shrink-0">
+                    <Image
+                      src={brandState.logo || '/assets/logo-1.png'}
+                      alt="লোগো প্রিভিউ"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-stone-200/70 flex items-center justify-between text-[10px] text-stone-500">
+              <span className="truncate max-w-[200px]" title={brandState.logo}>
+                উৎস: {brandState.logo}
+              </span>
+              <span className="text-emerald-700 font-bold flex items-center gap-1 flex-shrink-0">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                সক্রিয়
+              </span>
+            </div>
+          </div>
+
+          {/* Right: Upload Dropzone & Action Controls (7 cols) */}
+          <div className="lg:col-span-7 flex flex-col justify-between space-y-3">
+            {/* Hidden native file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/png, image/jpeg, image/webp, image/svg+xml, image/avif"
+              className="hidden"
+              onChange={(e) => handleFileUpload(e.target.files?.[0])}
+            />
+
+            {/* Clickable Drag & Drop Zone */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className={`p-5 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center text-center cursor-pointer group ${
+                logoUploading
+                  ? 'border-emerald-500 bg-emerald-50/50 cursor-wait'
+                  : 'border-emerald-300 hover:border-[#016831] bg-[#FAF9F5] hover:bg-emerald-50/30'
+              }`}
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-200 shadow-xs flex items-center justify-center text-[#016831] group-hover:scale-110 transition-transform mb-2">
+                {logoUploading ? (
+                  <Loader2 className="w-6 h-6 animate-spin text-[#016831]" />
+                ) : (
+                  <Upload className="w-6 h-6 text-[#016831]" />
+                )}
+              </div>
+
+              <div className="font-bold text-xs sm:text-sm text-stone-800">
+                {logoUploading ? (
+                  <span className="text-[#016831] animate-pulse">
+                    লোগো আপলোড ও সাইটে সেট হচ্ছে...
+                  </span>
+                ) : (
+                  <span>নতুন লোগো ছবি নির্বাচন করুন</span>
+                )}
+              </div>
+              <p className="text-[10px] text-stone-500 mt-1 max-w-xs">
+                ক্লিক করে মোবাইল বা পিসি থেকে ছবি সিলেক্ট করুন (PNG, JPG, WEBP, SVG)
+              </p>
+              <span className="inline-block mt-2 text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#FEF3C7] text-amber-900 border border-amber-300/60">
+                💡 সেরা লুকের জন্য স্বচ্ছ (Transparent PNG) ব্যাকগ্রাউন্ড ব্যবহার করুন
+              </span>
+            </div>
+
+            {/* Direct URL Input Option */}
+            <div className="flex items-center gap-1.5 pt-1">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={customLogoUrl}
+                  onChange={(e) => setCustomLogoUrl(e.target.value)}
+                  placeholder="অথবা সরাসরি ছবির লিংক (URL) পেস্ট করুন..."
+                  className="w-full text-xs px-3 py-2 rounded-xl bg-white border border-stone-300 focus:border-[#016831] outline-hidden pr-8 text-stone-800"
+                />
+                <LinkIcon className="w-3.5 h-3.5 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+              <button
+                type="button"
+                onClick={handleApplyCustomUrl}
+                disabled={!customLogoUrl.trim() || savingBrand}
+                className="px-3 py-2 rounded-xl bg-[#016831] hover:bg-[#02833E] active:scale-95 text-white font-bold text-xs shadow-xs transition-all disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap"
+              >
+                প্রয়োগ করুন
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

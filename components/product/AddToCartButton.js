@@ -90,17 +90,17 @@ export function getProductVariants(product) {
 
 export default function AddToCartButton({ product }) {
   const { content } = useSiteContentStore();
-  const helpline = content?.hero?.helpline || '০১৭১২-৩৪৫৬৭৮';
+  const helpline = content?.hero?.helpline || '০১৯০৮৯৪৫১৪৫';
   const bnToEn = (str) =>
-    (str || '').replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+    (str || '').replace(/[০-৯]/g, (d) => '০১৯০৮৯৪৫১৪৫'.indexOf(d));
   const rawHelpline = bnToEn(helpline);
-  const cleanPhone = rawHelpline.replace(/[^\d+]/g, '') || '01712345678';
+  const cleanPhone = rawHelpline.replace(/[^\d+]/g, '') || '01908945145';
   const cleanPhoneWithoutCountry = cleanPhone.replace(/^\+?88/, '');
   const whatsappNumber = cleanPhoneWithoutCountry.startsWith('0')
     ? '88' + cleanPhoneWithoutCountry
     : cleanPhoneWithoutCountry.length === 10
       ? '880' + cleanPhoneWithoutCountry
-      : '8801712345678';
+      : '8801908945145';
 
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -206,11 +206,10 @@ export default function AddToCartButton({ product }) {
                   key={idx}
                   type="button"
                   onClick={() => setSelectedVarIndex(idx)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 active:scale-95 ${
-                    isSelected
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 active:scale-95 ${isSelected
                       ? 'bg-[#016831] text-white border-[#016831] shadow-md scale-102 ring-2 ring-[#FAB116]/40'
                       : 'bg-white text-slate-800 border-[#E8E2D5] hover:border-[#016831]/50 hover:bg-[#FDFBF7]'
-                  }`}
+                    }`}
                 >
                   <span>{v.size}</span>
                   <span
@@ -264,11 +263,10 @@ export default function AddToCartButton({ product }) {
           id="halum-add-to-cart-btn"
           data-halum-target="add-to-cart"
           onClick={handleAddToCart}
-          className={`py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.98] ${
-            isAdded
+          className={`py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.98] ${isAdded
               ? 'bg-emerald-800 text-white'
               : 'bg-[#016831] hover:bg-[#014D24] text-white border border-[#016831]'
-          }`}
+            }`}
         >
           {isAdded ? (
             <>
@@ -347,11 +345,10 @@ export default function AddToCartButton({ product }) {
             <button
               type="button"
               onClick={handleAddToCart}
-              className={`px-3 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all active:scale-95 ${
-                isAdded
+              className={`px-3 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all active:scale-95 ${isAdded
                   ? 'bg-emerald-800 text-white shadow-sm'
                   : 'bg-[#016831] text-white hover:bg-[#014D24] shadow-xs'
-              }`}
+                }`}
               aria-label="কার্টে যোগ করুন"
             >
               {isAdded ? (
