@@ -289,7 +289,7 @@ export async function POST(request) {
       cleanMsg.includes('খরচ')
     ) {
       reply =
-        `হালুম! খুব সোজা ও সাশ্রয়ী নিয়ম: সারাদেশে ক্যাশ অন ডেলিভারিতে পণ্য পৌঁছানো হয়! 🚚 ঢাকা ও সাতক্ষীরায় ডেলিভারি চার্জ মাত্র ৳${deliveryConfig.insideDhaka}, অন্যান্য জেলায় ৳${deliveryConfig.outsideDhaka}। আর মোট অর্ডার ৳${deliveryConfig.freeDeliveryThreshold} বা তার বেশি হলে পুরো ডেলিভারি একদম ফ্রি!`;
+        `হালুম! খুব সোজা ও সাশ্রয়ী নিয়ম: সারাদেশে ক্যাশ অন ডেলিভারিতে পণ্য পৌঁছানো হয়! 🚚 সাতক্ষীরার ভেতরে ডেলিভারি চার্জ মাত্র ৳${deliveryConfig.insideSatkhira || 70}, সাতক্ষীরার বাইরে অন্যান্য জেলায় ৳${deliveryConfig.outsideSatkhira || 120}। আর মোট অর্ডার ৳${deliveryConfig.freeDeliveryThreshold} বা তার বেশি হলে পুরো ডেলিভারি একদম ফ্রি!`;
       recommendedProducts = getCombosOrOffers(liveProducts, 2);
       quickReplies = ['স্পেশাল কম্বো দেখতে চাই', 'অর্ডার করতে চাই', 'হেল্পলাইন নম্বর দাও'];
       characterState = 'talking';
@@ -381,7 +381,7 @@ Store Highlights:
 - ঐতিহ্যবাহী বিলোনা গাওয়া ঘি
 - কাঠের ঘানি ভাঙা সরিষার তেল ও কালোজিরা তেল
 - ফ্রি ডেলিভারি ৳${deliveryConfig.freeDeliveryThreshold}+ অর্ডারে সারা দেশে।
-- ডেলিভারি চার্জ: ঢাকা ও সাতক্ষীরা ৳${deliveryConfig.insideDhaka}, বাইরে ৳${deliveryConfig.outsideDhaka}।
+- ডেলিভারি চার্জ: সাতক্ষীরার ভেতরে ৳${deliveryConfig.insideSatkhira || 70}, সাতক্ষীরার বাইরে ৳${deliveryConfig.outsideSatkhira || 120}।
 - ক্যাশ অন ডেলিভারি, বিকাশ ও নগদ অনলাইন পেমেন্ট সুবিধা।
 
 Instructions:

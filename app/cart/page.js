@@ -48,13 +48,13 @@ export default function CartPage() {
 
   const { user } = useAuthStore();
 
-  // Form states with Dhaka as default delivery region
+  // Form states with Satkhira as default delivery region
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     address: '',
-    city: 'ঢাকা',
+    city: 'সাতক্ষীরা',
     paymentMethod: 'cod',
     paymentSenderNumber: '',
     paymentTrxId: '',
@@ -87,7 +87,7 @@ export default function CartPage() {
         phone: user.phone || prev.phone,
         email: user.email || prev.email,
         address: user.address || prev.address,
-        city: user.city || prev.city || 'ঢাকা',
+        city: user.city || prev.city || 'সাতক্ষীরা',
       }));
     }
   }, [user]);
@@ -101,6 +101,7 @@ export default function CartPage() {
     if (cleanPhone.length < 11) return;
 
     const timer = setTimeout(() => {
+      const isInside = formData.city === 'সাতক্ষীরা' || formData.city === 'সাতক্ষীরার ভেতরে' || formData.city === 'ঢাকা';
       fetch('/api/cart/abandoned', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -110,7 +111,7 @@ export default function CartPage() {
             phone: cleanPhone,
           },
           items,
-          cartTotal: Math.max(0, getTotalPrice() - discount + (formData.city === 'ঢাকা' ? deliveryConfig.insideDhaka : deliveryConfig.outsideDhaka)),
+          cartTotal: Math.max(0, getTotalPrice() - discount + (isInside ? (deliveryConfig.insideSatkhira || 70) : (deliveryConfig.outsideSatkhira || 120))),
           step: formData.address?.trim() ? 'address_entered' : 'checkout_initiated',
         }),
       }).catch(() => { });
@@ -130,12 +131,12 @@ export default function CartPage() {
 
   const subtotal = getTotalPrice();
   const isFreeDelivery = subtotal >= deliveryConfig.freeDeliveryThreshold && subtotal > 0;
-  const isDhaka = formData.city === 'ঢাকা';
+  const isInsideSatkhira = formData.city === 'সাতক্ষীরা' || formData.city === 'সাতক্ষীরার ভেতরে' || formData.city === 'ঢাকা';
   const deliveryCharge = isFreeDelivery
     ? 0
-    : isDhaka
-      ? deliveryConfig.insideDhaka
-      : deliveryConfig.outsideDhaka;
+    : isInsideSatkhira
+      ? (deliveryConfig.insideSatkhira || 70)
+      : (deliveryConfig.outsideSatkhira || 120);
   const total = Math.max(0, subtotal - discount + deliveryCharge);
   const remainingForFree = Math.max(0, deliveryConfig.freeDeliveryThreshold - subtotal);
 
@@ -580,48 +581,48 @@ export default function CartPage() {
                       </p>
                     </div>
 
-                    {/* Delivery Area Selection (Inside vs Outside Dhaka) */}
+                    {/* Delivery Area Selection (Inside vs Outside Satkhira) */}
                     <div>
                       <label className="block text-xs font-bold text-stone-700 mb-1.5">
                         ডেলিভারি এরিয়া নির্বাচন করুন <span className="text-red-500">*</span>
                       </label>
                       <div className="grid grid-cols-2 gap-2">
-                        {/* Inside Dhaka */}
+                        {/* Inside Satkhira */}
                         <button
                           type="button"
-                          onClick={() => setFormData({ ...formData, city: 'ঢাকা' })}
-                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${isDhaka
+                          onClick={() => setFormData({ ...formData, city: 'সাতক্ষীরা' })}
+                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${isInsideSatkhira
                             ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
                             : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
                             }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-stone-800">ঢাকার ভেতরে</span>
-                            {isDhaka && <Check className="w-3.5 h-3.5 text-[#016831]" />}
+                            <span className="text-xs font-bold text-stone-800">সাতক্ষীরার ভেতরে</span>
+                            {isInsideSatkhira && <Check className="w-3.5 h-3.5 text-[#016831]" />}
                           </div>
                           <div className="text-[11px] font-semibold text-[#016831] mt-0.5">
-                            {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(deliveryConfig.insideDhaka)}`}
+                            {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(deliveryConfig.insideSatkhira || 70)}`}
                           </div>
-                          <span className="text-[10px] text-stone-500 block">২৪-৪৮ ঘণ্টার মধ্যে</span>
+                          <span className="text-[10px] text-stone-500 block">হোম ডেলিভারি (২৪ ঘণ্টা)</span>
                         </button>
 
-                        {/* Outside Dhaka */}
+                        {/* Outside Satkhira */}
                         <button
                           type="button"
-                          onClick={() => setFormData({ ...formData, city: 'ঢাকার বাইরে' })}
-                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${!isDhaka
+                          onClick={() => setFormData({ ...formData, city: 'সাতক্ষীরার বাইরে' })}
+                          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative ${!isInsideSatkhira
                             ? 'border-[#016831] bg-emerald-50/80 ring-1 ring-[#016831]'
                             : 'border-[#E8E2D5] bg-white hover:bg-[#FAF8F5]'
                             }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-stone-800">ঢাকার বাইরে</span>
-                            {!isDhaka && <Check className="w-3.5 h-3.5 text-[#016831]" />}
+                            <span className="text-xs font-bold text-stone-800">সাতক্ষীরার বাইরে</span>
+                            {!isInsideSatkhira && <Check className="w-3.5 h-3.5 text-[#016831]" />}
                           </div>
                           <div className="text-[11px] font-semibold text-[#016831] mt-0.5">
-                            {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(deliveryConfig.outsideDhaka)}`}
+                            {isFreeDelivery ? 'ফ্রি ডেলিভারি' : `চার্জ: ৳${toBanglaNum(deliveryConfig.outsideSatkhira || 120)}`}
                           </div>
-                          <span className="text-[10px] text-stone-500 block">২-৩ দিনের মধ্যে</span>
+                          <span className="text-[10px] text-stone-500 block">কুরিয়ার (২-৩ দিন)</span>
                         </button>
                       </div>
                     </div>
@@ -1040,7 +1041,7 @@ export default function CartPage() {
                     )}
 
                     <div className="flex justify-between text-stone-600">
-                      <span>ডেলিভারি চার্জ ({isDhaka ? 'ঢাকা' : 'ঢাকার বাইরে'}):</span>
+                      <span>ডেলিভারি চার্জ ({isInsideSatkhira ? 'সাতক্ষীরার ভেতরে' : 'সাতক্ষীরার বাইরে'}):</span>
                       <span>
                         {isFreeDelivery ? (
                           <strong className="text-emerald-700 font-bold">ফ্রি</strong>

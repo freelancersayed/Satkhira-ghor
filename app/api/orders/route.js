@@ -196,14 +196,19 @@ export async function POST(request) {
 
     // 6. Server-Side Authoritative Delivery Fee Engine
     const isFreeDelivery = subtotalAfterDiscount >= deliveryConfig.freeDeliveryThreshold && subtotalAfterDiscount > 0;
-    const customerCity = (customer.city || 'ঢাকা').trim();
-    const isDhaka = customerCity === 'ঢাকা' || customerCity.toLowerCase().includes('dhaka');
+    const customerCity = (customer.city || 'সাতক্ষীরা').trim();
+    const isInsideSatkhira =
+      customerCity === 'সাতক্ষীরা' ||
+      customerCity === 'সাতক্ষীরার ভেতরে' ||
+      customerCity.toLowerCase().includes('satkhira') ||
+      customerCity.includes('সাতক্ষীরা') ||
+      customerCity === 'ঢাকা';
 
     const verifiedDeliveryFee = isFreeDelivery
       ? 0
-      : isDhaka
-        ? deliveryConfig.insideDhaka
-        : deliveryConfig.outsideDhaka;
+      : isInsideSatkhira
+        ? (deliveryConfig.insideSatkhira || 70)
+        : (deliveryConfig.outsideSatkhira || 120);
 
     const totalAmount = subtotalAfterDiscount + verifiedDeliveryFee;
 

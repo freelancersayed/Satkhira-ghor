@@ -850,7 +850,7 @@ export function matchLocalHalumIntent(message = '', context = {}, dynamicCatalog
     ])
   ) {
     return {
-      reply: `ঢাকা ও সাতক্ষীরায় ৳৭০ এবং সারাদেশের যেকোনো জেলা-উপজেলায় ৳১৩০ চার্জে ২৪–৪৮ ঘণ্টায় ক্যাশ অন ডেলিভারি পাবেন! আর মাত্র ৳${deliveryConfig.freeDeliveryThreshold} টাকার পণ্য নিলেই ডেলিভারি চার্জ একদম ফ্রি! 🚚💨`,
+      reply: `সাতক্ষীরার ভেতরে মাত্র ৳৭০ এবং সাতক্ষীরার বাইরে সারাদেশে ৳১২০ চার্জে ক্যাশ অন ডেলিভারি পাবেন! আর মাত্র ৳${deliveryConfig.freeDeliveryThreshold} টাকার পণ্য নিলেই ডেলিভারি চার্জ একদম ফ্রি! 🚚💨`,
       characterState: 'happy',
       quickReplies: ['🎁 মেগা কম্বো নিলে ফ্রি', '🛒 আমার কার্ট দেখাও', '🍯 মধু দেখতে চাই'],
     };

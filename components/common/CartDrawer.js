@@ -197,7 +197,7 @@ export default function CartDrawer() {
                   {remainingForFreeShipping === 0 ? (
                     <strong className="text-emerald-800 font-bold">ফ্রি</strong>
                   ) : (
-                    '৳৭০ (ঢাকা) / ৳১২০ (বাইরে)'
+                    '৳৭০ (সাতক্ষীরা) / ৳১২০ (বাইরে)'
                   )}
                 </span>
               </div>

@@ -86,9 +86,14 @@ export async function POST(request) {
     }
 
     // 2. Delivery Fee Engine
-    const customerCity = (cart.customer.city || 'ঢাকা').trim();
-    const isDhaka = customerCity === 'ঢাকা' || customerCity.toLowerCase().includes('dhaka');
-    const deliveryFee = calculateDeliveryFee(verifiedSubtotal, isDhaka ? 'dhaka' : 'outside');
+    const customerCity = (cart.customer.city || 'সাতক্ষীরা').trim();
+    const isInside =
+      customerCity === 'সাতক্ষীরা' ||
+      customerCity === 'সাতক্ষীরার ভেতরে' ||
+      customerCity.toLowerCase().includes('satkhira') ||
+      customerCity.includes('সাতক্ষীরা') ||
+      customerCity === 'ঢাকা';
+    const deliveryFee = calculateDeliveryFee(verifiedSubtotal, isInside ? 'satkhira' : 'outside');
     const totalAmount = verifiedSubtotal + deliveryFee;
 
     // 3. Generate Unique Order Number
