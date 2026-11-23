@@ -52,6 +52,9 @@ export const metadata = {
   alternates: {
     canonical: baseUrl,
   },
+  verification: {
+    google: '0gnjB0QzI8of3TgV_Xt7q-XoRf8EbQNYmMBD5c3HO_o',
+  },
   robots: {
     index: true,
     follow: true,
@@ -152,6 +155,10 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="bn" className={`scroll-smooth ${hindSiliguri.variable}`}>
       <head>
+        <meta
+          name="google-site-verification"
+          content="0gnjB0QzI8of3TgV_Xt7q-XoRf8EbQNYmMBD5c3HO_o"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
