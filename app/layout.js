@@ -23,7 +23,7 @@ export const viewport = {
   themeColor: '#016831',
 };
 
-const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app').replace(/\/$/, '');
+const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhiraghor.com').replace(/\/$/, '');
 
 export const metadata = {
   metadataBase: new URL(baseUrl),

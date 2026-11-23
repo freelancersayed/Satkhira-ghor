@@ -1,4 +1,4 @@
-const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app').replace(/\/$/, '');
+const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhiraghor.com').replace(/\/$/, '');
 
 export const metadata = {
   title: 'সব পণ্য | প্রাকৃতিক খাদ্য সম্ভার | সাতক্ষীরা ঘর',

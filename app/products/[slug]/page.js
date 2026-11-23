@@ -128,7 +128,7 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app').replace(/\/$/, '');
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhiraghor.com').replace(/\/$/, '');
   const productUrl = `${baseUrl}/products/${product.slug}`;
   const title = `${product.name} | দাম ৳${product.price}`;
   const description =
@@ -195,7 +195,7 @@ export default async function ProductDetailPage({ params }) {
     getRelatedProducts(product),
   ]);
 
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app').replace(/\/$/, '');
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhiraghor.com').replace(/\/$/, '');
   const productUrl = `${baseUrl}/products/${product.slug}`;
   const isOutOfStock = product.stock !== undefined && Number(product.stock) <= 0;
 

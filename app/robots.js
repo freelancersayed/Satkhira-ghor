@@ -1,5 +1,5 @@
 export default function robots() {
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app').replace(/\/$/, '');
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhiraghor.com').replace(/\/$/, '');
 
   return {
     rules: [

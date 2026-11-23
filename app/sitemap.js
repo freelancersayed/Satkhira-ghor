@@ -5,7 +5,7 @@ import SiteContent from '@/models/SiteContent';
 export const revalidate = 3600; // Revalidate sitemap every hour
 
 export default async function sitemap() {
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app').replace(/\/$/, '');
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhiraghor.com').replace(/\/$/, '');
 
   // 1. Static Standard Routes
   const staticRoutes = [
