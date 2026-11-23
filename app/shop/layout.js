@@ -26,9 +26,9 @@ export const metadata = {
     type: 'website',
     images: [
       {
-        url: '/assets/logo-1.png',
-        width: 800,
-        height: 800,
+        url: '/uploads/upload_1795353755877_oioatm.png',
+        width: 1200,
+        height: 1200,
         alt: 'সাতক্ষীরা ঘর পণ্য সম্ভার',
       },
     ],
@@ -38,7 +38,7 @@ export const metadata = {
     title: 'সব পণ্য | সাতক্ষীরা ঘর',
     description:
       'সুন্দরবনের খাঁটি মধু, বিলোনা গাওয়া ঘি ও প্রাকৃতিক খাদ্য সম্ভার সারাদেশে ক্যাশ অন ডেলিভারিতে।',
-    images: ['/assets/logo-1.png'],
+    images: ['/uploads/upload_1795353755877_oioatm.png'],
   },
 };
 

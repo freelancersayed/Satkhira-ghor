@@ -66,7 +66,7 @@ const defaultContent = {
     name: 'সাতক্ষীরা ঘর',
     tagline: 'Satkhira Ghor • Pure & Organic',
     logoChar: 'স',
-    logo: '/assets/logo-1.png',
+    logo: '/uploads/upload_1795353755877_oioatm.png',
   },
   theme: {
     primary: '#016831',

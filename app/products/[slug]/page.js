@@ -171,13 +171,13 @@ export async function generateMetadata({ params }) {
       siteName: 'Satkhira Ghor',
       locale: 'bn_BD',
       type: 'article',
-      images: ogImages.length > 0 ? ogImages : [{ url: `${baseUrl}/assets/logo-1.png` }],
+      images: ogImages.length > 0 ? ogImages : [{ url: `${baseUrl}/uploads/upload_1795353755877_oioatm.png` }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${product.name} | দাম ৳${product.price} | সাতক্ষীরা ঘর`,
       description,
-      images: rawImages.length > 0 ? [rawImages[0]] : [`${baseUrl}/assets/logo-1.png`],
+      images: rawImages.length > 0 ? [rawImages[0]] : [`${baseUrl}/uploads/upload_1795353755877_oioatm.png`],
     },
   };
 }
@@ -212,7 +212,7 @@ export default async function ProductDetailPage({ params }) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: schemaImages.length > 0 ? schemaImages : [`${baseUrl}/assets/logo-1.png`],
+    image: schemaImages.length > 0 ? schemaImages : [`${baseUrl}/uploads/upload_1795353755877_oioatm.png`],
     description: product.shortDescription || (product.description ? product.description.slice(0, 200) : product.name),
     sku: product.slug,
     mpn: product.id || String(product._id || product.slug),

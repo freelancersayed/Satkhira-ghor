@@ -9,7 +9,7 @@ import { useSiteContentStore } from '@/store/siteContentStore';
 export default function Footer() {
   const pathname = usePathname();
   const { content } = useSiteContentStore();
-  const brandLogo = content?.brand?.logo || '/assets/logo-1.png';
+  const brandLogo = content?.brand?.logo || '/uploads/upload_1795353755877_oioatm.png';
   const brandName = content?.brand?.name || 'সাতক্ষীরা ঘর';
 
   // Hide footer on checkout, cart, and admin pages

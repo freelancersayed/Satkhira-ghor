@@ -56,7 +56,7 @@ export default function Header() {
   const { user, logout, checkAuth } = useAuthStore();
   const { content } = useSiteContentStore();
   const hero = content?.hero || {};
-  const brandLogo = content?.brand?.logo || '/assets/logo-1.png';
+  const brandLogo = content?.brand?.logo || '/uploads/upload_1795353755877_oioatm.png';
   const brandName = content?.brand?.name || 'সাতক্ষীরা ঘর';
 
   useEffect(() => {
