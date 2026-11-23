@@ -124,17 +124,60 @@ export async function generateMetadata({ params }) {
 
   if (!product) {
     return {
-      title: 'পণ্য পাওয়া যায়নি | সাতক্ষীরা ঘর',
+      title: 'পণ্য পাওয়া যায়নি',
     };
   }
 
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app').replace(/\/$/, '');
+  const productUrl = `${baseUrl}/products/${product.slug}`;
+  const title = `${product.name} | দাম ৳${product.price}`;
+  const description =
+    product.shortDescription ||
+    (product.description ? product.description.slice(0, 160) : '') ||
+    `${product.name} - ১০০% খাঁটি ও প্রাকৃতিক। সুন্দরবন ও উপকূলীয় অঞ্চলের আসল স্বাদ। ক্যাশ অন ডেলিভারিতে অর্ডার করুন।`;
+
+  const rawImages = [
+    ...(product.image ? [product.image] : []),
+    ...(Array.isArray(product.images) ? product.images : []),
+  ].filter(Boolean);
+
+  const ogImages = rawImages.map((img) => ({
+    url: img.startsWith('http') ? img : `${baseUrl}${img.startsWith('/') ? '' : '/'}${img}`,
+    alt: product.name,
+  }));
+
+  const keywords = [
+    product.name,
+    product.categoryName || product.category,
+    `${product.name} এর দাম`,
+    `${product.name} বাংলাদেশ`,
+    'সাতক্ষীরা ঘর',
+    'খাঁটি প্রাকৃতিক খাদ্য',
+    'সুন্দরবনের পণ্য',
+    'অর্গানিক ফুড',
+  ].filter(Boolean);
+
   return {
-    title: `${product.name} | সাতক্ষীরা ঘর`,
-    description: product.shortDescription,
+    title,
+    description,
+    keywords,
+    alternates: {
+      canonical: productUrl,
+    },
     openGraph: {
       title: `${product.name} - সাতক্ষীরা ঘর`,
-      description: product.shortDescription,
-      images: [{ url: product.image }],
+      description,
+      url: productUrl,
+      siteName: 'Satkhira Ghor',
+      locale: 'bn_BD',
+      type: 'article',
+      images: ogImages.length > 0 ? ogImages : [{ url: `${baseUrl}/assets/logo-1.png` }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} | দাম ৳${product.price} | সাতক্ষীরা ঘর`,
+      description,
+      images: rawImages.length > 0 ? [rawImages[0]] : [`${baseUrl}/assets/logo-1.png`],
     },
   };
 }
@@ -152,6 +195,83 @@ export default async function ProductDetailPage({ params }) {
     getRelatedProducts(product),
   ]);
 
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://satkhir-ghor.vercel.app').replace(/\/$/, '');
+  const productUrl = `${baseUrl}/products/${product.slug}`;
+  const isOutOfStock = product.stock !== undefined && Number(product.stock) <= 0;
+
+  const rawImages = [
+    ...(product.image ? [product.image] : []),
+    ...(Array.isArray(product.images) ? product.images : []),
+  ].filter(Boolean);
+
+  const schemaImages = rawImages.map((img) =>
+    img.startsWith('http') ? img : `${baseUrl}${img.startsWith('/') ? '' : '/'}${img}`
+  );
+
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: schemaImages.length > 0 ? schemaImages : [`${baseUrl}/assets/logo-1.png`],
+    description: product.shortDescription || (product.description ? product.description.slice(0, 200) : product.name),
+    sku: product.slug,
+    mpn: product.id || String(product._id || product.slug),
+    brand: {
+      '@type': 'Brand',
+      name: 'সাতক্ষীরা ঘর',
+    },
+    category: product.categoryName || product.category || 'প্রাকৃতিক খাদ্য',
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'BDT',
+      price: Number(product.price) || 0,
+      priceValidUntil: '2027-12-31',
+      itemCondition: 'https://schema.org/NewCondition',
+      availability: isOutOfStock
+        ? 'https://schema.org/OutOfStock'
+        : 'https://schema.org/InStock',
+      url: productUrl,
+      seller: {
+        '@type': 'Organization',
+        name: 'সাতক্ষীরা ঘর',
+      },
+    },
+    ...(reviewSummary.count > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: String(reviewSummary.avg),
+        reviewCount: String(reviewSummary.count),
+        bestRating: '5',
+        worstRating: '1',
+      },
+    }),
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'হোম',
+        item: baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: product.categoryName || product.category || 'ক্যাটাগরি',
+        item: `${baseUrl}/shop?cat=${encodeURIComponent(product.category || product.categoryName || 'all')}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: product.name,
+        item: productUrl,
+      },
+    ],
+  };
+
   const hasOrigin = Boolean(product.origin && String(product.origin).trim());
   const hasHarvestDate = Boolean(
     product.harvestDate && String(product.harvestDate).trim()
@@ -164,6 +284,16 @@ export default async function ProductDetailPage({ params }) {
 
   return (
     <div className="py-4 sm:py-8 lg:py-10 bg-[#FDFBF7]">
+      {/* ── Google Product & Breadcrumb Rich Snippets JSON-LD Schemas ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-[#4B5563]">
