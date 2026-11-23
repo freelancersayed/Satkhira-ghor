@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { cache } from 'react';
 import { connectToDatabase } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import Review from '@/models/Review';
@@ -20,10 +21,10 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 export const dynamicParams = true;
 
-async function getProductBySlug(slug) {
+const getProductBySlug = cache(async function getProductBySlug(slug) {
   try {
     await connectToDatabase();
     const dbProduct = await Product.findOne({ slug }).lean();
@@ -42,7 +43,7 @@ async function getProductBySlug(slug) {
     // fallback
   }
   return null;
-}
+});
 
 async function getProductReviewsSummary(productId, productSlug) {
   try {
@@ -64,6 +65,45 @@ async function getProductReviewsSummary(productId, productSlug) {
   } catch (e) {
     return { count: 0, avg: 0 };
   }
+}
+
+async function getRelatedProducts(product) {
+  try {
+    const sameCatQuery = {
+      isDeleted: { $ne: true },
+      slug: { $ne: product.slug },
+      $or: [
+        { category: product.category },
+        { categoryName: product.categoryName },
+      ],
+    };
+    let relatedDb = await Product.find(sameCatQuery)
+      .select('name slug price originalPrice image unit stock category categoryName')
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .lean();
+
+    if (!relatedDb || relatedDb.length < 4) {
+      const existingSlugs = [product.slug, ...(relatedDb || []).map((p) => p.slug)];
+      const fallbackRelated = await Product.find({
+        isDeleted: { $ne: true },
+        slug: { $nin: existingSlugs },
+      })
+        .select('name slug price originalPrice image unit stock category categoryName')
+        .sort({ createdAt: -1 })
+        .limit(4 - (relatedDb ? relatedDb.length : 0))
+        .lean();
+      relatedDb = [...(relatedDb || []), ...(fallbackRelated || [])];
+    }
+
+    if (relatedDb && relatedDb.length > 0) {
+      return JSON.parse(JSON.stringify(relatedDb)).map((p) => ({
+        ...p,
+        id: p._id ? String(p._id) : p.slug,
+      }));
+    }
+  } catch (e) {}
+  return [];
 }
 
 export async function generateStaticParams() {
@@ -107,46 +147,10 @@ export default async function ProductDetailPage({ params }) {
     notFound();
   }
 
-  const reviewSummary = await getProductReviewsSummary(
-    product.id || product._id,
-    product.slug
-  );
-
-  // Related products from MongoDB database (prioritize same category)
-  let relatedProducts = [];
-  try {
-    const sameCatQuery = {
-      isDeleted: { $ne: true },
-      slug: { $ne: product.slug },
-      $or: [
-        { category: product.category },
-        { categoryName: product.categoryName },
-      ],
-    };
-    let relatedDb = await Product.find(sameCatQuery)
-      .sort({ createdAt: -1 })
-      .limit(4)
-      .lean();
-
-    if (!relatedDb || relatedDb.length < 4) {
-      const existingSlugs = [product.slug, ...(relatedDb || []).map((p) => p.slug)];
-      const fallbackRelated = await Product.find({
-        isDeleted: { $ne: true },
-        slug: { $nin: existingSlugs },
-      })
-        .sort({ createdAt: -1 })
-        .limit(4 - (relatedDb ? relatedDb.length : 0))
-        .lean();
-      relatedDb = [...(relatedDb || []), ...(fallbackRelated || [])];
-    }
-
-    if (relatedDb && relatedDb.length > 0) {
-      relatedProducts = JSON.parse(JSON.stringify(relatedDb)).map((p) => ({
-        ...p,
-        id: p._id ? String(p._id) : p.slug,
-      }));
-    }
-  } catch (e) {}
+  const [reviewSummary, relatedProducts] = await Promise.all([
+    getProductReviewsSummary(product.id || product._id, product.slug),
+    getRelatedProducts(product),
+  ]);
 
   const hasOrigin = Boolean(product.origin && String(product.origin).trim());
   const hasHarvestDate = Boolean(

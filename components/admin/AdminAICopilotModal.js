@@ -333,10 +333,10 @@ export default function AdminAICopilotModal({ isOpen, onClose, onRefreshData }) 
             >
               <div
                 className={`max-w-[92%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs ${m.sender === 'user'
-                    ? 'bg-[#016831] text-white rounded-br-xs'
-                    : m.isError
-                      ? 'bg-red-50 text-red-800 border border-red-200 rounded-bl-xs'
-                      : 'bg-white text-slate-800 border border-[#E8E2D5] rounded-bl-xs'
+                  ? 'bg-[#016831] text-white rounded-br-xs'
+                  : m.isError
+                    ? 'bg-red-50 text-red-800 border border-red-200 rounded-bl-xs'
+                    : 'bg-white text-slate-800 border border-[#E8E2D5] rounded-bl-xs'
                   }`}
               >
                 <div className="flex items-center gap-1.5 mb-1 text-[10px] opacity-70 font-semibold">
@@ -566,6 +566,7 @@ export default function AdminAICopilotModal({ isOpen, onClose, onRefreshData }) 
             >
               <span>➕ পদ্ম মধু যোগ করো</span>
             </button> */}
+
 
             <button
               onClick={() => handleSend('আজকের সামগ্রিক সেলস ও স্টক রিপোর্ট দাও')}

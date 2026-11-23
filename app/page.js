@@ -5,6 +5,7 @@ import WhyChooseUs from '@/components/home/WhyChooseUs';
 import SpecialBanner from '@/components/home/SpecialBanner';
 import { connectToDatabase } from '@/lib/mongodb';
 import SiteContent from '@/models/SiteContent';
+import Product from '@/models/Product';
 
 export const revalidate = 60;
 
@@ -21,8 +22,28 @@ async function getCategories() {
   return [];
 }
 
+async function getCategoryCounts() {
+  try {
+    await connectToDatabase();
+    const counts = await Product.aggregate([
+      { $match: { isDeleted: { $ne: true } } },
+      { $group: { _id: '$category', count: { $sum: 1 } } },
+    ]);
+    const map = {};
+    counts.forEach((c) => {
+      if (c._id) map[c._id] = c.count;
+    });
+    return map;
+  } catch (e) {
+    return {};
+  }
+}
+
 export default async function HomePage() {
-  const initialCategories = await getCategories();
+  const [initialCategories, initialCategoryCounts] = await Promise.all([
+    getCategories(),
+    getCategoryCounts(),
+  ]);
 
   return (
     <div>
@@ -30,7 +51,10 @@ export default async function HomePage() {
       <HeroBanner />
 
       {/* Category Icons Grid */}
-      <CategorySection initialCategories={initialCategories} />
+      <CategorySection
+        initialCategories={initialCategories}
+        initialCategoryCounts={initialCategoryCounts}
+      />
 
       {/* Featured Products */}
       <FeaturedProducts initialCategories={initialCategories} />

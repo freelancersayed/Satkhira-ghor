@@ -196,7 +196,7 @@ export default function HeroBanner() {
                       priority={i === 0}
                       className="object-cover object-center w-full h-full select-none"
                       sizes="(max-width: 1024px) 100vw, 72vw"
-                      quality={90}
+                      quality={85}
                     />
                   </div>
                 );
@@ -296,7 +296,7 @@ export default function HeroBanner() {
                   fill
                   className="object-cover object-center w-full h-full select-none transition-transform duration-500 group-hover/side:scale-105"
                   sizes="(max-width: 1024px) 100vw, 28vw"
-                  quality={90}
+                  quality={85}
                 />
               </Link>
             ) : (

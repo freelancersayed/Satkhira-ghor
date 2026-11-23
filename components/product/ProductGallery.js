@@ -35,13 +35,23 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [failedImages, setFailedImages] = useState({});
+
+  const handleImageError = (imgSrc) => {
+    if (imgSrc) {
+      setFailedImages((prev) => ({ ...prev, [imgSrc]: true }));
+    }
+  };
+
+  const getSafeSrc = (src) => (failedImages[src] ? '/assets/logo-1.png' : src);
 
   // Sync index if images change
   useEffect(() => {
     setCurrentIndex(0);
   }, [mainImage, images.length]);
 
-  const selectedImage = allImages[currentIndex] || mainImage || '';
+  const rawSelectedImage = allImages[currentIndex] || mainImage || '';
+  const selectedImage = getSafeSrc(rawSelectedImage);
 
   const handlePrev = useCallback(
     (e) => {
@@ -84,7 +94,9 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
             alt={`${name} - ছবি ${currentIndex + 1}`}
             fill
             priority
+            quality={85}
             unoptimized={isUnoptimizedSrc(selectedImage)}
+            onError={() => handleImageError(rawSelectedImage)}
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
@@ -163,10 +175,12 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
                   aria-label={`Show image ${idx + 1}`}
                 >
                   <Image
-                    src={img}
+                    src={getSafeSrc(img)}
                     alt={`${name} thumbnail ${idx + 1}`}
                     fill
+                    quality={75}
                     unoptimized={isUnoptimizedSrc(img)}
+                    onError={() => handleImageError(img)}
                     className="object-cover group-hover/thumb:scale-110 transition-transform duration-300"
                     sizes="80px"
                   />
@@ -232,7 +246,9 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
                   src={selectedImage}
                   alt={name}
                   fill
+                  quality={85}
                   unoptimized={isUnoptimizedSrc(selectedImage)}
+                  onError={() => handleImageError(rawSelectedImage)}
                   className="object-contain"
                   sizes="100vw"
                   priority

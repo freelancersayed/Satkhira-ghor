@@ -8,6 +8,7 @@ import { useCartStore } from '@/store/cartStore';
 
 export default function ProductCard({ product }) {
   const [isAdded, setIsAdded] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
 
   const isOutOfStock = product.stock !== undefined && Number(product.stock) <= 0;
@@ -37,7 +38,7 @@ export default function ProductCard({ product }) {
     );
   };
 
-  const imageSrc = product.image || '/assets/logo-1.png';
+  const imageSrc = imgError ? '/assets/logo-1.png' : (product.image || '/assets/logo-1.png');
 
   return (
     <div className="group bg-white rounded-xl sm:rounded-2xl p-2.5 border border-[#E8E2D5] hover:border-[#016831]/40 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between h-full relative">
@@ -49,6 +50,7 @@ export default function ProductCard({ product }) {
             alt={product.name}
             fill
             unoptimized={isUnoptimizedSrc(imageSrc)}
+            onError={() => setImgError(true)}
             className={`object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale opacity-75' : 'group-hover:scale-105'}`}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           />

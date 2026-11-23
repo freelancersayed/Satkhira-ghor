@@ -143,11 +143,9 @@ export default function ModernProductShowcase({ initialProducts = [], initialCat
     return discounted.length >= 3 ? discounted : initialProducts.slice(0, 6);
   }, [flashSale.productSlugs, flashSale.customOffers, initialProducts]);
 
-  // Duplicate flash sale products for seamless right-to-left auto-swipe carousel
+  // Duplicate flash sale products for seamless right-to-left auto-swipe carousel (lightweight 2x)
   const loopedFlashProducts = useMemo(() => {
     return [
-      ...flashSaleProducts,
-      ...flashSaleProducts,
       ...flashSaleProducts,
       ...flashSaleProducts,
     ];
@@ -166,9 +164,9 @@ export default function ModernProductShowcase({ initialProducts = [], initialCat
 
       const firstItem = container.firstElementChild;
       const stepWidth = firstItem ? firstItem.offsetWidth + 16 : 280;
-      const singleCycleWidth = container.scrollWidth / 4;
+      const singleCycleWidth = container.scrollWidth / 2;
 
-      if (container.scrollLeft >= singleCycleWidth * 2) {
+      if (container.scrollLeft >= singleCycleWidth) {
         container.scrollLeft -= singleCycleWidth;
       }
 

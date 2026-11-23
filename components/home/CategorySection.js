@@ -9,23 +9,15 @@ import AdminSectionEditModal from '@/components/common/AdminSectionEditModal';
 import CategoryEditModal from '@/components/home/CategoryEditModal';
 import CategoryGridSkeleton from '@/components/home/CategoryGridSkeleton';
 
-export default function CategorySection({ initialCategories = [] }) {
+export default function CategorySection({ initialCategories = [], initialCategoryCounts = {} }) {
   const { content } = useSiteContentStore();
   const catContent = content?.categorySection || {};
-  const [liveProducts, setLiveProducts] = useState([]);
   const [liveCategories, setLiveCategories] = useState(initialCategories);
+  const [categoryCounts, setCategoryCounts] = useState(initialCategoryCounts);
+  const [failedCats, setFailedCats] = useState({});
   const [loading, setLoading] = useState(initialCategories.length === 0);
 
   useEffect(() => {
-    fetch('/api/products')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && Array.isArray(data.products)) {
-          setLiveProducts(data.products);
-        }
-      })
-      .catch(() => { });
-
     const loadCats = () => {
       fetch('/api/categories')
         .then((res) => res.json())
@@ -72,32 +64,17 @@ export default function CategorySection({ initialCategories = [] }) {
     const slug = cat.slug?.toLowerCase()?.trim() || '';
     const name = cat.name?.toLowerCase()?.trim() || '';
     const id = cat.id?.toLowerCase()?.trim() || '';
-    const norm = (s) => (s ? s.replace(/[^a-z0-9]/g, '') : '');
 
-    return liveProducts.filter((p) => {
-      const pCat = p.category?.toLowerCase()?.trim() || '';
-      const pName = p.categoryName?.toLowerCase()?.trim() || '';
+    if (categoryCounts[slug] !== undefined) return categoryCounts[slug];
+    if (categoryCounts[id] !== undefined) return categoryCounts[id];
+    if (categoryCounts[name] !== undefined) return categoryCounts[name];
 
-      if (
-        (slug && pCat === slug) ||
-        (id && pCat === id) ||
-        (slug && norm(slug) && (norm(slug).includes(norm(pCat)) || norm(pCat).includes(norm(slug))))
-      ) {
-        return true;
-      }
+    for (const [k, v] of Object.entries(categoryCounts)) {
+      const kl = k.toLowerCase().trim();
+      if (kl === slug || kl === id || kl === name) return v;
+    }
 
-      if (
-        name &&
-        (pName === name ||
-          pCat === name ||
-          pName.includes(name) ||
-          name.includes(pName))
-      ) {
-        return true;
-      }
-
-      return false;
-    }).length;
+    return 0;
   };
 
   const toBanglaNum = (num) => {
@@ -165,12 +142,13 @@ export default function CategorySection({ initialCategories = [] }) {
                 >
                   {/* Visual Category Thumbnail with Rounded Container */}
                   <div className="relative w-18 h-18 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#FAF8F5] mb-2 sm:mb-3 border border-[#E8E2D5]/70 group-hover:scale-105 transition-transform duration-300">
-                    {cat.image ? (
+                    {cat.image && !failedCats[cat.id || cat.slug] ? (
                       <Image
                         src={cat.image}
                         alt={cat.name}
                         fill
                         unoptimized={Boolean(cat.image?.startsWith('data:'))}
+                        onError={() => setFailedCats((prev) => ({ ...prev, [cat.id || cat.slug]: true }))}
                         className="object-cover"
                         sizes="(max-width: 640px) 120px, 150px"
                       />

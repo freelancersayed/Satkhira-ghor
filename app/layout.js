@@ -1,8 +1,4 @@
 import './globals.css';
-import '@fortawesome/fontawesome-svg-core/styles.css';
-import { config } from '@fortawesome/fontawesome-svg-core';
-config.autoAddCss = false;
-
 import { Hind_Siliguri } from 'next/font/google';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
@@ -73,13 +69,6 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="bn" className={`scroll-smooth ${hindSiliguri.variable}`}>
       <head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-          integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-        />
         <style
           id="satkhira-ghor-dynamic-theme-ssr"
           dangerouslySetInnerHTML={{ __html: themeCSS }}

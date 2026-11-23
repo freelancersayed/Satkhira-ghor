@@ -138,11 +138,10 @@ export default function CouponsAndCartView() {
       <div className="flex gap-2 border-b border-[#E8E2D5] pb-3">
         <button
           onClick={() => setSubTab('coupons')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-            subTab === 'coupons'
-              ? 'bg-[#016831] text-white'
-              : 'text-slate-600 hover:bg-emerald-50'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${subTab === 'coupons'
+            ? 'bg-[#016831] text-white'
+            : 'text-slate-600 hover:bg-emerald-50'
+            }`}
         >
           <Tag className="w-4 h-4" />
           <span>কুপন ও ডিসকাউন্ট ভাউচার ({coupons.length})</span>
@@ -150,11 +149,10 @@ export default function CouponsAndCartView() {
 
         <button
           onClick={() => setSubTab('abandoned')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-            subTab === 'abandoned'
-              ? 'bg-[#016831] text-white'
-              : 'text-slate-600 hover:bg-emerald-50'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${subTab === 'abandoned'
+            ? 'bg-[#016831] text-white'
+            : 'text-slate-600 hover:bg-emerald-50'
+            }`}
         >
           <ShoppingCart className="w-4 h-4" />
           <span>অসম্পূর্ণ কার্ট রিকভারি (Abandoned Carts)</span>
@@ -173,11 +171,10 @@ export default function CouponsAndCartView() {
 
             {formMsg.text && (
               <div
-                className={`p-3 rounded-xl text-xs font-bold ${
-                  formMsg.type === 'error'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-emerald-100 text-emerald-800'
-                }`}
+                className={`p-3 rounded-xl text-xs font-bold ${formMsg.type === 'error'
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-emerald-100 text-emerald-800'
+                  }`}
               >
                 {formMsg.text}
               </div>
@@ -328,6 +325,8 @@ export default function CouponsAndCartView() {
         </div>
       )}
 
+
+
       {/* ================= TAB: ABANDONED CARTS ================= */}
       {subTab === 'abandoned' && (
         <div className="bg-white rounded-3xl border border-[#E8E2D5] shadow-sm overflow-hidden">
@@ -381,13 +380,12 @@ export default function CouponsAndCartView() {
                       <td className="p-3 text-slate-500 capitalize">{cart.step}</td>
                       <td className="p-3">
                         <span
-                          className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
-                            cart.recoveryStatus === 'recovered'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : cart.recoveryStatus === 'contacted'
+                          className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${cart.recoveryStatus === 'recovered'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : cart.recoveryStatus === 'contacted'
                               ? 'bg-blue-100 text-blue-800'
                               : 'bg-amber-100 text-amber-800'
-                          }`}
+                            }`}
                         >
                           {cart.recoveryStatus}
                         </span>
