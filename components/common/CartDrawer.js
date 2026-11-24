@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
@@ -8,6 +9,7 @@ import { useCartStore } from '@/store/cartStore';
 import { deliveryConfig } from '@/lib/deliveryConfig';
 
 export default function CartDrawer() {
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const {
     isOpen,
@@ -33,7 +35,7 @@ export default function CartDrawer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, closeCart]);
 
-  if (!mounted) return null;
+  if (!mounted || pathname?.startsWith('/admin')) return null;
 
   const totalPrice = getTotalPrice();
   const freeShippingThreshold = deliveryConfig.freeDeliveryThreshold;

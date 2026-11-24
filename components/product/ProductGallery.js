@@ -170,11 +170,10 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
                   key={idx}
                   type="button"
                   onClick={() => setCurrentIndex(idx)}
-                  className={`group/thumb relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden flex-shrink-0 transition-all duration-200 border-2 ${
-                    isSelected
-                      ? 'border-[#016831] ring-2 ring-[#016831]/25 scale-102 shadow-sm'
-                      : 'border-[#E8E2D5] opacity-75 hover:opacity-100 hover:border-[#016831]/50'
-                  }`}
+                  className={`group/thumb relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden flex-shrink-0 transition-all duration-200 border-2 ${isSelected
+                    ? 'border-[#016831] ring-2 ring-[#016831]/25 scale-102 shadow-sm'
+                    : 'border-[#E8E2D5] opacity-75 hover:opacity-100 hover:border-[#016831]/50'
+                    }`}
                   aria-label={`Show image ${idx + 1}`}
                 >
                   <Image
@@ -293,11 +292,10 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
                   key={idx}
                   type="button"
                   onClick={() => setCurrentIndex(idx)}
-                  className={`relative w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${
-                    currentIndex === idx
-                      ? 'border-emerald-500 ring-2 ring-emerald-500/50 scale-105'
-                      : 'border-white/30 opacity-60 hover:opacity-100'
-                  }`}
+                  className={`relative w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${currentIndex === idx
+                    ? 'border-emerald-500 ring-2 ring-emerald-500/50 scale-105'
+                    : 'border-white/30 opacity-60 hover:opacity-100'
+                    }`}
                 >
                   <Image
                     src={img}

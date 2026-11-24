@@ -152,6 +152,11 @@ export default function Header() {
         : (Array.isArray(categories) ? categories : []);
   const displayCategories = allCategories.filter((c) => c.id !== 'all' && c.slug !== 'all').slice(0, 7);
 
+  // Never render customer storefront header in admin panel
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-40 w-full transition-all duration-200 shadow-xs">
       {/* ── Top Notification Bar (Polli Bazar Style) ── */}

@@ -187,6 +187,11 @@ export default function MobileBottomNav() {
     router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
   };
 
+  // Never render mobile bottom nav on admin panel
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <>
       {/* ═════════════════════════════════════════════════════════════════

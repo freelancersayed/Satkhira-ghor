@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { Check, ShoppingBag, X, ArrowRight, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 
 export default function AddToCartToast() {
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const showToast = useCartStore((state) => state.showToast);
   const hideToast = useCartStore((state) => state.hideToast);
@@ -28,7 +30,7 @@ export default function AddToCartToast() {
     return () => clearTimeout(timer);
   }, [showToast, lastAddedItem, hideToast]);
 
-  if (!mounted || !showToast || !lastAddedItem) {
+  if (!mounted || !showToast || !lastAddedItem || pathname?.startsWith('/admin')) {
     return null;
   }
 
