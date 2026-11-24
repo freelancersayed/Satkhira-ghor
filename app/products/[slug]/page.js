@@ -9,6 +9,7 @@ import AddToCartButton from '@/components/product/AddToCartButton';
 import ProductCard from '@/components/product/ProductCard';
 import ProductReviewsSection from '@/components/product/ProductReviewsSection';
 import ProductDetailsCard from '@/components/product/ProductDetailsCard';
+import ProductViewTracker from '@/components/product/ProductViewTracker';
 import { deliveryConfig } from '@/lib/deliveryConfig';
 import {
   Star,
@@ -284,6 +285,9 @@ export default async function ProductDetailPage({ params }) {
 
   return (
     <div className="py-4 sm:py-8 lg:py-10 bg-[#FDFBF7]">
+      {/* ── E-commerce ViewItem Analytics Tracker ── */}
+      <ProductViewTracker product={product} />
+
       {/* ── Google Product & Breadcrumb Rich Snippets JSON-LD Schemas ── */}
       <script
         type="application/ld+json"

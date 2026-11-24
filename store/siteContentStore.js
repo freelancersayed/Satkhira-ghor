@@ -104,6 +104,12 @@ const defaultContent = {
     // Announcement
     topNotice:
       'সুন্দরবনের খাঁটি মধু ও সাতক্ষীরার খাঁটি গাওয়া ঘিয়ে সারাদেশে ফ্রি ক্যাশ অন ডেলিভারি (১৫০০ টাকার অর্ডারে)',
+
+    // Analytics & Conversion Tracking
+    gtmId: '',
+    pixelId: '',
+    gaMeasurementId: '',
+    clarityId: '',
   },
 };
 

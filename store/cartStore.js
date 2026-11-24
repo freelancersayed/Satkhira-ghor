@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { trackAddToCart } from '@/lib/analytics';
 
 export const useCartStore = create(
   persist(
@@ -27,6 +28,9 @@ export const useCartStore = create(
         if (product.stock !== undefined && Number(product.stock) <= 0) {
           return;
         }
+
+        // Fire non-blocking E-commerce Analytics event
+        trackAddToCart(product, quantity);
 
         set((state) => {
           const existingItemIndex = state.items.findIndex(

@@ -21,6 +21,7 @@ import {
   Sparkles,
   ShieldCheck,
   Percent,
+  Activity,
 } from 'lucide-react';
 import { useSiteContentStore } from '@/store/siteContentStore';
 import { deliveryConfig } from '@/lib/deliveryConfig';
@@ -52,6 +53,12 @@ export const DEFAULT_SETTINGS = {
   // Top Notice / Announcement Banner
   topNotice:
     'সুন্দরবনের খাঁটি মধু ও সাতক্ষীরার খাঁটি গাওয়া ঘিয়ে সারাদেশে ফ্রি ক্যাশ অন ডেলিভারি (১৫০০ টাকার অর্ডারে)',
+
+  // Analytics & Conversion Tracking (LazyOnload Zero-Lag)
+  gtmId: '',
+  pixelId: '',
+  gaMeasurementId: '',
+  clarityId: '',
 };
 
 const toBanglaNum = (num) => {
@@ -196,6 +203,7 @@ export default function AdminSettingsView({ showNotification }) {
           { id: 'support', label: 'হেল্পলাইন ও সাপোর্ট', icon: Phone },
           { id: 'delivery', label: 'ডেলিভারি চার্জ ও অফার', icon: Truck },
           { id: 'store', label: 'ঠিকানা ও সোশ্যাল লিংক', icon: Globe },
+          { id: 'analytics', label: 'ট্র্যাকিং ও অ্যানালিটিক্স', icon: Activity },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -609,6 +617,127 @@ export default function AdminSettingsView({ showNotification }) {
               </div>
             </div>
           )}
+
+          {/* ═════════════════════════════════════════════════════════════════
+              সেকশন ৫: ট্র্যাকিং ও অ্যানালিটিক্স সেটিংস (GTM, Pixel, GA4, Clarity)
+              ═════════════════════════════════════════════════════════════════ */}
+          {(activeTab === 'all' || activeTab === 'analytics') && (
+            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-stone-200 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                    <Activity className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-black text-stone-900">
+                      অ্যানালিটিক্স ও কনভার্সন ট্র্যাকিং
+                    </h3>
+                    <p className="text-[11px] text-stone-500">
+                      GTM, Meta Pixel, GA4 ও Clarity আইডি দিয়ে বিজ্ঞাপন ও সেলস ট্র্যাক করুন
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-emerald-600" />
+                  <span>সুপার ফাস্ট lazyOnload</span>
+                </span>
+              </div>
+
+              {/* Informative Speed Guarantee Notice */}
+              <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-xl flex items-start gap-2.5 text-xs text-purple-950">
+                <ShieldCheck className="w-4 h-4 text-purple-700 flex-shrink-0 mt-0.5" />
+                <div className="leading-relaxed">
+                  <span className="font-bold">জিরো-ল্যাগ (Zero-Lag) স্পিড গ্যারান্টি:</span> প্রতিটি স্ক্রিপ্ট Next.js-এর <code className="bg-white px-1.5 py-0.5 rounded text-[11px] font-mono border border-purple-200 font-bold">lazyOnload</code> মোডে পেজের সব ইমেজ ও কনটেন্ট শতভাগ লোড হওয়ার পরই কেবল ব্যাকগ্রাউন্ডে রান করবে। ফলে ওয়েবসাইটের লোডিং স্পিডে কোনো প্রভাব পড়বে না।
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                {/* 1. Google Tag Manager (GTM) */}
+                <div className="p-3.5 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-blue-600" />
+                      <span>Google Tag Manager (GTM)</span>
+                    </label>
+                    <span className="text-[10px] text-stone-400 font-mono">GTM-XXXXXXX</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formState.gtmId || ''}
+                    onChange={(e) => handleChange('gtmId', e.target.value)}
+                    placeholder="যেমন: GTM-ABCD123"
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-[#016831]"
+                  />
+                  <p className="text-[10px] text-stone-500">
+                    GTM আইডি দিলে অন্যান্য ট্যাগ সরাসরি GTM ড্যাশবোর্ড থেকে হ্যান্ডেল করতে পারবেন।
+                  </p>
+                </div>
+
+                {/* 2. Meta (Facebook) Pixel */}
+                <div className="p-3.5 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-blue-500" />
+                      <span>Meta (Facebook) Pixel ID</span>
+                    </label>
+                    <span className="text-[10px] text-stone-400 font-mono">Numeric ID</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formState.pixelId || ''}
+                    onChange={(e) => handleChange('pixelId', e.target.value)}
+                    placeholder="যেমন: 123456789012345"
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-[#016831]"
+                  />
+                  <p className="text-[10px] text-stone-500">
+                    ফেসবুক অ্যাডস রিটার্গেটিং ও সেলস কনভার্সন ট্র্যাক করতে মেটা পিক্সেল আইডি দিন।
+                  </p>
+                </div>
+
+                {/* 3. Google Analytics 4 (GA4) */}
+                <div className="p-3.5 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      <span>Google Analytics 4 (GA4) ID</span>
+                    </label>
+                    <span className="text-[10px] text-stone-400 font-mono">G-XXXXXXXXXX</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formState.gaMeasurementId || ''}
+                    onChange={(e) => handleChange('gaMeasurementId', e.target.value)}
+                    placeholder="যেমন: G-ABC123XYZ0"
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-[#016831]"
+                  />
+                  <p className="text-[10px] text-stone-500">
+                    ভিজিটর ট্রাফিক, পেজভিউ ও ফুল ই-কমার্স ফানেল অ্যানালাইসিস করতে মেজারমেন্ট আইডি দিন।
+                  </p>
+                </div>
+
+                {/* 4. Microsoft Clarity */}
+                <div className="p-3.5 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-indigo-600" />
+                      <span>Microsoft Clarity Project ID</span>
+                    </label>
+                    <span className="text-[10px] text-stone-400 font-mono">Project ID</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formState.clarityId || ''}
+                    onChange={(e) => handleChange('clarityId', e.target.value)}
+                    placeholder="যেমন: n8qabcdefg"
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-[#016831]"
+                  />
+                  <p className="text-[10px] text-stone-500">
+                    ভিজিটরদের লাইভ স্ক্রিন ব্রাউজিং ভিডিও রেকর্ডিং ও হিটম্যাপ দেখতে ক্ল্যারিটি আইডি দিন।
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ═════════════════════════════════════════════════════════════════
@@ -825,6 +954,42 @@ export default function AdminSettingsView({ showNotification }) {
                   {formState.email}
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* লাইভ প্রিভিউ ৪: ট্র্যাকিং ও অ্যানালিটিক্স লাইভ স্ট্যাটাস */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200 shadow-xs space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-stone-100 text-xs font-black text-stone-800">
+              <span className="flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-purple-600" />
+                <span>ট্র্যাকিং স্ট্যাটাস প্রিভিউ</span>
+              </span>
+              <span className="text-[10px] bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-bold">
+                lazyOnload
+              </span>
+            </div>
+
+            <div className="space-y-1.5 text-xs">
+              {[
+                { name: 'Google Tag Manager', val: formState.gtmId, placeholder: 'GTM নেই' },
+                { name: 'Meta (FB) Pixel', val: formState.pixelId, placeholder: 'Pixel নেই' },
+                { name: 'Google Analytics 4', val: formState.gaMeasurementId, placeholder: 'GA4 নেই' },
+                { name: 'Microsoft Clarity', val: formState.clarityId, placeholder: 'Clarity নেই' },
+              ].map((t) => (
+                <div key={t.name} className="flex items-center justify-between p-2 rounded-lg bg-stone-50 border border-stone-100">
+                  <span className="text-stone-700 font-medium text-[11px]">{t.name}</span>
+                  {t.val?.trim() ? (
+                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-mono flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                      <span>সক্রিয়</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-medium text-stone-400 bg-stone-100 px-2 py-0.5 rounded">
+                      {t.placeholder}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

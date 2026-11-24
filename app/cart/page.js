@@ -30,6 +30,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { deliveryConfig, getMergedDeliveryConfig } from '@/lib/deliveryConfig';
 import { useSiteContentStore } from '@/store/siteContentStore';
+import { trackInitiateCheckout, trackPurchase } from '@/lib/analytics';
 
 const toBanglaNum = (num) => {
   const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
@@ -246,6 +247,13 @@ export default function CartPage() {
     return () => clearTimeout(timer);
   }, [formData.phone, formData.name, formData.address, formData.city, formData.district, items, discount, mounted, orderPlaced, getTotalPrice, activeDeliveryConfig]);
 
+  // Track InitiateCheckout on cart page view
+  useEffect(() => {
+    if (mounted && items && items.length > 0) {
+      trackInitiateCheckout(items, getTotalPrice());
+    }
+  }, [mounted]);
+
   if (!mounted) {
     return (
       <div className="py-20 text-center bg-[#FDFBF7] min-h-[50vh] flex flex-col items-center justify-center">
@@ -401,6 +409,7 @@ export default function CartPage() {
 
       setConfirmedOrder(data.order);
       setOrderPlaced(true);
+      trackPurchase(data.order);
       clearCart();
       if (typeof window !== 'undefined') {
         window.scrollTo({ top: 0, behavior: 'smooth' });

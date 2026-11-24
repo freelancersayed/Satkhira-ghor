@@ -7,6 +7,7 @@ import MobileBottomNav from '@/components/common/MobileBottomNav';
 import AddToCartToast from '@/components/common/AddToCartToast';
 import DynamicThemeInjector from '@/components/common/DynamicThemeInjector';
 import CustomerAIAssistantWidget from '@/components/ai/CustomerAIAssistantWidget';
+import AnalyticsTracker from '@/components/common/AnalyticsTracker';
 import { getSavedTheme, generateThemeCSS } from '@/lib/themeServer';
 
 const hindSiliguri = Hind_Siliguri({
@@ -187,6 +188,7 @@ export default async function RootLayout({ children }) {
         <AddToCartToast />
         <MobileBottomNav />
         <CustomerAIAssistantWidget />
+        <AnalyticsTracker />
       </body>
     </html>
   );
