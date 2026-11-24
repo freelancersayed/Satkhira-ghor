@@ -9,6 +9,7 @@ import {
   Package,
   ShoppingBag,
   Users,
+  User,
   Plus,
   Edit2,
   Trash2,
@@ -2986,7 +2987,7 @@ export default function AdminDashboardPage() {
                       </span>
                     </div>
                     <span className="text-[11px] text-slate-400 block truncate">
-                      অর্ডারের সময়: {new Date(selectedOrderDetails.createdAt).toLocaleString('bn-BD')}
+                      অর্ডারের সময়: {selectedOrderDetails.createdAt ? new Date(selectedOrderDetails.createdAt).toLocaleString('bn-BD') : 'আজ'}
                     </span>
                   </div>
                 </div>
@@ -3052,7 +3053,7 @@ export default function AdminDashboardPage() {
                           </a>
                           {selectedOrderDetails.customer?.phone && (
                             <a
-                              href={`https://wa.me/88${selectedOrderDetails.customer.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                              href={`https://wa.me/88${String(selectedOrderDetails.customer.phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
                                 `সালামু আলাইকুম ${selectedOrderDetails.customer.name || ''}, সাতক্ষীরা ঘর থেকে আপনার #${selectedOrderDetails.orderNumber} অর্ডারটি নিশ্চিতকরণের জন্য যোগাযোগ করা হয়েছে।`
                               )}`}
                               target="_blank"
