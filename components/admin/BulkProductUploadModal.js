@@ -52,7 +52,7 @@ export default function BulkProductUploadModal({ isOpen, onClose, onUploadSucces
             originalPrice: obj.originalPrice ? Number(obj.originalPrice) : null,
             unit: obj.unit || '১ একক',
             stock: obj.stock !== undefined ? Number(obj.stock) : 10,
-            image: obj.image || '/assets/logo-1.png',
+            image: obj.image || '/uploads/upload_1795353755877_oioatm.png',
             shortDescription: obj.shortDescription || '',
           });
         }

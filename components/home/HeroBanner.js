@@ -16,9 +16,9 @@ import HeroBannerEditModal from '@/components/home/HeroBannerEditModal';
 
 const SLIDE_INTERVAL_MS = 4500;
 
-export default function HeroBanner() {
+export default function HeroBanner({ initialHero = null }) {
   const { content, loaded, fetchContent } = useSiteContentStore();
-  const hero = content?.hero || {};
+  const hero = (loaded && content?.hero) ? content.hero : (initialHero || content?.hero || {});
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -31,8 +31,9 @@ export default function HeroBanner() {
 
   // Extract and normalize slides dynamically from database (pure dynamic, zero static fallback)
   const slides = useMemo(() => {
-    if (Array.isArray(hero.slides) && hero.slides.length > 0) {
-      const dbSlides = hero.slides
+    const rawHero = (loaded && content?.hero) ? content.hero : (initialHero || content?.hero || {});
+    if (Array.isArray(rawHero.slides) && rawHero.slides.length > 0) {
+      const dbSlides = rawHero.slides
         .map((item) => {
           if (typeof item === 'string' && item.trim()) {
             return { url: item.trim(), link: '/shop', label: 'ব্যানার' };
@@ -53,28 +54,29 @@ export default function HeroBanner() {
       }
     }
     return [];
-  }, [hero.slides]);
+  }, [content?.hero, initialHero, loaded]);
 
   // 2nd side banner (small banner next to main slider - Polli Bazar style, pure dynamic)
   const sideBanner = useMemo(() => {
-    if (hero.sideBanner && typeof hero.sideBanner === 'object' && hero.sideBanner.url) {
+    const rawHero = (loaded && content?.hero) ? content.hero : (initialHero || content?.hero || {});
+    if (rawHero.sideBanner && typeof rawHero.sideBanner === 'object' && rawHero.sideBanner.url) {
       return {
-        url: hero.sideBanner.url,
-        link: hero.sideBanner.link || '/shop?cat=combos',
-        label: hero.sideBanner.label || 'স্পেশাল অফার',
-        showOnMobile: hero.sideBanner.showOnMobile !== false,
+        url: rawHero.sideBanner.url,
+        link: rawHero.sideBanner.link || '/shop?cat=combos',
+        label: rawHero.sideBanner.label || 'স্পেশাল অফার',
+        showOnMobile: rawHero.sideBanner.showOnMobile !== false,
       };
     }
-    if (typeof hero.sideBanner === 'string' && hero.sideBanner.trim()) {
+    if (typeof rawHero.sideBanner === 'string' && rawHero.sideBanner.trim()) {
       return {
-        url: hero.sideBanner.trim(),
+        url: rawHero.sideBanner.trim(),
         link: '/shop?cat=combos',
         label: 'স্পেশাল অফার',
         showOnMobile: true,
       };
     }
     return null;
-  }, [hero.sideBanner]);
+  }, [content?.hero, initialHero, loaded]);
 
   // Auto slide timer
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function HeroBanner() {
   };
 
   // Skeleton Loader while dynamic banner data is loading
-  if (!loaded && slides.length === 0) {
+  if (!loaded && slides.length === 0 && !initialHero) {
     return (
       <section className="py-2.5 sm:py-4 bg-[#FCFBF7]">
         <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
@@ -194,6 +196,7 @@ export default function HeroBanner() {
                       alt={slide.label || `সাতক্ষীরা ঘর প্রধান ব্যানার ${i + 1}`}
                       fill
                       priority={i === 0}
+                      fetchPriority={i === 0 ? 'high' : 'auto'}
                       className="object-cover object-center w-full h-full select-none"
                       sizes="(max-width: 1024px) 100vw, 72vw"
                       quality={85}
@@ -294,6 +297,8 @@ export default function HeroBanner() {
                   src={sideBanner.url}
                   alt={sideBanner.label || 'সাতক্ষীরা ঘর স্পেশাল অফার'}
                   fill
+                  priority
+                  fetchPriority="high"
                   className="object-cover object-center w-full h-full select-none transition-transform duration-500 group-hover/side:scale-105"
                   sizes="(max-width: 1024px) 100vw, 28vw"
                   quality={85}

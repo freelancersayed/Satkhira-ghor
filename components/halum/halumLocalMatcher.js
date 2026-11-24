@@ -70,7 +70,7 @@ function formatCard(slugOrId, catalog = currentLiveCatalog) {
     slug: p.slug,
     price: p.price,
     originalPrice: p.originalPrice || null,
-    image: p.image || '/assets/logo-1.png',
+    image: p.image || '/uploads/upload_1795353755877_oioatm.png',
     unit: p.unit || '১ কেজি',
     badge: p.badge || (p.originalPrice > p.price ? 'বিশেষ ছাড়' : '১০০% খাঁটি'),
   };

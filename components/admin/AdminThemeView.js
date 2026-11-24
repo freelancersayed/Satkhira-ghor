@@ -167,7 +167,7 @@ export default function AdminThemeView({ showNotification }) {
     name: 'সাতক্ষীরা ঘর',
     tagline: 'Satkhira Ghor • Pure & Organic',
     logoChar: 'স',
-    logo: '/assets/logo-1.png',
+    logo: '/uploads/upload_1795353755877_oioatm.png',
   });
   const [logoUploading, setLogoUploading] = useState(false);
   const [savingBrand, setSavingBrand] = useState(false);
@@ -267,10 +267,10 @@ export default function AdminThemeView({ showNotification }) {
   };
 
   const handleResetLogo = async () => {
-    if (!confirm('লোগোটি পূর্বের ডিফল্ট (logo-1.png) লোগোতে রিস্টোর করতে চান?')) return;
+    if (!confirm('লোগোটি পূর্বের ডিফল্ট লোগোতে রিস্টোর করতে চান?')) return;
     try {
       setSavingBrand(true);
-      const defaultLogo = '/assets/logo-1.png';
+      const defaultLogo = '/uploads/upload_1795353755877_oioatm.png';
       const updatedBrand = { ...brandState, logo: defaultLogo };
       setBrandState(updatedBrand);
       await updateSection('brand', updatedBrand);
@@ -439,7 +439,7 @@ export default function AdminThemeView({ showNotification }) {
             </div>
           </div>
 
-          {brandState.logo !== '/assets/logo-1.png' && (
+          {brandState.logo !== '/uploads/upload_1795353755877_oioatm.png' && (
             <button
               type="button"
               onClick={handleResetLogo}
@@ -472,7 +472,7 @@ export default function AdminThemeView({ showNotification }) {
                   </span>
                   <div className="w-14 h-14 relative flex-shrink-0">
                     <Image
-                      src={brandState.logo || '/assets/logo-1.png'}
+                      src={brandState.logo || '/uploads/upload_1795353755877_oioatm.png'}
                       alt="লোগো প্রিভিউ"
                       fill
                       className="object-contain"
@@ -487,7 +487,7 @@ export default function AdminThemeView({ showNotification }) {
                   </span>
                   <div className="w-14 h-14 relative flex-shrink-0">
                     <Image
-                      src={brandState.logo || '/assets/logo-1.png'}
+                      src={brandState.logo || '/uploads/upload_1795353755877_oioatm.png'}
                       alt="লোগো প্রিভিউ"
                       fill
                       className="object-contain"

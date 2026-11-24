@@ -385,7 +385,7 @@ export default function AdminAICopilotModal({ isOpen, onClose, onRefreshData }) 
                             </div>
 
                             <div className="flex items-center gap-3">
-                              {prod.image && prod.image !== '/assets/logo-1.png' ? (
+                              {prod.image ? (
                                 <img
                                   src={prod.image}
                                   alt={prod.name}

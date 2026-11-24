@@ -9,6 +9,19 @@ import Product from '@/models/Product';
 
 export const revalidate = 60;
 
+async function getHeroContent() {
+  try {
+    await connectToDatabase();
+    const doc = await SiteContent.findOne({ key: 'hero' }).lean();
+    if (doc && doc.data) {
+      return JSON.parse(JSON.stringify(doc.data));
+    }
+  } catch (e) {
+    console.warn('Failed to load hero for homepage:', e.message);
+  }
+  return null;
+}
+
 async function getCategories() {
   try {
     await connectToDatabase();
@@ -40,15 +53,16 @@ async function getCategoryCounts() {
 }
 
 export default async function HomePage() {
-  const [initialCategories, initialCategoryCounts] = await Promise.all([
+  const [initialCategories, initialCategoryCounts, initialHero] = await Promise.all([
     getCategories(),
     getCategoryCounts(),
+    getHeroContent(),
   ]);
 
   return (
     <div>
-      {/* Hero Section */}
-      <HeroBanner />
+      {/* Hero Section with Server-Rendered Preload */}
+      <HeroBanner initialHero={initialHero} />
 
       {/* Category Icons Grid */}
       <CategorySection

@@ -156,7 +156,7 @@ export default function CustomerAIChatWindow({
       slug: product.slug,
       name: product.name,
       price: Number(product.price) || 0,
-      image: product.image || '/assets/logo-1.png',
+      image: product.image || '/uploads/upload_1795353755877_oioatm.png',
       unit: product.unit || '১ কেজি',
       quantity: 1,
       stock: product.stock ?? 10,
@@ -283,7 +283,7 @@ export default function CustomerAIChatWindow({
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <img
-                                src={prod.image || '/assets/logo-1.png'}
+                                src={prod.image || '/uploads/upload_1795353755877_oioatm.png'}
                                 alt={prod.name}
                                 className="w-12 h-12 rounded-lg object-cover border border-[#E8E2D5] flex-shrink-0 bg-white"
                               />

@@ -9,6 +9,7 @@ import { useCartStore } from '@/store/cartStore';
 export default function ProductCard({ product }) {
   const [isAdded, setIsAdded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [retry, setRetry] = useState(0);
   const addItem = useCartStore((state) => state.addItem);
 
   const isOutOfStock = product.stock !== undefined && Number(product.stock) <= 0;
@@ -34,11 +35,24 @@ export default function ProductCard({ product }) {
     return (
       src.startsWith('data:') ||
       src.startsWith('blob:') ||
+      src.startsWith('/uploads/') ||
       /\.(svg|jfif|bmp|heic|heif)(\?.*)?$/i.test(src)
     );
   };
 
-  const imageSrc = imgError ? '/assets/logo-1.png' : (product.image || '/assets/logo-1.png');
+  const DEFAULT_FALLBACK = '/uploads/upload_1795353755877_oioatm.png';
+  const rawImage = product.image && product.image !== '/assets/logo-1.png' ? product.image : DEFAULT_FALLBACK;
+  const imageSrc = imgError ? DEFAULT_FALLBACK : rawImage;
+
+  const handleImageError = () => {
+    if (retry < 2) {
+      setTimeout(() => {
+        setRetry((r) => r + 1);
+      }, 700);
+    } else {
+      setImgError(true);
+    }
+  };
 
   return (
     <div className="group bg-white rounded-xl sm:rounded-2xl p-2.5 border border-[#E8E2D5] hover:border-[#016831]/40 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between h-full relative">
@@ -46,13 +60,15 @@ export default function ProductCard({ product }) {
       <div className="relative aspect-square w-full rounded-lg sm:rounded-xl overflow-hidden bg-[#FAF8F5] border border-[#F0EBE1]">
         <Link href={`/products/${product.slug || product.id}`} className="block w-full h-full">
           <Image
+            key={`${imageSrc}-${retry}`}
             src={imageSrc}
             alt={product.name}
             fill
             unoptimized={isUnoptimizedSrc(imageSrc)}
-            onError={() => setImgError(true)}
+            onError={handleImageError}
             className={`object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale opacity-75' : 'group-hover:scale-105'}`}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            loading="lazy"
           />
         </Link>
 

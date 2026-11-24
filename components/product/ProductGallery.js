@@ -22,9 +22,12 @@ const isUnoptimizedSrc = (src) => {
   return (
     src.startsWith('data:') ||
     src.startsWith('blob:') ||
+    src.startsWith('/uploads/') ||
     /\.(svg|jfif|bmp|heic|heif)(\?.*)?$/i.test(src)
   );
 };
+
+const DYNAMIC_FALLBACK_LOGO = '/uploads/upload_1795353755877_oioatm.png';
 
 export default function ProductGallery({ images = [], mainImage = '', name = 'Product Image' }) {
   // Combine primary image and additional gallery images, ensuring primary mainImage is always first
@@ -43,7 +46,7 @@ export default function ProductGallery({ images = [], mainImage = '', name = 'Pr
     }
   };
 
-  const getSafeSrc = (src) => (failedImages[src] ? '/assets/logo-1.png' : src);
+  const getSafeSrc = (src) => (failedImages[src] ? DYNAMIC_FALLBACK_LOGO : (src || DYNAMIC_FALLBACK_LOGO));
 
   // Sync index if images change
   useEffect(() => {
